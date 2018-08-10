@@ -24,6 +24,10 @@
   },
   "homepage": "https://github.com/Kiosked/vulpes#readme",
   "dependencies": {
-    "eventemitter3": "^3.1.0"
+    "@buttercup/channel-queue": "^0.3.0",
+    "debounce": "^1.1.0",
+    "eventemitter3": "^3.1.0",
+    "pify": "^4.0.0",
+    "sleep-promise": "^8.0.1"
   }
 }
