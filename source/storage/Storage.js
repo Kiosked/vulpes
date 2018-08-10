@@ -37,6 +37,18 @@ class Storage {
     }
 
     /**
+     * Initialise the storage
+     * This usually entails reading the store from the storage so that it is
+     * immediately available
+     * @returns {Promise} A promise that resolves once initialisation has
+     *  completed
+     * @memberof Storage
+     */
+    initialise() {
+        return Promise.resolve();
+    }
+
+    /**
      * Remove an item from storage
      * @param {String} key The key to remove
      * @returns {Promise} A promise that resolves once the key has been removed
