@@ -1,0 +1,29 @@
+{
+  "name": "vulpes",
+  "version": "0.0.0",
+  "description": "Job management framework",
+  "main": "source/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kiosked/vulpes.git"
+  },
+  "keywords": [
+    "job",
+    "job",
+    "management",
+    "service",
+    "task"
+  ],
+  "author": "Perry Mitchell <perry@kiosked.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Kiosked/vulpes/issues"
+  },
+  "homepage": "https://github.com/Kiosked/vulpes#readme",
+  "dependencies": {
+    "eventemitter3": "^3.1.0"
+  }
+}
