@@ -22,13 +22,29 @@ class MemoryStorage extends Storage {
     }
 
     /**
+     * Get all items in the storage
+     * @returns {Promise.<Array.<*>>} A promise that resolves with all items
+     * @memberof MemoryStorage
+     */
+    getAllItems() {
+        return Promise.resolve(
+            this.getAllKeys().map(key => this.getItem(key))
+        );
+    }
+
+    /**
      * Get all storage keys
      * @returns {Promise.<Array.<String>>} A promise that resolves with an array of
      *  all the keys in storage
      * @memberof MemoryStorage
      */
     getAllKeys() {
-        return Promise.resolve(Object.keys(this.store));
+        const keyPrefixLen = this.getKeyPrefix().length;
+        return Promise.resolve(
+            Object.keys(this.store).map(key =>
+                key.substr(keyPrefixLen)
+            )
+        );
     }
 
     /**

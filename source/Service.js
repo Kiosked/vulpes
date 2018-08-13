@@ -4,6 +4,7 @@ const merge = require("merge");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const { generateEmptyJob } = require("./jobGeneration.js");
+const { selectJobs } = require("./jobQuery.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
@@ -66,6 +67,15 @@ class Service extends EventEmitter {
             .getItem(`job/${jobID}`)
             // Clone job
             .then(job => merge(true, job));
+    }
+
+    queryJobs(query) {
+        return this.storage
+            .getAllItems()
+            // Search
+            .then(items => selectJobs(items, query))
+            // Clone
+            .then(items => items.map(item => merge(true, item)));
     }
 }
 

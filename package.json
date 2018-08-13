@@ -31,6 +31,7 @@
     "merge": "^1.2.0",
     "ms": "^2.1.1",
     "pify": "^4.0.0",
+    "simple-object-query": "^1.6.1",
     "sleep-promise": "^8.0.1",
     "uuid": "^3.3.2"
   }

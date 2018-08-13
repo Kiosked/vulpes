@@ -6,6 +6,16 @@
  */
 class Storage {
     /**
+     * Get all items in the storage
+     * EXPENSIVE: Returns all items in storage
+     * @returns {Promise.<Array.<*>>} A promise that resolves with all items
+     * @memberof Storage
+     */
+    getAllItems() {
+        return Promise.resolve([]);
+    }
+
+    /**
      * Get all keys in the storage
      * @returns {Promise.<Array.<String>>} A promise that resolves with an array of
      *  all the keys
@@ -18,7 +28,7 @@ class Storage {
     /**
      * Get an item by its key
      * @param {String} key The key to fetch
-     * @returns {Promise.<String|null>} A promise that resolves with the item, or
+     * @returns {Promise.<*|null>} A promise that resolves with the item, or
      *  null if the item doesn't exist
      * @memberof Storage
      */
