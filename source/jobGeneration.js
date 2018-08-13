@@ -5,9 +5,11 @@ const {
 } = require("./symbols.js");
 
 function generateEmptyJob() {
+    const id = uuid();
     return {
         ["@@type"]: "vulpes/job",
-        id: uuid(),
+        id,
+        chains: [id],
         type: "generic",
         status: JOB_STATUS_PENDING,
         priority: JOB_PRIORITY_NORMAL,

@@ -5,6 +5,7 @@ const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const { generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
+const { updateJobChainForParents } = require("./jobMediation.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
@@ -58,6 +59,9 @@ class Service extends EventEmitter {
                     generateEmptyJob(),
                     properties
                 );
+                return updateJobChainForParents(this, job);
+            })
+            .then(job => {
                 return this.storage.setItem(`job/${job.id}`, job);
             });
     }
