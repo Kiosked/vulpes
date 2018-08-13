@@ -1,4 +1,3 @@
-const assert = require("assert");
 const EventEmitter = require("eventemitter3");
 const merge = require("merge");
 const Storage = require("./storage/Storage.js");
@@ -26,14 +25,6 @@ const JOB_PRIORITIES = {
 };
 
 class Service extends EventEmitter {
-    /**
-     * Job priority helper
-     * @memberof Service
-     * @type {JobPriorities}
-     * @static
-     */
-    static JobPriority = Object.freeze(JOB_PRIORITIES);
-
     constructor(storage = new MemoryStorage()) {
         super();
         if (storage instanceof Storage !== true) {
@@ -51,10 +42,6 @@ class Service extends EventEmitter {
         return Promise
             .resolve()
             .then(() => {
-                assert(
-                    properties.data && Object.keys(properties.data).length > 0,
-                    "Job data must be provided"
-                );
                 const job = merge.recursive(
                     generateEmptyJob(),
                     properties
@@ -82,5 +69,13 @@ class Service extends EventEmitter {
             .then(items => items.map(item => merge(true, item)));
     }
 }
+
+/**
+ * Job priority helper
+ * @memberof Service
+ * @type {JobPriorities}
+ * @static
+ */
+Service.JobPriority = Object.freeze(JOB_PRIORITIES);
 
 module.exports = Service;
