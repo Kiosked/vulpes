@@ -51,7 +51,10 @@ class Service extends EventEmitter {
             .then(job => {
                 return this.storage
                     .setItem(`job/${job.id}`, job)
-                    .then(() => job.id);
+                    .then(() => {
+                        this.emit("jobAdded", { id: job.id });
+                        return job.id;
+                    });
             });
     }
 
