@@ -49,7 +49,9 @@ class Service extends EventEmitter {
                 return updateJobChainForParents(this, job);
             })
             .then(job => {
-                return this.storage.setItem(`job/${job.id}`, job);
+                return this.storage
+                    .setItem(`job/${job.id}`, job)
+                    .then(() => job.id);
             });
     }
 

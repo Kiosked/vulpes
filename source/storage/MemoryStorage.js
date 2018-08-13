@@ -1,3 +1,4 @@
+const pLimit = require("p-limit");
 const Storage = require("./Storage.js");
 
 /**
@@ -10,6 +11,7 @@ class MemoryStorage extends Storage {
     constructor() {
         super();
         this._store = {};
+        this._limitAllItemsFetch = pLimit(20);
     }
 
     /**
@@ -27,9 +29,10 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     getAllItems() {
-        return Promise.resolve(
-            this.getAllKeys().map(key => this.getItem(key))
-        );
+        return this.getAllKeys()
+            .then(keys => Promise.all(keys.map(key =>
+                this._limitAllItemsFetch(() => this.getItem(key))
+            )));
     }
 
     /**

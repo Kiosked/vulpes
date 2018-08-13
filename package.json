@@ -34,6 +34,7 @@
     "file-exists": "^5.0.1",
     "merge": "^1.2.0",
     "ms": "^2.1.1",
+    "p-limit": "^2.0.0",
     "pify": "^4.0.0",
     "simple-object-query": "^1.6.1",
     "sleep-promise": "^8.0.1",
