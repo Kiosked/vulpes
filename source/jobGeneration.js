@@ -1,4 +1,5 @@
 const uuid = require("uuid/v4");
+const { getTimestamp } = require("./time.js");
 const {
     JOB_PRIORITY_NORMAL,
     JOB_STATUS_PENDING
@@ -13,6 +14,7 @@ function generateEmptyJob() {
         type: "generic",
         status: JOB_STATUS_PENDING,
         priority: JOB_PRIORITY_NORMAL,
+        created: getTimestamp(),
         parents: [],
         predicate: "",
         data: {},
