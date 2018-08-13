@@ -74,7 +74,7 @@ class FileStorage extends MemoryStorage {
     /**
      * Set an item in storage
      * @param {String} key The key to set
-     * @param {String} value The value to store
+     * @param {*} value The value to store
      * @returns {Promise} A promise that resolves once the
      *  value has been stored
      * @memberof FileStorage

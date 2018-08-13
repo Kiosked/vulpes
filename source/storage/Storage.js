@@ -61,7 +61,7 @@ class Storage {
     /**
      * Set an item
      * @param {String} key The key to set the value for
-     * @param {String} value The value to set
+     * @param {*} value The value to set
      * @returns {Promise} A promise that resolves once the value has been
      *  stored
      * @memberof Storage
