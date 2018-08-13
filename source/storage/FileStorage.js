@@ -58,22 +58,50 @@ class FileStorage extends MemoryStorage {
             });
     }
 
+    /**
+     * Remove an item from storage
+     * @param {String} key The key to remove
+     * @returns {Promise} A promise that resolves once the item
+     *  has been removed
+     * @memberof FileStorage
+     */
     removeItem(key) {
         return super
             .removeItem(key)
             .then(() => this.writeStateToFile());
     }
 
+    /**
+     * Set an item in storage
+     * @param {String} key The key to set
+     * @param {String} value The value to store
+     * @returns {Promise} A promise that resolves once the
+     *  value has been stored
+     * @memberof FileStorage
+     */
     setItem(key, value) {
         return super
             .setItem(key, value)
             .then(() => this.writeStateToFile());
     }
 
+    /**
+     * Get the serialised state
+     * @returns {String} The state in serialised form
+     * @protected
+     * @memberof FileStorage
+     */
     _getSerialisedState() {
         return JSON.stringify(this.store);
     }
 
+    /**
+     * Write the state to a file
+     * Enqueues write operations for storing the state in
+     * the specified file
+     * @protected
+     * @memberof FileStorage
+     */
     _writeStateToFile() {
         this._queue.channel("write").enqueue(() => {
             return writeFile(this._filename, this._getSerialisedState())
