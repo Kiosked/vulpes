@@ -9,7 +9,7 @@ function generateEmptyJob() {
     return {
         ["@@type"]: "vulpes/job",
         id,
-        chains: [id],
+        chain: [id],
         type: "generic",
         status: JOB_STATUS_PENDING,
         priority: JOB_PRIORITY_NORMAL,

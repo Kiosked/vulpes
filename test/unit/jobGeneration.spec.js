@@ -12,5 +12,11 @@ describe("jobGeneration", function() {
             expect(generateEmptyJob()).to.have.property("id")
                 .that.matches(UUID_REXP);
         });
+
+        it("sets the chain property to hold the ID", function() {
+            const job = generateEmptyJob();
+            const { id } = job;
+            expect(job).to.have.property("chain").that.deep.equals([id]);
+        });
     });
 });
