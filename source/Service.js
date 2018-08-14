@@ -6,13 +6,14 @@ const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const { generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
-const { updateJobChainForParents } = require("./jobMediation.js");
+const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
     JOB_STATUS_PENDING,
+    JOB_STATUS_RUNNING,
     JOB_TIMELIMIT_DEFAULT
 } = require("./symbols.js");
 
@@ -95,6 +96,38 @@ class Service extends EventEmitter {
             .then(items => selectJobs(items, query))
             // Clone
             .then(items => items.map(item => merge(true, item)));
+    }
+
+    startJob(jobID, { executePredicate = false } = {}) {
+        return this.jobQueue.enqueue(() =>
+            this.getJob(jobID)
+                .then(job => {
+                    if (job.status !== JOB_STATUS_PENDING) {
+                        throw new Error(`Invalid job status: ${job.status}`);
+                    }
+                    if (executePredicate) {
+                        // @todo predicates
+                    }
+                    job.status = JOB_STATUS_RUNNING;
+                    job.times.started = getTimestamp();
+                    if (job.times.firstStarted === null) {
+                        job.times.firstStarted = job.times.started;
+                    }
+                    return this.storage
+                        .setItem(`job/${job.id}`, job)
+                        .then(() => {
+                            this.emit("jobStarted", { id: job.id });
+                            return prepareJobForWorker(this, job);
+                        });
+                })
+                .catch(err => {
+                    throw new VError(err, `Failed starting job (${jobID})`);
+                })
+        );
+    }
+
+    use(helper) {
+        // @todo
     }
 }
 

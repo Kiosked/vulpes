@@ -1,3 +1,34 @@
+function prepareJobForWorker(service, job) {
+    const {
+        id,
+        type,
+        data,
+        parents,
+        timeLimit
+    } = job;
+    const workerJob = {
+        id,
+        type,
+        data,
+        timeLimit
+    };
+    return service
+        .queryJobs({
+            id: jobID => parents.indexOf(jobID) >= 0
+        })
+        .then(parentJobs => {
+            parentJobs.forEach(parentJob => {
+                workerJob.data = Object.assign(
+                    {},
+                    parentJob.data,
+                    parentJob.result.data,
+                    workerJob.data
+                );
+            });
+            return workerJob;
+        });
+}
+
 function updateJobChainForParents(service, job) {
     const chain = [];
     let work = Promise.resolve();
@@ -17,5 +48,6 @@ function updateJobChainForParents(service, job) {
 }
 
 module.exports = {
+    prepareJobForWorker,
     updateJobChainForParents
 };

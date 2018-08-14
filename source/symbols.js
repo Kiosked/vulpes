@@ -4,13 +4,13 @@ const JOB_PRIORITY_HIGH = 5;
 const JOB_PRIORITY_LOW = -5;
 const JOB_PRIORITY_NORMAL = 0;
 
-const JOB_RESULT_TYPE_FAILURE = "result/fail";
-const JOB_RESULT_TYPE_SUCCESS = "result/success";
-const JOB_RESULT_TYPE_TIMEOUT = "result/fail/timeout";
+const JOB_RESULT_TYPE_FAILURE = "job/result/fail";
+const JOB_RESULT_TYPE_SUCCESS = "job/result/success";
+const JOB_RESULT_TYPE_TIMEOUT = "job/result/fail/timeout";
 
-const JOB_STATUS_COMPLETE = "status/complete";
-const JOB_STATUS_PENDING = "status/pending";
-const JOB_STATUS_RUNNING = "status/running";
+const JOB_STATUS_COMPLETE = "job/status/complete";
+const JOB_STATUS_PENDING = "job/status/pending";
+const JOB_STATUS_RUNNING = "job/status/running";
 
 const JOB_TIMELIMIT_DEFAULT = ms("10m");
 
