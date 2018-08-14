@@ -9,10 +9,14 @@ const { selectJobs } = require("./jobQuery.js");
 const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const {
+    ERROR_CODE_INVALID_JOB_RESULT,
+    ERROR_CODE_INVALID_JOB_STATUS,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
+    JOB_RESULT_TYPE_FAILURE,
     JOB_RESULT_TYPE_SUCCESS,
+    JOB_RESULT_TYPE_TIMEOUT,
     JOB_RESULT_TYPES_REXP,
     JOB_STATUS_PENDING,
     JOB_STATUS_RUNNING,
@@ -30,6 +34,18 @@ const JOB_PRIORITIES = {
     High: JOB_PRIORITY_HIGH,
     Normal: JOB_PRIORITY_NORMAL,
     Low: JOB_PRIORITY_LOW
+};
+
+/**
+ * Job result types
+ * @name JobResultTypes
+ * @readonly
+ * @enum {String}
+ */
+const JOB_RESULTS = {
+    Failure: JOB_RESULT_TYPE_FAILURE,
+    Success: JOB_RESULT_TYPE_SUCCESS,
+    Timeout: JOB_RESULT_TYPE_TIMEOUT
 };
 
 class Service extends EventEmitter {
@@ -107,8 +123,12 @@ class Service extends EventEmitter {
                 .then(job => {
                     // @todo restart
                     if (job.status !== JOB_STATUS_PENDING) {
-                        throw new Error(`Invalid job status: ${job.status}`);
+                        throw new VError(
+                            { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
+                            `Invalid job status: ${job.status}`
+                        );
                     }
+                    // @todo parent completion
                     if (executePredicate) {
                         // @todo predicates
                     }
@@ -136,10 +156,16 @@ class Service extends EventEmitter {
             this.getJob(jobID)
                 .then(job => {
                     if (job.status !== JOB_STATUS_RUNNING) {
-                        throw new Error(`Invalid job status: ${job.status}`);
+                        throw new VError(
+                            { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
+                            `Invalid job status: ${job.status}`
+                        );
                     }
                     if (JOB_RESULT_TYPES_REXP.test(resultType) === false) {
-                        throw new Error(`Invalid job result type: ${resultType}`);
+                        throw new VError(
+                            { info: { code: ERROR_CODE_INVALID_JOB_RESULT } },
+                            `Invalid job result type: ${resultType}`
+                        );
                     }
                     job.status = JOB_STATUS_STOPPED;
                     job.result.type = resultType;
@@ -172,11 +198,19 @@ class Service extends EventEmitter {
 }
 
 /**
- * Job priority helper
+ * Job priority
  * @memberof Service
  * @type {JobPriorities}
  * @static
  */
 Service.JobPriority = Object.freeze(JOB_PRIORITIES);
+
+/**
+ * Job result type
+ * @memberof Service
+ * @type {JobResultTypes}
+ * @static
+ */
+Service.JobResult = Object.freeze(JOB_RESULTS);
 
 module.exports = Service;

@@ -38,4 +38,25 @@ describe("Service", function() {
                 expect(workerData).to.have.property("timeLimit", this.service.timeLimit);
             });
     });
+
+    it("provides data merged in the correct manner", function() {
+        return this.service
+            .addJob({ parents: [this.jobID1], data: { name: "test1-3" } })
+            .then(jobID => {
+                this.jobID3 = jobID;
+            })
+            .then(() => this.service.startJob(this.jobID1))
+            .then(() => this.service.stopJob(this.jobID1, Service.JobResult.Success, {
+                name: "test1-2",
+                value: 2
+            }))
+            .then(() => this.service.startJob(this.jobID3))
+            .then(workerJob => {
+                const { data } = workerJob;
+                expect(data).to.deep.equal({
+                    name: "test1-3",
+                    value: 2
+                });
+            });
+    });
 });
