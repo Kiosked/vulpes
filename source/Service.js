@@ -12,8 +12,11 @@ const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
+    JOB_RESULT_TYPE_SUCCESS,
+    JOB_RESULT_TYPES_REXP,
     JOB_STATUS_PENDING,
     JOB_STATUS_RUNNING,
+    JOB_STATUS_STOPPED,
     JOB_TIMELIMIT_DEFAULT
 } = require("./symbols.js");
 
@@ -98,10 +101,11 @@ class Service extends EventEmitter {
             .then(items => items.map(item => merge(true, item)));
     }
 
-    startJob(jobID, { executePredicate = false } = {}) {
+    startJob(jobID, { executePredicate = false, restart = false } = {}) {
         return this.jobQueue.enqueue(() =>
             this.getJob(jobID)
                 .then(job => {
+                    // @todo restart
                     if (job.status !== JOB_STATUS_PENDING) {
                         throw new Error(`Invalid job status: ${job.status}`);
                     }
@@ -113,6 +117,7 @@ class Service extends EventEmitter {
                     if (job.times.firstStarted === null) {
                         job.times.firstStarted = job.times.started;
                     }
+                    job.attempts += 1;
                     return this.storage
                         .setItem(`job/${job.id}`, job)
                         .then(() => {
@@ -122,6 +127,41 @@ class Service extends EventEmitter {
                 })
                 .catch(err => {
                     throw new VError(err, `Failed starting job (${jobID})`);
+                })
+        );
+    }
+
+    stopJob(jobID, resultType, resultData = {}) {
+        return this.jobQueue.enqueue(() =>
+            this.getJob(jobID)
+                .then(job => {
+                    if (job.status !== JOB_STATUS_RUNNING) {
+                        throw new Error(`Invalid job status: ${job.status}`);
+                    }
+                    if (JOB_RESULT_TYPES_REXP.test(resultType) === false) {
+                        throw new Error(`Invalid job result type: ${resultType}`);
+                    }
+                    job.status = JOB_STATUS_STOPPED;
+                    job.result.type = resultType;
+                    Object.assign(job.result.data, resultData);
+                    job.times.stopped = getTimestamp();
+                    if (resultType === JOB_RESULT_TYPE_SUCCESS) {
+                        job.times.completed = job.times.stopped;
+                    }
+                    return this.storage
+                        .setItem(`job/${job.id}`, job)
+                        .then(() => {
+                            this.emit("jobStopped", { id: job.id });
+                            if (resultType === JOB_RESULT_TYPE_SUCCESS) {
+                                this.emit("jobCompleted", { id: job.id });
+                            } else {
+                                this.emit("jobFailed", { id: job.id });
+                            }
+                            return prepareJobForWorker(this, job);
+                        });
+                })
+                .catch(err => {
+                    throw new VError(err, `Failed stopping job (${jobID})`);
                 })
         );
     }

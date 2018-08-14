@@ -25,9 +25,11 @@ function generateEmptyJob() {
         times: {
             firstStarted: null,
             started: null,
+            stopped: null,
             completed: null
         },
-        timeLimit: null
+        timeLimit: null,
+        attempts: 0
     };
 }
 
