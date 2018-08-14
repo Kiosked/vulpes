@@ -4,11 +4,13 @@ const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
+const Helper = require("./helper/Helper.js");
 const { generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
 const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const {
+    ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
     JOB_PRIORITY_HIGH,
@@ -48,6 +50,18 @@ const JOB_RESULTS = {
     Timeout: JOB_RESULT_TYPE_TIMEOUT
 };
 
+/**
+ * Job statuses
+ * @name JobStatuses
+ * @readonly
+ * @enum {String}
+ */
+const JOB_STATUSES = {
+    Pending: JOB_STATUS_PENDING,
+    Running: JOB_STATUS_RUNNING,
+    Stopped: JOB_STATUS_STOPPED
+};
+
 class Service extends EventEmitter {
     constructor(storage = new MemoryStorage()) {
         super();
@@ -57,6 +71,11 @@ class Service extends EventEmitter {
         this._storage = storage;
         this._timeLimit = JOB_TIMELIMIT_DEFAULT;
         this._channelQueue = new ChannelQueue();
+        this._helpers = [];
+    }
+
+    get helpers() {
+        return this._helpers;
     }
 
     get jobQueue() {
@@ -115,6 +134,13 @@ class Service extends EventEmitter {
             .then(items => selectJobs(items, query))
             // Clone
             .then(items => items.map(item => merge(true, item)));
+    }
+
+    shutdown() {
+        this.helpers.forEach(helper => {
+            helper.shutdown();
+        });
+        this._helpers = [];
     }
 
     startJob(jobID, { executePredicate = false, restart = false } = {}) {
@@ -178,6 +204,9 @@ class Service extends EventEmitter {
                         .setItem(`job/${job.id}`, job)
                         .then(() => {
                             this.emit("jobStopped", { id: job.id });
+                            if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
+                                this.emit("jobTimeout", { id: job.id });
+                            }
                             if (resultType === JOB_RESULT_TYPE_SUCCESS) {
                                 this.emit("jobCompleted", { id: job.id });
                             } else {
@@ -193,7 +222,15 @@ class Service extends EventEmitter {
     }
 
     use(helper) {
-        // @todo
+        if (!helper || helper instanceof Helper === false) {
+            throw new VError(
+                { info: { code: ERROR_CODE_HELPER_INVALID } },
+                "Failed attaching helper: Invalid helper instance"
+            );
+        }
+        this.helpers.push(helper);
+        helper.attach(this);
+        return this;
     }
 }
 
@@ -212,5 +249,13 @@ Service.JobPriority = Object.freeze(JOB_PRIORITIES);
  * @static
  */
 Service.JobResult = Object.freeze(JOB_RESULTS);
+
+/**
+ * Job status
+ * @memberof Service
+ * @type {JobStatus}
+ * @static
+ */
+Service.JobStatus = Object.freeze(JOB_STATUSES);
 
 module.exports = Service;

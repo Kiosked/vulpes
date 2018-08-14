@@ -1,5 +1,6 @@
 const ms = require("ms");
 
+const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";
 const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
 const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
 
@@ -19,6 +20,7 @@ const JOB_STATUS_STOPPED = "job/status/stopped";
 const JOB_TIMELIMIT_DEFAULT = ms("10m");
 
 module.exports = {
+    ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
     JOB_PRIORITY_HIGH,
