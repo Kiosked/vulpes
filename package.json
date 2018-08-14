@@ -21,6 +21,9 @@
     "service",
     "task"
   ],
+  "engines": {
+    "node": ">=6"
+  },
   "author": "Perry Mitchell <perry@kiosked.com>",
   "license": "MIT",
   "bugs": {
