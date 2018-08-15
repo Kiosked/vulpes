@@ -1,7 +1,33 @@
+const VError = require("verror");
 const {
+    ERROR_CODE_PARENTS_INCOMPLETE,
+    JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPES_RESTARTABLE_REXP,
     JOB_STATUS_STOPPED
 } = require("./symbols.js");
+
+function ensureParentsComplete(service, job) {
+    if (job.parents.length === 0) {
+        return Promise.resolve();
+    }
+    return Promise
+        .all(job.parents.map(parentID =>
+            service
+                .getJob(parentID)
+                .then(job => ({
+                    status: job.status,
+                    result: job.result.type
+                }))
+        ))
+        .then(jobStates => {
+            if (!jobStates.every(jobState => jobState.status === JOB_STATUS_STOPPED && jobState.result === JOB_RESULT_TYPE_SUCCESS)) {
+                throw new VError(
+                    { info: { code: ERROR_CODE_PARENTS_INCOMPLETE } },
+                    `Job ${job.id} has parents that have not completed successfully`
+                );
+            }
+        });
+}
 
 function jobCanBeRestarted(job) {
     return job.status === JOB_STATUS_STOPPED &&
@@ -62,6 +88,7 @@ function updateJobChainForParents(service, job) {
 }
 
 module.exports = {
+    ensureParentsComplete,
     jobCanBeRestarted,
     prepareJobForWorker,
     updateJobChainForParents

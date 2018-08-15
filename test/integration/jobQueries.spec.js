@@ -16,16 +16,18 @@ describe("Service", function() {
             });
     });
 
-    it("can be queried for jobs with data values", function() {
-        return this.service.queryJobs({ "data.name": /^test\d+$/ }).then(jobs => {
-            expect(jobs).to.have.lengthOf(2);
+    describe("when querying jobs", function() {
+        it("can query for jobs with data values", function() {
+            return this.service.queryJobs({ "data.name": /^test\d+$/ }).then(jobs => {
+                expect(jobs).to.have.lengthOf(2);
+            });
         });
-    });
 
-    it("can be queried for jobs with exact data values", function() {
-        return this.service.queryJobs({ "data.name": "test2" }).then(jobs => {
-            expect(jobs).to.have.lengthOf(1);
-            expect(jobs[0]).to.have.property("id", this.jobID2);
+        it("can query for jobs with exact data values", function() {
+            return this.service.queryJobs({ "data.name": "test2" }).then(jobs => {
+                expect(jobs).to.have.lengthOf(1);
+                expect(jobs[0]).to.have.property("id", this.jobID2);
+            });
         });
     });
 });

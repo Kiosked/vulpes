@@ -7,7 +7,7 @@ const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
-const { jobCanBeRestarted, prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
+const { ensureParentsComplete, jobCanBeRestarted, prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const { sortJobsByPriority } = require("./jobSorting.js");
 const {
@@ -301,18 +301,19 @@ class Service extends EventEmitter {
                             `Invalid job status (${job.status}): ${job.id}`
                         );
                     }
-                    // @todo parent completion
-                    if (executePredicate) {
-                        // @todo predicates
-                    }
-                    job.status = JOB_STATUS_RUNNING;
-                    job.times.started = getTimestamp();
-                    if (job.times.firstStarted === null) {
-                        job.times.firstStarted = job.times.started;
-                    }
-                    job.attempts += 1;
-                    return this.storage
-                        .setItem(`job/${job.id}`, job)
+                    return ensureParentsComplete(this, job)
+                        .then(() => {
+                            if (executePredicate) {
+                                // @todo predicates
+                            }
+                            job.status = JOB_STATUS_RUNNING;
+                            job.times.started = getTimestamp();
+                            if (job.times.firstStarted === null) {
+                                job.times.firstStarted = job.times.started;
+                            }
+                            job.attempts += 1;
+                            return this.storage.setItem(`job/${job.id}`, job)
+                        })
                         .then(() => {
                             this.emit("jobStarted", { id: job.id });
                             if (!jobID) {
