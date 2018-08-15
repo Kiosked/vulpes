@@ -5,7 +5,7 @@ const ChannelQueue = require("@buttercup/channel-queue");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
-const { generateEmptyJob } = require("./jobGeneration.js");
+const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
 const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
@@ -113,10 +113,11 @@ class Service extends EventEmitter {
             Promise
                 .resolve()
                 .then(() => {
+                    const initProps = filterJobInitObject(properties);
                     const job = merge.recursive(
                         generateEmptyJob(),
                         { timeLimit: this.timeLimit },
-                        properties
+                        initProps
                     );
                     return updateJobChainForParents(this, job);
                 })

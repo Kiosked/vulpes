@@ -5,6 +5,24 @@ const {
     JOB_STATUS_PENDING
 } = require("./symbols.js");
 
+const CONFIGURABLE_JOB_KEYS = [
+    "type",
+    "priority",
+    "parents",
+    "predicate",
+    "data",
+    "timeLimit"
+];
+
+function filterJobInitObject(info) {
+    return Object.keys(info).reduce((output, nextKey) => {
+        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0) {
+            output[nextKey] = info[nextKey];
+        }
+        return output;
+    }, {});
+}
+
 function generateEmptyJob() {
     const id = uuid();
     return {
@@ -34,5 +52,6 @@ function generateEmptyJob() {
 }
 
 module.exports = {
+    filterJobInitObject,
     generateEmptyJob
 };
