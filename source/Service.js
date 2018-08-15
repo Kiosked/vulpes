@@ -10,9 +10,11 @@ const { selectJobs } = require("./jobQuery.js");
 const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const {
+    ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
+    ERROR_CODE_NOT_INIT,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
@@ -62,6 +64,11 @@ const JOB_STATUSES = {
     Stopped: JOB_STATUS_STOPPED
 };
 
+const newNotInitialisedError = () => new VError(
+    { info: { code: ERROR_CODE_NOT_INIT } },
+    "Service not initialised"
+);
+
 class Service extends EventEmitter {
     constructor(storage = new MemoryStorage()) {
         super();
@@ -72,6 +79,7 @@ class Service extends EventEmitter {
         this._timeLimit = JOB_TIMELIMIT_DEFAULT;
         this._channelQueue = new ChannelQueue();
         this._helpers = [];
+        this._initialised = false;
     }
 
     get helpers() {
@@ -98,6 +106,9 @@ class Service extends EventEmitter {
     }
 
     addJob(properties = {}) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
         return this.jobQueue.enqueue(() =>
             Promise
                 .resolve()
@@ -121,6 +132,9 @@ class Service extends EventEmitter {
     }
 
     getJob(jobID) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
         return this.storage
             .getItem(`job/${jobID}`)
             // Clone job
@@ -128,12 +142,26 @@ class Service extends EventEmitter {
     }
 
     queryJobs(query) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
         return this.storage
             .getAllItems()
             // Search
             .then(items => selectJobs(items, query))
             // Clone
             .then(items => items.map(item => merge(true, item)));
+    }
+
+    initialise() {
+        if (this._initialised) {
+            return Promise.reject(new VError(
+                { info: { code: ERROR_CODE_ALREADY_INIT } },
+                "Service already initialised"
+            ));
+        }
+        this._initialised = true;
+        return this.storage.initialise();
     }
 
     shutdown() {
@@ -144,6 +172,9 @@ class Service extends EventEmitter {
     }
 
     startJob(jobID, { executePredicate = false, restart = false } = {}) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
         return this.jobQueue.enqueue(() =>
             this.getJob(jobID)
                 .then(job => {
@@ -178,6 +209,9 @@ class Service extends EventEmitter {
     }
 
     stopJob(jobID, resultType, resultData = {}) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
         return this.jobQueue.enqueue(() =>
             this.getJob(jobID)
                 .then(job => {

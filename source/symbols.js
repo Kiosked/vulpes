@@ -1,8 +1,10 @@
 const ms = require("ms");
 
+const ERROR_CODE_ALREADY_INIT = "error/init/multi-call";
 const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";
 const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
 const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
+const ERROR_CODE_NOT_INIT = "error/init/not-init";
 
 const JOB_PRIORITY_HIGH = 5;
 const JOB_PRIORITY_LOW = -5;
@@ -20,9 +22,11 @@ const JOB_STATUS_STOPPED = "job/status/stopped";
 const JOB_TIMELIMIT_DEFAULT = ms("10m");
 
 module.exports = {
+    ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
+    ERROR_CODE_NOT_INIT,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
