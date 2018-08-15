@@ -1,5 +1,12 @@
 # Vulpes Changelog
 
+## v0.3.0
+_2018-08-15_
+
+ * `Service#getNextJob` for getting the next job that should be started
+ * `Service#startJob` support for dynamically choosing a job to start (supports atomic opertion)
+ * More strict checking of state before starting/stopping jobs
+
 ## v0.2.0
 _2018-08-15_
 
