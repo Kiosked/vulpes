@@ -8,12 +8,12 @@
     "docs": "jsdoc2md 'source/**/*.js' > API.md",
     "format": "prettier --write '{source,test}/**/*.js'",
     "precommit": "lint-staged",
-    "test": "run-s test:all test:coverage test:format",
+    "test": "run-s build test:all test:coverage test:format",
     "test:all": "nyc mocha -r test/index.js 'test/**/*.spec.js'",
     "test:coverage": "nyc check-coverage --lines 50 --functions 50 --branches 50 --statements 50",
     "test:format": "prettier-check '{source,test}/**/*.js'",
-    "test:integration": "mocha -r test/index.js 'test/integration/**/*.spec.js'",
-    "test:unit": "mocha -r test/index.js 'test/unit/**/*.spec.js'"
+    "test:integration": "npm run build && mocha -r test/index.js 'test/integration/**/*.spec.js'",
+    "test:unit": "npm run build && mocha -r test/index.js 'test/unit/**/*.spec.js'"
   },
   "lint-staged": {
     "{source,test}/**/*.js": [
