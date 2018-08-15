@@ -11,7 +11,8 @@ const CONFIGURABLE_JOB_KEYS = [
     "parents",
     "predicate",
     "data",
-    "timeLimit"
+    "timeLimit",
+    "attemptsMax"
 ];
 
 function filterJobInitObject(info) {
@@ -47,7 +48,8 @@ function generateEmptyJob() {
             completed: null
         },
         timeLimit: null,
-        attempts: 0
+        attempts: 0,
+        attemptsMax: 1
     };
 }
 

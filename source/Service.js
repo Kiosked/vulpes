@@ -9,6 +9,7 @@ const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
 const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
+const { sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_HELPER_INVALID,
@@ -19,6 +20,7 @@ const {
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
     JOB_RESULT_TYPE_FAILURE,
+    JOB_RESULT_TYPE_FAILURE_SOFT,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPE_TIMEOUT,
     JOB_RESULT_TYPES_REXP,
@@ -48,6 +50,7 @@ const JOB_PRIORITIES = {
  */
 const JOB_RESULTS = {
     Failure: JOB_RESULT_TYPE_FAILURE,
+    SoftFailure: JOB_RESULT_TYPE_FAILURE_SOFT,
     Success: JOB_RESULT_TYPE_SUCCESS,
     Timeout: JOB_RESULT_TYPE_TIMEOUT
 };
@@ -140,6 +143,16 @@ class Service extends EventEmitter {
             .getItem(`job/${jobID}`)
             // Clone job
             .then(job => merge(true, job));
+    }
+
+    getNextJob() {
+        return this
+            .queryJobs({
+                status: status => [JOB_STATUS_PENDING, JOB_STATUS_STOPPED].includes(status),
+                "result.type": type => !type || type === JOB_RESULT_TYPE_FAILURE_SOFT
+            })
+            .then(sortJobsByPriority)
+            .then(jobs => jobs[0] || null);
     }
 
     queryJobs(query) {
