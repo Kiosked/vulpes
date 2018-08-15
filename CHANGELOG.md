@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.2.0
+_2018-08-15_
+
+ * Strict filtering of properties for `Service#addJob`
+
 ## v0.1.1
 _2018-08-15_
 
