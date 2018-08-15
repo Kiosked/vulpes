@@ -1,6 +1,6 @@
 {
   "name": "vulpes",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Job management framework",
   "main": "source/index.js",
   "scripts": {
