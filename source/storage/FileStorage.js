@@ -11,6 +11,12 @@ const FILE_WRITE_DELAY = 500;
 const readFile = pify(fs.readFile);
 const writeFile = pify(fs.writeFile);
 
+/**
+ * File storage interface
+ * Extends memory storage with persistent disk writes so that a
+ * full copy of all jobs is kept on-disk.
+ * @augments MemoryStorage
+ */
 class FileStorage extends MemoryStorage {
     /**
      * Constructor for the FileStorage adapter

@@ -9,6 +9,11 @@ attach to services to perform ancillary tasks.</p>
 <dt><a href="#Service">Service</a> ⇐ <code>EventEmitter</code></dt>
 <dd><p>Service for managing jobs</p>
 </dd>
+<dt><a href="#FileStorage">FileStorage</a> ⇐ <code><a href="#MemoryStorage">MemoryStorage</a></code></dt>
+<dd><p>File storage interface
+Extends memory storage with persistent disk writes so that a
+full copy of all jobs is kept on-disk.</p>
+</dd>
 <dt><a href="#MemoryStorage">MemoryStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
 <dd><p>Memory storage adapter
 Stores jobs in memory. Once application is closed all jobs are
@@ -281,6 +286,146 @@ Job result type
 Job status
 
 **Kind**: static property of [<code>Service</code>](#Service)  
+<a name="FileStorage"></a>
+
+## FileStorage ⇐ [<code>MemoryStorage</code>](#MemoryStorage)
+File storage interface
+Extends memory storage with persistent disk writes so that a
+full copy of all jobs is kept on-disk.
+
+**Kind**: global class  
+**Extends**: [<code>MemoryStorage</code>](#MemoryStorage)  
+
+* [FileStorage](#FileStorage) ⇐ [<code>MemoryStorage</code>](#MemoryStorage)
+    * [new FileStorage(filename)](#new_FileStorage_new)
+    * _instance_
+        * [.store](#MemoryStorage+store) : <code>Object</code>
+        * [.initialise()](#FileStorage+initialise) ⇒ <code>Promise</code>
+        * [.removeItem(key)](#FileStorage+removeItem) ⇒ <code>Promise</code>
+        * [.setItem(key, value)](#FileStorage+setItem) ⇒ <code>Promise</code>
+        * [._getSerialisedState()](#FileStorage+_getSerialisedState) ⇒ <code>String</code>
+        * [._writeStateToFile()](#FileStorage+_writeStateToFile)
+        * [.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+        * [.getAllKeys()](#MemoryStorage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
+        * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+        * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
+    * _static_
+        * [.this.writeStateToFile](#FileStorage.this.writeStateToFile) : <code>function</code>
+
+<a name="new_FileStorage_new"></a>
+
+### new FileStorage(filename)
+Constructor for the FileStorage adapter
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| filename | <code>String</code> | The filename to store the state in |
+
+<a name="MemoryStorage+store"></a>
+
+### fileStorage.store : <code>Object</code>
+The job store
+
+**Kind**: instance property of [<code>FileStorage</code>](#FileStorage)  
+<a name="FileStorage+initialise"></a>
+
+### fileStorage.initialise() ⇒ <code>Promise</code>
+Initialise the file storage
+This method reads the contents of the file into memory
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Overrides**: [<code>initialise</code>](#Storage+initialise)  
+**Returns**: <code>Promise</code> - A promise that resolves once the cached
+ file storage is loaded  
+<a name="FileStorage+removeItem"></a>
+
+### fileStorage.removeItem(key) ⇒ <code>Promise</code>
+Remove an item from storage
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Overrides**: [<code>removeItem</code>](#MemoryStorage+removeItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the item
+ has been removed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to remove |
+
+<a name="FileStorage+setItem"></a>
+
+### fileStorage.setItem(key, value) ⇒ <code>Promise</code>
+Set an item in storage
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Overrides**: [<code>setItem</code>](#MemoryStorage+setItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the
+ value has been stored  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to set |
+| value | <code>\*</code> | The value to store |
+
+<a name="FileStorage+_getSerialisedState"></a>
+
+### fileStorage._getSerialisedState() ⇒ <code>String</code>
+Get the serialised state
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>String</code> - The state in serialised form  
+**Access**: protected  
+<a name="FileStorage+_writeStateToFile"></a>
+
+### fileStorage._writeStateToFile()
+Write the state to a file
+Enqueues write operations for storing the state in
+the specified file
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Access**: protected  
+<a name="MemoryStorage+getAllItems"></a>
+
+### fileStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+Get all items in the storage
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code> - A promise that resolves with all items  
+<a name="MemoryStorage+getAllKeys"></a>
+
+### fileStorage.getAllKeys() ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
+Get all storage keys
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>Promise.&lt;Array.&lt;String&gt;&gt;</code> - A promise that resolves with an array of
+ all the keys in storage  
+<a name="MemoryStorage+getItem"></a>
+
+### fileStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+Get an item's value
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the value of
+ the key or null if not found  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | Get the value of a key |
+
+<a name="Storage+getKeyPrefix"></a>
+
+### fileStorage.getKeyPrefix() ⇒ <code>String</code>
+Get the base key prefix
+This prefix is prepended to all keys before writing to storage
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+<a name="FileStorage.this.writeStateToFile"></a>
+
+### FileStorage.this.writeStateToFile : <code>function</code>
+Debounced method for writing to the file
+
+**Kind**: static property of [<code>FileStorage</code>](#FileStorage)  
+**See**: _writeStateToFile  
 <a name="MemoryStorage"></a>
 
 ## MemoryStorage ⇐ [<code>Storage</code>](#Storage)
