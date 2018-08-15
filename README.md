@@ -9,6 +9,8 @@ Vulpes (_/ˈwul.peːs/_) is a job management framework, designed at making job m
 
 Vulpes does not do any job processing itself - it is merely a _service_ designed to outsource the processing elsewhere. A Vulpes Service tracks jobs, their dependencies and their parents.
 
+Check out the [API documentation](API.md).
+
 ## Installation
 Install Vulpes as a dependency by running the following:
 
@@ -51,6 +53,8 @@ await service.stopJob(
 ```
 
 A job will not execute if its parents have not been completed. Providing the `parents` property when adding a job will tie a job to others in terms of processing and results - the property is an array of job IDs.
+
+More information is found in the [API documentation](API.md).
 
 ## Developing
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory.
