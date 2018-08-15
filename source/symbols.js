@@ -5,7 +5,7 @@ const ms = require("ms");
  * @typedef {String} ResultType
  */
 
- /**
+/**
  * Job status
  * @typedef {String} Status
  */
@@ -22,7 +22,7 @@ const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
 const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
 const ERROR_CODE_NO_JOB_FOR_ID = "error/job/notfoundforid";
 const ERROR_CODE_NOT_INIT = "error/init/not-init";
-const ERROR_CODE_PARENTS_INCOMPLETE = "error/job/parents/incomplete"
+const ERROR_CODE_PARENTS_INCOMPLETE = "error/job/parents/incomplete";
 
 const JOB_PRIORITY_HIGH = 5;
 const JOB_PRIORITY_LOW = -5;

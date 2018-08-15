@@ -5,13 +5,16 @@ describe("Service", function() {
         this.service = new Service();
         return this.service
             .initialise()
-            .then(() => Promise.all([
-                this.service.addJob({ data: { name: "test1" } }),
-                this.service.addJob({ data: { name: "test2" } }),
-            ]))
+            .then(() =>
+                Promise.all([
+                    this.service.addJob({ data: { name: "test1" } }),
+                    this.service.addJob({ data: { name: "test2" } })
+                ])
+            )
             .then(([jobID1, jobID2]) => {
                 Object.assign(this, {
-                    jobID1, jobID2
+                    jobID1,
+                    jobID2
                 });
             });
     });

@@ -6,12 +6,22 @@ describe("Service", function() {
         this.service = new Service();
         return this.service
             .initialise()
-            .then(() => Promise.all([
-                this.service.addJob({ data: { name: "test1" }, priority: Service.JobPriority.Low }),
-                this.service.addJob({ data: { name: "test2" }, priority: Service.JobPriority.Normal }),
-            ]))
+            .then(() =>
+                Promise.all([
+                    this.service.addJob({
+                        data: { name: "test1" },
+                        priority: Service.JobPriority.Low
+                    }),
+                    this.service.addJob({
+                        data: { name: "test2" },
+                        priority: Service.JobPriority.Normal
+                    })
+                ])
+            )
             .then(() => sleep(80))
-            .then(() => this.service.addJob({ data: { name: "test3" }, priority: Service.JobPriority.High }));
+            .then(() =>
+                this.service.addJob({ data: { name: "test3" }, priority: Service.JobPriority.High })
+            );
     });
 
     describe("getNextJob", function() {

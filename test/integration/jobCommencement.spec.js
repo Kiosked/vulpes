@@ -6,13 +6,22 @@ describe("Service", function() {
         this.service = new Service();
         return this.service
             .initialise()
-            .then(() => Promise.all([
-                this.service.addJob({ data: { name: "test1" }, priority: Service.JobPriority.High }),
-                this.service.addJob({ data: { name: "test2" }, priority: Service.JobPriority.Normal }),
-            ]))
+            .then(() =>
+                Promise.all([
+                    this.service.addJob({
+                        data: { name: "test1" },
+                        priority: Service.JobPriority.High
+                    }),
+                    this.service.addJob({
+                        data: { name: "test2" },
+                        priority: Service.JobPriority.Normal
+                    })
+                ])
+            )
             .then(([jobID1, jobID2]) => {
                 Object.assign(this, {
-                    jobID1, jobID2
+                    jobID1,
+                    jobID2
                 });
             });
     });
@@ -28,17 +37,16 @@ describe("Service", function() {
         });
 
         it("starts jobs by outputting worker-specific data", function() {
-            return this.service
-                .startJob(this.jobID1)
-                .then(workerData => {
-                    expect(workerData).to.have.property("id", this.jobID1);
-                    expect(workerData).to.have.property("type", "generic");
-                    expect(workerData).to.have.property("data")
-                        .that.deep.equals({
-                            name: "test1"
-                        });
-                    expect(workerData).to.have.property("timeLimit", this.service.timeLimit);
-                });
+            return this.service.startJob(this.jobID1).then(workerData => {
+                expect(workerData).to.have.property("id", this.jobID1);
+                expect(workerData).to.have.property("type", "generic");
+                expect(workerData)
+                    .to.have.property("data")
+                    .that.deep.equals({
+                        name: "test1"
+                    });
+                expect(workerData).to.have.property("timeLimit", this.service.timeLimit);
+            });
         });
 
         it("provides data merged in the correct manner", function() {
@@ -48,10 +56,12 @@ describe("Service", function() {
                     this.jobID3 = jobID;
                 })
                 .then(() => this.service.startJob(this.jobID1))
-                .then(() => this.service.stopJob(this.jobID1, Service.JobResult.Success, {
-                    name: "test1-2",
-                    value: 2
-                }))
+                .then(() =>
+                    this.service.stopJob(this.jobID1, Service.JobResult.Success, {
+                        name: "test1-2",
+                        value: 2
+                    })
+                )
                 .then(() => this.service.startJob(this.jobID3))
                 .then(workerJob => {
                     const { data } = workerJob;

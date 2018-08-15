@@ -72,9 +72,7 @@ class FileStorage extends MemoryStorage {
      * @memberof FileStorage
      */
     removeItem(key) {
-        return super
-            .removeItem(key)
-            .then(() => this.writeStateToFile());
+        return super.removeItem(key).then(() => this.writeStateToFile());
     }
 
     /**
@@ -86,9 +84,7 @@ class FileStorage extends MemoryStorage {
      * @memberof FileStorage
      */
     setItem(key, value) {
-        return super
-            .setItem(key, value)
-            .then(() => this.writeStateToFile());
+        return super.setItem(key, value).then(() => this.writeStateToFile());
     }
 
     /**
@@ -110,8 +106,7 @@ class FileStorage extends MemoryStorage {
      */
     _writeStateToFile() {
         this._queue.channel("write").enqueue(() => {
-            return writeFile(this._filename, this._getSerialisedState())
-                .then(() => sleep(100));
+            return writeFile(this._filename, this._getSerialisedState()).then(() => sleep(100));
         });
     }
 }

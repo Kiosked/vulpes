@@ -1,9 +1,6 @@
 const uuid = require("uuid/v4");
 const { getTimestamp } = require("./time.js");
-const {
-    JOB_PRIORITY_NORMAL,
-    JOB_STATUS_PENDING
-} = require("./symbols.js");
+const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
 
 /**
  * New job data

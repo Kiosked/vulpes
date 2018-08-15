@@ -7,7 +7,12 @@ const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
-const { ensureParentsComplete, jobCanBeRestarted, prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
+const {
+    ensureParentsComplete,
+    jobCanBeRestarted,
+    prepareJobForWorker,
+    updateJobChainForParents
+} = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const { sortJobsByPriority } = require("./jobSorting.js");
 const {
@@ -69,10 +74,8 @@ const JOB_STATUSES = {
     Stopped: JOB_STATUS_STOPPED
 };
 
-const newNotInitialisedError = () => new VError(
-    { info: { code: ERROR_CODE_NOT_INIT } },
-    "Service not initialised"
-);
+const newNotInitialisedError = () =>
+    new VError({ info: { code: ERROR_CODE_NOT_INIT } }, "Service not initialised");
 
 /**
  * Service for managing jobs
@@ -151,8 +154,7 @@ class Service extends EventEmitter {
             return Promise.reject(newNotInitialisedError());
         }
         return this.jobQueue.enqueue(() =>
-            Promise
-                .resolve()
+            Promise.resolve()
                 .then(() => {
                     const initProps = filterJobInitObject(properties);
                     const job = merge.recursive(
@@ -163,12 +165,10 @@ class Service extends EventEmitter {
                     return updateJobChainForParents(this, job);
                 })
                 .then(job => {
-                    return this.storage
-                        .setItem(`job/${job.id}`, job)
-                        .then(() => {
-                            this.emit("jobAdded", { id: job.id });
-                            return job.id;
-                        });
+                    return this.storage.setItem(`job/${job.id}`, job).then(() => {
+                        this.emit("jobAdded", { id: job.id });
+                        return job.id;
+                    });
                 })
         );
     }
@@ -184,10 +184,12 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.storage
-            .getItem(`job/${jobID}`)
-            // Clone job
-            .then(job => job ? merge(true, job) : null);
+        return (
+            this.storage
+                .getItem(`job/${jobID}`)
+                // Clone job
+                .then(job => (job ? merge(true, job) : null))
+        );
     }
 
     /**
@@ -199,11 +201,10 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     getNextJob() {
-        return this
-            .queryJobs({
-                status: status => [JOB_STATUS_PENDING, JOB_STATUS_STOPPED].includes(status),
-                "result.type": type => !type || type === JOB_RESULT_TYPE_FAILURE_SOFT
-            })
+        return this.queryJobs({
+            status: status => [JOB_STATUS_PENDING, JOB_STATUS_STOPPED].includes(status),
+            "result.type": type => !type || type === JOB_RESULT_TYPE_FAILURE_SOFT
+        })
             .then(sortJobsByPriority)
             .then(jobs => jobs[0] || null);
     }
@@ -223,12 +224,14 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.storage
-            .getAllItems()
-            // Search
-            .then(items => selectJobs(items, query))
-            // Clone
-            .then(items => items.map(item => merge(true, item)));
+        return (
+            this.storage
+                .getAllItems()
+                // Search
+                .then(items => selectJobs(items, query))
+                // Clone
+                .then(items => items.map(item => merge(true, item)))
+        );
     }
 
     /**
@@ -240,10 +243,12 @@ class Service extends EventEmitter {
      */
     initialise() {
         if (this._initialised) {
-            return Promise.reject(new VError(
-                { info: { code: ERROR_CODE_ALREADY_INIT } },
-                "Service already initialised"
-            ));
+            return Promise.reject(
+                new VError(
+                    { info: { code: ERROR_CODE_ALREADY_INIT } },
+                    "Service already initialised"
+                )
+            );
         }
         this._initialised = true;
         return this.storage.initialise();
@@ -290,12 +295,18 @@ class Service extends EventEmitter {
                             `No job found for ID: ${jobID}`
                         );
                     }
-                    if (job.status === JOB_STATUS_STOPPED && (jobCanBeRestarted(job) === false) || restart === true) {
+                    if (
+                        (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) ||
+                        restart === true
+                    ) {
                         throw new VError(
                             { info: { code: ERROR_CODE_CANNOT_RESTART } },
                             `Job not valid to restart: ${job.id}`
                         );
-                    } else if (job.status !== JOB_STATUS_PENDING && job.status !== JOB_STATUS_STOPPED) {
+                    } else if (
+                        job.status !== JOB_STATUS_PENDING &&
+                        job.status !== JOB_STATUS_STOPPED
+                    ) {
                         throw new VError(
                             { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
                             `Invalid job status (${job.status}): ${job.id}`
@@ -312,7 +323,7 @@ class Service extends EventEmitter {
                                 job.times.firstStarted = job.times.started;
                             }
                             job.attempts += 1;
-                            return this.storage.setItem(`job/${job.id}`, job)
+                            return this.storage.setItem(`job/${job.id}`, job);
                         })
                         .then(() => {
                             this.emit("jobStarted", { id: job.id });
@@ -363,19 +374,17 @@ class Service extends EventEmitter {
                     if (resultType === JOB_RESULT_TYPE_SUCCESS) {
                         job.times.completed = job.times.stopped;
                     }
-                    return this.storage
-                        .setItem(`job/${job.id}`, job)
-                        .then(() => {
-                            this.emit("jobStopped", { id: job.id });
-                            if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
-                                this.emit("jobTimeout", { id: job.id });
-                            }
-                            if (resultType === JOB_RESULT_TYPE_SUCCESS) {
-                                this.emit("jobCompleted", { id: job.id });
-                            } else {
-                                this.emit("jobFailed", { id: job.id });
-                            }
-                        });
+                    return this.storage.setItem(`job/${job.id}`, job).then(() => {
+                        this.emit("jobStopped", { id: job.id });
+                        if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
+                            this.emit("jobTimeout", { id: job.id });
+                        }
+                        if (resultType === JOB_RESULT_TYPE_SUCCESS) {
+                            this.emit("jobCompleted", { id: job.id });
+                        } else {
+                            this.emit("jobFailed", { id: job.id });
+                        }
+                    });
                 })
                 .catch(err => {
                     throw new VError(err, `Failed stopping job (${jobID})`);

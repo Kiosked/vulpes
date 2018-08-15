@@ -8,11 +8,7 @@ describe("Service", function() {
 
     describe("when adding jobs", function() {
         it("can add jobs", function() {
-            return Promise
-                .all([
-                    this.service.addJob(),
-                    this.service.addJob()
-                ])
+            return Promise.all([this.service.addJob(), this.service.addJob()])
                 .then(() => this.service.storage.getAllKeys())
                 .then(keys => {
                     expect(keys).to.have.lengthOf(2);
@@ -21,11 +17,7 @@ describe("Service", function() {
 
         it("sets chain IDs correctly", function() {
             let parentIDs;
-            return Promise
-                .all([
-                    this.service.addJob(),
-                    this.service.addJob()
-                ])
+            return Promise.all([this.service.addJob(), this.service.addJob()])
                 .then(ids => {
                     parentIDs = ids;
                     return this.service.addJob({

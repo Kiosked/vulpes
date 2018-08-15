@@ -19,17 +19,16 @@ describe("TimeoutHelper", function() {
                 this.jobID = jobID;
                 return this.service.startJob(jobID);
             })
-            .then(() => new Promise((resolve, reject) => {
-                this.service.once(
-                    "jobCompleted",
-                    () => reject(new Error("Job should have failed"))
-                );
-                this.service.once(
-                    "jobFailed",
-                    ({ id }) => resolve(id)
-                );
-                this.service.use(this.timeoutHelper);
-            }))
+            .then(
+                () =>
+                    new Promise((resolve, reject) => {
+                        this.service.once("jobCompleted", () =>
+                            reject(new Error("Job should have failed"))
+                        );
+                        this.service.once("jobFailed", ({ id }) => resolve(id));
+                        this.service.use(this.timeoutHelper);
+                    })
+            )
             .then(jobID => this.service.getJob(jobID))
             .then(job => {
                 expect(job.status).to.equal(Service.JobStatus.Stopped);
@@ -44,13 +43,13 @@ describe("TimeoutHelper", function() {
                 this.jobID = jobID;
                 return this.service.startJob(jobID);
             })
-            .then(() => new Promise(resolve => {
-                this.service.once(
-                    "jobTimeout",
-                    ({ id }) => resolve(id)
-                );
-                this.service.use(this.timeoutHelper);
-            }))
+            .then(
+                () =>
+                    new Promise(resolve => {
+                        this.service.once("jobTimeout", ({ id }) => resolve(id));
+                        this.service.use(this.timeoutHelper);
+                    })
+            )
             .then(jobID => {
                 expect(jobID).to.equal(this.jobID);
             });

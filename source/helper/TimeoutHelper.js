@@ -27,10 +27,11 @@ class TimeoutHelper extends Helper {
                 timeLimit: timeLimit => timeLimit !== null,
                 status: JOB_STATUS_RUNNING
             })
-            .then(runningJobs =>
-                runningJobs.length > PROCESSING_LIMIT
-                    ? runningJobs.splice(0, PROCESSING_LIMIT)
-                    : runningJobs
+            .then(
+                runningJobs =>
+                    runningJobs.length > PROCESSING_LIMIT
+                        ? runningJobs.splice(0, PROCESSING_LIMIT)
+                        : runningJobs
             )
             .then(runningJobs => {
                 let work = Promise.resolve();
@@ -52,7 +53,7 @@ class TimeoutHelper extends Helper {
                         }
                     });
                 });
-            })
+            });
     }
 
     shutdown() {

@@ -29,10 +29,9 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     getAllItems() {
-        return this.getAllKeys()
-            .then(keys => Promise.all(keys.map(key =>
-                this._limitAllItemsFetch(() => this.getItem(key))
-            )));
+        return this.getAllKeys().then(keys =>
+            Promise.all(keys.map(key => this._limitAllItemsFetch(() => this.getItem(key))))
+        );
     }
 
     /**
@@ -43,11 +42,7 @@ class MemoryStorage extends Storage {
      */
     getAllKeys() {
         const keyPrefixLen = this.getKeyPrefix().length;
-        return Promise.resolve(
-            Object.keys(this.store).map(key =>
-                key.substr(keyPrefixLen)
-            )
-        );
+        return Promise.resolve(Object.keys(this.store).map(key => key.substr(keyPrefixLen)));
     }
 
     /**
