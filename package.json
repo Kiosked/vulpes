@@ -2,8 +2,9 @@
   "name": "vulpes",
   "version": "0.2.0",
   "description": "Job management framework",
-  "main": "source/index.js",
+  "main": "dist/index.js",
   "scripts": {
+    "build": "babel source/ --out-dir dist",
     "docs": "jsdoc2md 'source/**/*.js' > API.md",
     "format": "prettier --write '{source,test}/**/*.js'",
     "precommit": "lint-staged",
@@ -54,6 +55,10 @@
     "verror": "^1.10.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "husky": "^0.14.3",

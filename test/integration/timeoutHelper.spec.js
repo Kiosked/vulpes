@@ -1,5 +1,5 @@
-const TimeoutHelper = require("../../source/helper/TimeoutHelper.js");
-const Service = require("../../source/Service.js");
+const TimeoutHelper = require("../../dist/helper/TimeoutHelper.js");
+const Service = require("../../dist/Service.js");
 
 describe("TimeoutHelper", function() {
     beforeEach(function() {

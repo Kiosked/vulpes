@@ -1,5 +1,5 @@
 const sleep = require("sleep-promise");
-const Service = require("../../source/Service.js");
+const Service = require("../../dist/Service.js");
 
 describe("Service", function() {
     beforeEach(function() {
