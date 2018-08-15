@@ -7,8 +7,8 @@ describe("Service", function() {
         return this.service
             .initialise()
             .then(() => Promise.all([
-                this.service.addJob({ data: { name: "test1" } }),
-                this.service.addJob({ data: { name: "test2" } }),
+                this.service.addJob({ data: { name: "test1" }, priority: Service.JobPriority.High }),
+                this.service.addJob({ data: { name: "test2" }, priority: Service.JobPriority.Normal }),
             ]))
             .then(([jobID1, jobID2]) => {
                 Object.assign(this, {
@@ -58,6 +58,27 @@ describe("Service", function() {
                     name: "test1-3",
                     value: 2
                 });
+            });
+    });
+
+    it("fails if the job ID doesn't exist", function() {
+        const work = this.service.startJob("notreal");
+        return expect(work).to.be.rejectedWith(/No job found for ID/i);
+    });
+
+    it("can start jobs dynamically", function() {
+        return this.service
+            .startJob()
+            .then(job => {
+                expect(job.data.name).to.equal("test1");
+                return this.service.startJob();
+            })
+            .then(job => {
+                expect(job.data.name).to.equal("test2");
+                return this.service.startJob();
+            })
+            .then(job => {
+                expect(job).to.be.null;
             });
     });
 });
