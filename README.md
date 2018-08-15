@@ -2,7 +2,7 @@
 
 > Job management framework
 
-[![Build Status](https://travis-ci.org/Kiosked/vulpes.svg?branch=master)](https://travis-ci.org/Kiosked/vulpes)
+[![Build Status](https://travis-ci.org/Kiosked/vulpes.svg?branch=master)](https://travis-ci.org/Kiosked/vulpes) [![npm version](https://badge.fury.io/js/vulpes.svg)](https://www.npmjs.com/package/vulpes)
 
 ## About
 Vulpes (_/ˈwul.peːs/_) is a job management framework, designed at making job management and processing easy. Jobs are simply blobs of JSON data that are tracked by a globally unique ID (UUID), which retain status and result information. They can be linked to other jobs and processed in a tree-like manner.
