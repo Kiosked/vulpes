@@ -278,65 +278,59 @@ class Service extends EventEmitter {
      *  worker
      * @memberof Service
      */
-    startJob(jobID = null, { executePredicate = false, restart = false } = {}) {
+    async startJob(jobID = null, { executePredicate = false, restart = false } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.jobQueue.enqueue(() =>
-            (jobID === null || jobID === undefined ? this.getNextJob() : this.getJob(jobID))
-                .then(job => {
-                    if (!job && !jobID) {
-                        // no job to start
-                        return Promise.resolve(null);
-                    } else if (!job) {
-                        // no job found
-                        throw new VError(
-                            { info: { code: ERROR_CODE_NO_JOB_FOR_ID } },
-                            `No job found for ID: ${jobID}`
-                        );
-                    }
-                    if (
-                        (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) ||
-                        restart === true
-                    ) {
-                        throw new VError(
-                            { info: { code: ERROR_CODE_CANNOT_RESTART } },
-                            `Job not valid to restart: ${job.id}`
-                        );
-                    } else if (
-                        job.status !== JOB_STATUS_PENDING &&
-                        job.status !== JOB_STATUS_STOPPED
-                    ) {
-                        throw new VError(
-                            { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
-                            `Invalid job status (${job.status}): ${job.id}`
-                        );
-                    }
-                    return ensureParentsComplete(this, job)
-                        .then(() => {
-                            if (executePredicate) {
-                                // @todo predicates
-                            }
-                            job.status = JOB_STATUS_RUNNING;
-                            job.times.started = getTimestamp();
-                            if (job.times.firstStarted === null) {
-                                job.times.firstStarted = job.times.started;
-                            }
-                            job.attempts += 1;
-                            return this.storage.setItem(`job/${job.id}`, job);
-                        })
-                        .then(() => {
-                            this.emit("jobStarted", { id: job.id });
-                            if (!jobID) {
-                                this.emit("jobRestarted", { id: job.id });
-                            }
-                            return prepareJobForWorker(this, job);
-                        });
-                })
-                .catch(err => {
-                    throw new VError(err, `Failed starting job (${jobID})`);
-                })
-        );
+        return this.jobQueue
+            .enqueue(async () => {
+                const job = await (jobID === null || jobID === undefined
+                    ? this.getNextJob()
+                    : this.getJob(jobID));
+                if (!job && !jobID) {
+                    // no job to start
+                    return Promise.resolve(null);
+                } else if (!job) {
+                    // no job found
+                    throw new VError(
+                        { info: { code: ERROR_CODE_NO_JOB_FOR_ID } },
+                        `No job found for ID: ${jobID}`
+                    );
+                }
+                if (
+                    (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) ||
+                    restart === true
+                ) {
+                    throw new VError(
+                        { info: { code: ERROR_CODE_CANNOT_RESTART } },
+                        `Job not valid to restart: ${job.id}`
+                    );
+                } else if (job.status !== JOB_STATUS_PENDING && job.status !== JOB_STATUS_STOPPED) {
+                    throw new VError(
+                        { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
+                        `Invalid job status (${job.status}): ${job.id}`
+                    );
+                }
+                await ensureParentsComplete(this, job);
+                if (executePredicate) {
+                    // @todo predicates
+                }
+                job.status = JOB_STATUS_RUNNING;
+                job.times.started = getTimestamp();
+                if (job.times.firstStarted === null) {
+                    job.times.firstStarted = job.times.started;
+                }
+                job.attempts += 1;
+                await this.storage.setItem(`job/${job.id}`, job);
+                this.emit("jobStarted", { id: job.id });
+                if (!jobID) {
+                    this.emit("jobRestarted", { id: job.id });
+                }
+                return await prepareJobForWorker(this, job);
+            })
+            .catch(err => {
+                throw new VError(err, `Failed starting job (${jobID})`);
+            });
     }
 
     /**

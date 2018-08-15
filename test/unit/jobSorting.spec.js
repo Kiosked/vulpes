@@ -1,9 +1,9 @@
-const { sortJobsByPriority } = require("../../source/jobSorting.js");
+const { sortJobsByPriority } = require("../../dist/jobSorting.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL
-} = require("../../source/symbols.js");
+} = require("../../dist/symbols.js");
 
 describe("jobSorting", function() {
     describe("sortJobsByPriority", function() {

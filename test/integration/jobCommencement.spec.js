@@ -1,5 +1,5 @@
-const Service = require("../../source/Service.js");
-const { JOB_STATUS_RUNNING } = require("../../source/symbols.js");
+const Service = require("../../dist/Service.js");
+const { JOB_STATUS_RUNNING } = require("../../dist/symbols.js");
 
 describe("Service", function() {
     beforeEach(function() {

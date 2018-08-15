@@ -1,3 +1,5 @@
+require("babel-polyfill");
+
 const Service = require("./Service.js");
 
 const Helper = require("./helper/Helper.js");

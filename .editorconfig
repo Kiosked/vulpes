@@ -15,5 +15,5 @@ trim_trailing_whitespace = false
 [*.yml]
 indent_size = 2
 
-[{package.json,package-lock.json,.prettierrc}]
+[{package.json,package-lock.json,.prettierrc,.babelrc}]
 indent_size = 2
