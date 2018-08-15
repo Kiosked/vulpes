@@ -74,6 +74,10 @@ const newNotInitialisedError = () => new VError(
     "Service not initialised"
 );
 
+/**
+ * Service for managing jobs
+ * @augments EventEmitter
+ */
 class Service extends EventEmitter {
     constructor(storage = new MemoryStorage()) {
         super();
@@ -85,20 +89,46 @@ class Service extends EventEmitter {
         this._channelQueue = new ChannelQueue();
         this._helpers = [];
         this._initialised = false;
+        this._shutdown = false;
     }
 
+    /**
+     * Helpers attached to the Service
+     * @type {Array.<Helper>}
+     * @readonly
+     * @memberof Service
+     */
     get helpers() {
         return this._helpers;
     }
 
+    /**
+     * Execute queue for job manipulations
+     * @type {Channel}
+     * @readonly
+     * @memberof Service
+     */
     get jobQueue() {
         return this._channelQueue.channel("job");
     }
 
+    /**
+     * The storage mechanism used by the Service
+     * @type {Storage}
+     * @readonly
+     * @memberof Service
+     */
     get storage() {
         return this._storage;
     }
 
+    /**
+     * The current default time-limit (milliseconds)
+     * The timelimit is applied to *new* jobs as they're added, and
+     * changes to this value do not affect existing jobs.
+     * @type {Number}
+     * @memberof Service
+     */
     get timeLimit() {
         return this._timeLimit;
     }
@@ -110,6 +140,12 @@ class Service extends EventEmitter {
         this._timeLimit = tl;
     }
 
+    /**
+     * Add a new job
+     * @param {NewJob=} properties The new job's properties
+     * @returns {Promise.<String>} A promise that resolves with the job's ID
+     * @memberof Service
+     */
     addJob(properties = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -137,6 +173,13 @@ class Service extends EventEmitter {
         );
     }
 
+    /**
+     * Get a job by its ID
+     * @param {String} jobID The job ID
+     * @returns {Promise.<Object|null>} A promise that resolves with the job
+     *  or null if not found
+     * @memberof Service
+     */
     getJob(jobID) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -147,6 +190,14 @@ class Service extends EventEmitter {
             .then(job => job ? merge(true, job) : null);
     }
 
+    /**
+     * Get the next job that should be started
+     * This method is expensive as it sorts available jobs by priority first,
+     * before returning the very next job that should be started.
+     * @returns {Promise.<Object|null>} A promise that resolves with the job
+     *  or null if none available
+     * @memberof Service
+     */
     getNextJob() {
         return this
             .queryJobs({
@@ -157,6 +208,17 @@ class Service extends EventEmitter {
             .then(jobs => jobs[0] || null);
     }
 
+    /**
+     * Perform a jobs query
+     * Query for an array of jobs by the job's properties. This uses a library
+     * called simple-object-query to query each job. This method uses the
+     * library's `find` method.
+     * @see https://www.npmjs.com/package/simple-object-query
+     * @param {Object} query The object query to perform
+     * @returns {Promise.<Array.<Job>>} Returns a promise that resolves with
+     *  an array of jobs
+     * @memberof Service
+     */
     queryJobs(query) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -169,6 +231,13 @@ class Service extends EventEmitter {
             .then(items => items.map(item => merge(true, item)));
     }
 
+    /**
+     * Initialise the Service instance
+     * Must be called before any other operation
+     * @returns {Promise} A promise that resolves once initialisation
+     *  has been completed
+     * @memberof Service
+     */
     initialise() {
         if (this._initialised) {
             return Promise.reject(new VError(
@@ -180,13 +249,30 @@ class Service extends EventEmitter {
         return this.storage.initialise();
     }
 
+    /**
+     * Shutdown the instance
+     * @memberof Service
+     */
     shutdown() {
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
         this._helpers = [];
+        this._shutdown = true;
+        this._initialised = false;
     }
 
+    /**
+     * Start a job
+     * @param {String=} jobID The job ID to start. If none provided the Service
+     *  will attempt to start the next job by priority. If none is found it
+     *  will simply resolve with null. If the job ID is specified by not found
+     *  an exception will be thrown.
+     * @param {Object=} options Configuration options
+     * @returns {Promise.<Object>} A promise that resolves with job data for a
+     *  worker
+     * @memberof Service
+     */
     startJob(jobID = null, { executePredicate = false, restart = false } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -204,7 +290,7 @@ class Service extends EventEmitter {
                             `No job found for ID: ${jobID}`
                         );
                     }
-                    if (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) {
+                    if (job.status === JOB_STATUS_STOPPED && (jobCanBeRestarted(job) === false) || restart === true) {
                         throw new VError(
                             { info: { code: ERROR_CODE_CANNOT_RESTART } },
                             `Job not valid to restart: ${job.id}`
@@ -241,6 +327,15 @@ class Service extends EventEmitter {
         );
     }
 
+    /**
+     * Stop a job
+     * @param {String} jobID The job's ID to stop
+     * @param {ResultType} resultType The result type to set
+     * @param {Object=} resultData Optional results data
+     * @returns {Promise} A promise that resolves once the job has been
+     *  stopped successfully
+     * @memberof Service
+     */
     stopJob(jobID, resultType, resultData = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -279,7 +374,6 @@ class Service extends EventEmitter {
                             } else {
                                 this.emit("jobFailed", { id: job.id });
                             }
-                            return prepareJobForWorker(this, job);
                         });
                 })
                 .catch(err => {
@@ -288,6 +382,13 @@ class Service extends EventEmitter {
         );
     }
 
+    /**
+     * Attach a helper to the Service instance
+     * @param {Helper} helper The helper to attach
+     * @return {Service} Returns self, for chaining
+     * @memberof Service
+     * @throws {VError} Throws if the helper instance is invalid
+     */
     use(helper) {
         if (!helper || helper instanceof Helper === false) {
             throw new VError(
