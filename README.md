@@ -25,6 +25,11 @@ The main concept behind Vulpes is the `Service` class, which controls a collecti
 const ms = require("ms");
 const { Service } = require("vulpes");
 
+// Create a new service
+const service = new Service(); // Service takes an optional storage parameter
+// Initialise the service
+await service.initialise();
+
 // Jobs can be added by passing in properties that are merged with the job
 const jobID = await service.addJob({
     type: "my/custom/type",
