@@ -5,6 +5,7 @@ describe("TimeoutHelper", function() {
     beforeEach(function() {
         this.service = new Service();
         this.timeoutHelper = new TimeoutHelper(500);
+        return this.service.initialise();
     });
 
     afterEach(function() {

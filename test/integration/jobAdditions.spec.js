@@ -3,6 +3,7 @@ const Service = require("../../source/Service.js");
 describe("Service", function() {
     beforeEach(function() {
         this.service = new Service();
+        return this.service.initialise();
     });
 
     it("can add jobs", function() {
