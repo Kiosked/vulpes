@@ -1,5 +1,20 @@
 const ms = require("ms");
 
+/**
+ * Job result type
+ * @typedef {String} ResultType
+ */
+
+ /**
+ * Job status
+ * @typedef {String} Status
+ */
+
+/**
+ * Job priority
+ * @typedef {String} Priority
+ */
+
 const ERROR_CODE_ALREADY_INIT = "error/init/multi-call";
 const ERROR_CODE_CANNOT_RESTART = "error/job/restart/invalid";
 const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";

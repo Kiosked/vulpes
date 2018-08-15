@@ -39,6 +39,15 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Job">Job</a> : <code>Object</code></dt>
 <dd><p>A job</p>
 </dd>
+<dt><a href="#ResultType">ResultType</a> : <code>String</code></dt>
+<dd><p>Job result type</p>
+</dd>
+<dt><a href="#Status">Status</a> : <code>String</code></dt>
+<dd><p>Job status</p>
+</dd>
+<dt><a href="#Priority">Priority</a> : <code>String</code></dt>
+<dd><p>Job priority</p>
+</dd>
 </dl>
 
 <a name="Helper"></a>
@@ -235,7 +244,7 @@ Stop a job
 | Param | Type | Description |
 | --- | --- | --- |
 | jobID | <code>String</code> | The job's ID to stop |
-| resultType | <code>ResultType</code> | The result type to set |
+| resultType | [<code>ResultType</code>](#ResultType) | The result type to set |
 | [resultData] | <code>Object</code> | Optional results data |
 
 <a name="Service+use"></a>
@@ -504,7 +513,7 @@ New job data
 | Name | Type | Description |
 | --- | --- | --- |
 | [type] | <code>String</code> | The type of job (custom, controlled by the consumer) |
-| [priority] | <code>Priority</code> | The priority of the job (defaults to normal priority) |
+| [priority] | [<code>Priority</code>](#Priority) | The priority of the job (defaults to normal priority) |
 | [parents] | <code>Array.&lt;String&gt;</code> | Parents of this job |
 | [predicate] | <code>String</code> | The predicate function that should evaluate to true  before this job can run |
 | [data] | <code>Object</code> | Data for this job |
@@ -524,14 +533,14 @@ A job
 | id | <code>String</code> | The job's ID |
 | chain | <code>Array.&lt;String&gt;</code> | An array of IDs that form the job's chain |
 | type | <code>String</code> | The job type (consumer controlled) |
-| status | <code>Status</code> | The current job state |
-| priority | <code>Priority</code> | The job's priority |
+| status | [<code>Status</code>](#Status) | The current job state |
+| priority | [<code>Priority</code>](#Priority) | The job's priority |
 | created | <code>Number</code> | The creation timestamp of the job |
 | parents | <code>Array.&lt;String&gt;</code> | An array of IDs of the job's parents |
 | predicate | <code>String</code> | Predicate function for the job |
 | data | <code>Object</code> | The data for the job (incoming) |
 | result | <code>Object</code> | Result information |
-| result.type | <code>ResultType</code> \| <code>null</code> | The type of result (null if not  stopped at least once) |
+| result.type | [<code>ResultType</code>](#ResultType) \| <code>null</code> | The type of result (null if not  stopped at least once) |
 | result.data | <code>Object</code> | Resulting data from the last execution  (outgoing) |
 | times | <code>Object</code> | Collection of notable timestamps for the job |
 | times.firstStarted | <code>Number</code> \| <code>null</code> | Timestamp for when the job was  first started |
@@ -542,3 +551,21 @@ A job
 | attempts | <code>Number</code> | Number of attempts the job has had |
 | attemptsMax | <code>Number</code> | Maximum attempts that can be undertaken  on the job before it is failed |
 
+<a name="ResultType"></a>
+
+## ResultType : <code>String</code>
+Job result type
+
+**Kind**: global typedef  
+<a name="Status"></a>
+
+## Status : <code>String</code>
+Job status
+
+**Kind**: global typedef  
+<a name="Priority"></a>
+
+## Priority : <code>String</code>
+Job priority
+
+**Kind**: global typedef  
