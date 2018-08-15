@@ -144,7 +144,7 @@ class Service extends EventEmitter {
         return this.storage
             .getItem(`job/${jobID}`)
             // Clone job
-            .then(job => merge(true, job));
+            .then(job => job ? merge(true, job) : null);
     }
 
     getNextJob() {
@@ -192,7 +192,7 @@ class Service extends EventEmitter {
             return Promise.reject(newNotInitialisedError());
         }
         return this.jobQueue.enqueue(() =>
-            !jobID ? this.getNextJob() : this.getJob(jobID)
+            (jobID === null || jobID === undefined ? this.getNextJob() : this.getJob(jobID))
                 .then(job => {
                     if (!job && !jobID) {
                         // no job to start

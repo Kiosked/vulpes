@@ -14,12 +14,16 @@ function prepareJobForWorker(service, job) {
         type,
         data,
         parents,
+        priority,
+        status,
         timeLimit
     } = job;
     const workerJob = {
         id,
         type,
         data,
+        priority,
+        status,
         timeLimit
     };
     return service
