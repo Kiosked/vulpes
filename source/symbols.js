@@ -1,9 +1,11 @@
 const ms = require("ms");
 
 const ERROR_CODE_ALREADY_INIT = "error/init/multi-call";
+const ERROR_CODE_CANNOT_RESTART = "error/job/restart/invalid";
 const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";
 const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
 const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
+const ERROR_CODE_NO_JOB_FOR_ID = "error/job/notfoundforid";
 const ERROR_CODE_NOT_INIT = "error/init/not-init";
 
 const JOB_PRIORITY_HIGH = 5;
@@ -14,6 +16,7 @@ const JOB_RESULT_TYPE_FAILURE = "job/result/fail";
 const JOB_RESULT_TYPE_FAILURE_SOFT = "job/result/fail/soft";
 const JOB_RESULT_TYPE_SUCCESS = "job/result/success";
 const JOB_RESULT_TYPE_TIMEOUT = "job/result/fail/timeout";
+const JOB_RESULT_TYPES_RESTARTABLE_REXP = /^job\/result\/(success|fail\/soft)$/;
 const JOB_RESULT_TYPES_REXP = /^job\/result\/.+$/;
 
 const JOB_STATUS_PENDING = "job/status/pending";
@@ -24,9 +27,11 @@ const JOB_TIMELIMIT_DEFAULT = ms("10m");
 
 module.exports = {
     ERROR_CODE_ALREADY_INIT,
+    ERROR_CODE_CANNOT_RESTART,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
+    ERROR_CODE_NO_JOB_FOR_ID,
     ERROR_CODE_NOT_INIT,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
@@ -35,6 +40,7 @@ module.exports = {
     JOB_RESULT_TYPE_FAILURE_SOFT,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPE_TIMEOUT,
+    JOB_RESULT_TYPES_RESTARTABLE_REXP,
     JOB_RESULT_TYPES_REXP,
     JOB_STATUS_PENDING,
     JOB_STATUS_RUNNING,

@@ -1,3 +1,13 @@
+const {
+    JOB_RESULT_TYPES_RESTARTABLE_REXP,
+    JOB_STATUS_STOPPED
+} = require("./symbols.js");
+
+function jobCanBeRestarted(job) {
+    return job.status === JOB_STATUS_STOPPED &&
+        (JOB_RESULT_TYPES_RESTARTABLE_REXP.test(job.result.type) || job.result.type === null);
+}
+
 function prepareJobForWorker(service, job) {
     const {
         id,
@@ -48,6 +58,7 @@ function updateJobChainForParents(service, job) {
 }
 
 module.exports = {
+    jobCanBeRestarted,
     prepareJobForWorker,
     updateJobChainForParents
 };

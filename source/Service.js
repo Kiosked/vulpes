@@ -7,14 +7,16 @@ const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
-const { prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
+const { jobCanBeRestarted, prepareJobForWorker, updateJobChainForParents } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const { sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
+    ERROR_CODE_CANNOT_RESTART,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
+    ERROR_CODE_NO_JOB_FOR_ID,
     ERROR_CODE_NOT_INIT,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
@@ -185,18 +187,32 @@ class Service extends EventEmitter {
         this._helpers = [];
     }
 
-    startJob(jobID, { executePredicate = false, restart = false } = {}) {
+    startJob(jobID = null, { executePredicate = false, restart = false } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
         return this.jobQueue.enqueue(() =>
-            this.getJob(jobID)
+            !jobID ? this.getNextJob() : this.getJob(jobID)
                 .then(job => {
-                    // @todo restart
-                    if (job.status !== JOB_STATUS_PENDING) {
+                    if (!job && !jobID) {
+                        // no job to start
+                        return Promise.resolve(null);
+                    } else if (!job) {
+                        // no job found
+                        throw new VError(
+                            { info: { code: ERROR_CODE_NO_JOB_FOR_ID } },
+                            `No job found for ID: ${jobID}`
+                        );
+                    }
+                    if (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) {
+                        throw new VError(
+                            { info: { code: ERROR_CODE_CANNOT_RESTART } },
+                            `Job not valid to restart: ${job.id}`
+                        );
+                    } else if (job.status !== JOB_STATUS_PENDING && job.status !== JOB_STATUS_STOPPED) {
                         throw new VError(
                             { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
-                            `Invalid job status: ${job.status}`
+                            `Invalid job status (${job.status}): ${job.id}`
                         );
                     }
                     // @todo parent completion
@@ -213,6 +229,9 @@ class Service extends EventEmitter {
                         .setItem(`job/${job.id}`, job)
                         .then(() => {
                             this.emit("jobStarted", { id: job.id });
+                            if (!jobID) {
+                                this.emit("jobRestarted", { id: job.id });
+                            }
                             return prepareJobForWorker(this, job);
                         });
                 })
