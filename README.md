@@ -57,7 +57,7 @@ A job will not execute if its parents have not been completed. Providing the `pa
 More information is found in the [API documentation](API.md).
 
 ## Developing
-To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory.
+To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
 
 To run the tests, execute `npm t` - this executes all tests and coverage checks. To run just unit tests or just integration tests, run `npm run test:unit` or `npm run test:integration` respectively.
 
