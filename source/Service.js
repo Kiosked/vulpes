@@ -175,16 +175,50 @@ class Service extends EventEmitter {
      *  or null if not found
      * @memberof Service
      */
-    getJob(jobID) {
+    async getJob(jobID) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return (
-            this.storage
-                .getItem(`job/${jobID}`)
-                // Clone job
-                .then(job => (job ? merge(true, job) : null))
+        return await this.storage
+            .getItem(`job/${jobID}`)
+            // Clone job
+            .then(job => (job ? merge(true, job) : null));
+    }
+
+    async getJobChildren(jobID) {
+        return await this.queryJobs({
+            parents: parents => parents.includes(jobID)
+        });
+    }
+
+    async getJobParents(jobID, { fullAncestry = false } = {}) {
+        const job = await this.getJob(jobID);
+        if (job.parents.length <= 0) {
+            return Promise.resolve([]);
+        }
+        const parents = await Promise.all(job.parents.map(parentID => this.getJob(parentID)));
+        if (fullAncestry) {
+            // @todo
+        }
+        return parents;
+    }
+
+    async getJobTree(jobID, { resolveParents = false } = {}) {
+        const job = await this.getJob(jobID);
+        const tree = [job];
+        if (resolveParents) {
+            const parents = await this.getJobParents(jobID, { fullAncestry: true });
+            tree.push(...parents);
+        }
+        const children = await this.getJobChildren(jobID);
+        await Promise.all(
+            children.map(async child => {
+                const childTree = await this.getJobTree(child.id);
+                tree.push(...childTree);
+            })
         );
+        // @todo remove dupes
+        return tree;
     }
 
     /**
