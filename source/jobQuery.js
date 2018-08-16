@@ -6,6 +6,9 @@ function selectJob(jobs, query) {
 }
 
 function selectJobs(jobs, query) {
+    if (Object.keys(query).length <= 0) {
+        throw new Error("Invalid query: Query parameter cannot be empty");
+    }
     return find(jobs, query);
 }
 
