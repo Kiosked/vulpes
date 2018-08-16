@@ -10,8 +10,7 @@ const { selectJobs } = require("./jobQuery.js");
 const {
     ensureParentsComplete,
     jobCanBeRestarted,
-    prepareJobForWorker,
-    updateJobChainForParents
+    prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const { sortJobsByPriority } = require("./jobSorting.js");
@@ -154,22 +153,18 @@ class Service extends EventEmitter {
             return Promise.reject(newNotInitialisedError());
         }
         return this.jobQueue.enqueue(() =>
-            Promise.resolve()
-                .then(() => {
-                    const initProps = filterJobInitObject(properties);
-                    const job = merge.recursive(
-                        generateEmptyJob(),
-                        { timeLimit: this.timeLimit },
-                        initProps
-                    );
-                    return updateJobChainForParents(this, job);
-                })
-                .then(job => {
-                    return this.storage.setItem(`job/${job.id}`, job).then(() => {
-                        this.emit("jobAdded", { id: job.id });
-                        return job.id;
-                    });
-                })
+            Promise.resolve().then(() => {
+                const initProps = filterJobInitObject(properties);
+                const job = merge.recursive(
+                    generateEmptyJob(),
+                    { timeLimit: this.timeLimit },
+                    initProps
+                );
+                return this.storage.setItem(`job/${job.id}`, job).then(() => {
+                    this.emit("jobAdded", { id: job.id });
+                    return job.id;
+                });
+            })
         );
     }
 

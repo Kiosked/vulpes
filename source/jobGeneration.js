@@ -40,7 +40,6 @@ function filterJobInitObject(info) {
  * A job
  * @typedef {Object} Job
  * @property {String} id - The job's ID
- * @property {Array.<String>} chain - An array of IDs that form the job's chain
  * @property {String} type - The job type (consumer controlled)
  * @property {Status} status - The current job state
  * @property {Priority} priority - The job's priority
@@ -78,7 +77,6 @@ function generateEmptyJob() {
     return {
         ["@@type"]: "vulpes/job",
         id,
-        chain: [id],
         type: "generic",
         status: JOB_STATUS_PENDING,
         priority: JOB_PRIORITY_NORMAL,

@@ -14,20 +14,5 @@ describe("Service", function() {
                     expect(keys).to.have.lengthOf(2);
                 });
         });
-
-        it("sets chain IDs correctly", function() {
-            let parentIDs;
-            return Promise.all([this.service.addJob(), this.service.addJob()])
-                .then(ids => {
-                    parentIDs = ids;
-                    return this.service.addJob({
-                        parents: parentIDs
-                    });
-                })
-                .then(jobID => this.service.getJob(jobID))
-                .then(job => {
-                    expect(job.chain).to.deep.equal(parentIDs);
-                });
-        });
     });
 });
