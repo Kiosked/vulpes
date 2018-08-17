@@ -55,6 +55,7 @@
     "p-limit": "^2.0.0",
     "pify": "^4.0.0",
     "simple-object-query": "^1.6.1",
+    "sleep-promise": "^8.0.1",
     "uuid": "^3.3.2",
     "verror": "^1.10.0"
   },
@@ -75,7 +76,6 @@
     "nyc": "^12.0.2",
     "prettier": "^1.14.2",
     "prettier-check": "^2.0.0",
-    "sinon": "^6.1.5",
-    "sleep-promise": "^8.0.1"
+    "sinon": "^6.1.5"
   }
 }

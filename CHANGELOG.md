@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.4.1
+_2018-08-17_
+
+ * **Bugfix**:
+   * Fix `FileStorage` reference to `sleep-promise`
+
 ## v0.4.0
 _2018-08-17_
 
