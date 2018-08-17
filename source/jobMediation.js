@@ -1,10 +1,77 @@
 const VError = require("verror");
+const merge = require("merge");
 const {
     ERROR_CODE_PARENTS_INCOMPLETE,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPES_RESTARTABLE_REXP,
-    JOB_STATUS_STOPPED
+    JOB_STATUS_STOPPED,
+    UUID_REXP
 } = require("./symbols.js");
+
+async function addJobBatch(service, jobs) {
+    const results = merge(true, jobs);
+    const resolvedIDs = [];
+    jobs.forEach(job => {
+        if (typeof job.id === "undefined" || job.id === null) {
+            return Promise.reject(
+                new Error("Failed adding job batch: All jobs must have an ID (non-UUID)")
+            );
+        }
+    });
+    let work = Promise.resolve();
+    const processBatch = async () => {
+        let workPerformed = false;
+        results.filter((pendingJob, index) => !resolvedIDs[index]).forEach(pendingJob => {
+            const { id, parents: parentsRaw } = pendingJob;
+            let parents = parentsRaw;
+            if (UUID_REXP.test(id)) {
+                throw new Error(
+                    `Failed adding job batch: Cannot add jobs with pre-set UUID: ${id}`
+                );
+            }
+            // First check if the parents are resolved
+            if (parents && parents.length > 0) {
+                const resolvedParents = parents.map(parentID => {
+                    if (UUID_REXP.test(parentID) === false) {
+                        // Try to find job in resolved IDs
+                        const targetIndex = jobs.findIndex(job => job.id === parentID);
+                        if (targetIndex >= 0 === false || !resolvedIDs[targetIndex]) {
+                            throw new Error(
+                                `Failed adding job batch: Failed resolving parent ID: ${parentID}`
+                            );
+                        }
+                        return resolvedIDs[targetIndex];
+                    }
+                    return parentID;
+                });
+                const allResolved = resolvedParents.every(parentID => UUID_REXP.test(parentID));
+                if (!allResolved) {
+                    // Some IDs could not be resolved
+                    return;
+                }
+                parents = resolvedParents;
+            }
+            // Add this job to the service
+            workPerformed = true;
+            work = work.then(async () => {
+                const jobID = await service.addJob(
+                    Object.assign(pendingJob, {
+                        id: null,
+                        parents
+                    })
+                );
+                const index = jobs.findIndex(job => job.id === id);
+                resolvedIDs[index] = jobID;
+                results[index] = await service.getJob(jobID);
+            });
+        });
+        if (!workPerformed) {
+            throw new Error("Failed adding job batch: Stalled while resolving dependencies");
+        }
+    };
+    await processBatch();
+    return results;
+}
 
 function ensureParentsComplete(service, job) {
     if (job.parents.length === 0) {
@@ -68,6 +135,7 @@ function prepareJobForWorker(service, job) {
 }
 
 module.exports = {
+    addJobBatch,
     ensureParentsComplete,
     jobCanBeRestarted,
     prepareJobForWorker

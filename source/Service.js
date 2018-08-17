@@ -8,6 +8,7 @@ const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
 const {
+    addJobBatch,
     ensureParentsComplete,
     jobCanBeRestarted,
     prepareJobForWorker
@@ -163,6 +164,13 @@ class Service extends EventEmitter {
             this.emit("jobAdded", { id: job.id });
             return job.id;
         });
+    }
+
+    async addJobs(jobs) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
+        return await addJobBatch(this, jobs);
     }
 
     /**
