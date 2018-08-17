@@ -259,12 +259,20 @@ class Service extends EventEmitter {
      * @typedef {Object} GetJobTreeOptions
      * @property {Boolean=} resolveParents - Fetch the ancestry of the specified
      *  job, not just the children. Defaults to true (full tree).
+     */
+
+    /**
+     * Get a job tree
+     * Fetches an array of jobs that form the relationship tree
+     * (parents-children) of a certain job.
+     * @param {String} jobID The job ID to branch from
+     * @param {GetJobTreeOptions=} options Fetch options for the tree
+     *  processing
      * @returns {Promise.<Array.<Job>>} A deduplicated array of jobs containing,
      *  if configured, all of the job's ancestry and progeny. Will also contain
      *  the job itself.
      * @memberof Service
      */
-
     async getJobTree(jobID, { resolveParents = true } = {}) {
         const job = await this.getJob(jobID);
         const tree = [job];
@@ -326,7 +334,7 @@ class Service extends EventEmitter {
      *  has been completed
      * @memberof Service
      */
-    initialise() {
+    async initialise() {
         if (this._initialised) {
             return Promise.reject(
                 new VError(
@@ -336,7 +344,7 @@ class Service extends EventEmitter {
             );
         }
         this._initialised = true;
-        return this.storage.initialise();
+        await this.storage.initialise();
     }
 
     /**
