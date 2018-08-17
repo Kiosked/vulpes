@@ -13,7 +13,7 @@ const {
     prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
-const { sortJobsByPriority } = require("./jobSorting.js");
+const { filterDuplicateJobs, sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_CANNOT_RESTART,
@@ -185,12 +185,51 @@ class Service extends EventEmitter {
             .then(job => (job ? merge(true, job) : null));
     }
 
-    async getJobChildren(jobID) {
-        return await this.queryJobs({
+    /**
+     * Options for fetching job children
+     * @typedef {Object} GetJobChildrenOptions
+     * @property {Boolean=} fullProgeny - Fetch the full progeny of the job
+     *  (all of the children and their children)
+     */
+
+    /**
+     * Get a job's children (shallow)
+     * @param {String} jobID The job ID
+     * @param {GetJobChildrenOptions=} options Options for fetching
+     * @returns {Promise.<Array.<Job>>} A promise that resolves with an array
+     *  of child jobs
+     * @memberof Service
+     */
+    async getJobChildren(jobID, { fullProgeny = false } = {}) {
+        const children = await this.queryJobs({
             parents: parents => parents.includes(jobID)
         });
+        if (fullProgeny) {
+            await Promise.all(
+                children.map(async child => {
+                    const childJobs = await this.getJobChildren(child.id);
+                    children.push(...childJobs);
+                })
+            );
+        }
+        return filterDuplicateJobs(children);
     }
 
+    /**
+     * Options for fetching job parents
+     * @typedef {Object} GetJobParentsOptions
+     * @property {Boolean=} fullAncestry - Fetch the full fullAncestry of the job
+     *  (all of the parents and their parents)
+     */
+
+    /**
+     * Get the parents of a job
+     * @param {String} jobID The ID of the job
+     * @param {GetJobParentsOptions=} options Job fetching options
+     * @returns {Promise.<Array.<Job>>} A promise that resolves with an array of
+     *  jobs
+     * @memberof Service
+     */
     async getJobParents(jobID, { fullAncestry = false } = {}) {
         const job = await this.getJob(jobID);
         if (job.parents.length <= 0) {
@@ -198,27 +237,37 @@ class Service extends EventEmitter {
         }
         const parents = await Promise.all(job.parents.map(parentID => this.getJob(parentID)));
         if (fullAncestry) {
-            // @todo
+            const parentsParents = await Promise.all(
+                job.parents.map(parentID => this.getJobParents(parentID))
+            );
+            parentsParents.forEach(jobs => {
+                parents.push(...jobs);
+            });
         }
-        return parents;
+        return filterDuplicateJobs(parents);
     }
 
-    async getJobTree(jobID, { resolveParents = false } = {}) {
+    /**
+     * Options for fetching a job tree
+     * @typedef {Object} GetJobTreeOptions
+     * @property {Boolean=} resolveParents - Fetch the ancestry of the specified
+     *  job, not just the children. Defaults to true (full tree).
+     * @returns {Promise.<Array.<Job>>} A deduplicated array of jobs containing,
+     *  if configured, all of the job's ancestry and progeny. Will also contain
+     *  the job itself.
+     * @memberof Service
+     */
+
+    async getJobTree(jobID, { resolveParents = true } = {}) {
         const job = await this.getJob(jobID);
         const tree = [job];
         if (resolveParents) {
             const parents = await this.getJobParents(jobID, { fullAncestry: true });
             tree.push(...parents);
         }
-        const children = await this.getJobChildren(jobID);
-        await Promise.all(
-            children.map(async child => {
-                const childTree = await this.getJobTree(child.id);
-                tree.push(...childTree);
-            })
-        );
-        // @todo remove dupes
-        return tree;
+        const children = await this.getJobChildren(jobID, { fullProgeny: true });
+        tree.push(...children);
+        return filterDuplicateJobs(tree);
     }
 
     /**
