@@ -6,18 +6,68 @@ describe("Service", function() {
         return this.service
             .initialise()
             .then(() =>
-                Promise.all([
-                    this.service.addJob({ data: { name: "test1" } }),
-                    this.service.addJob({ data: { name: "test2" } })
+                this.service.addJobs([
+                    { id: 1, type: "job1" },
+                    { id: 2, type: "job2", parents: [1] },
+                    { id: 3, type: "job3", parents: [1, 2] },
+                    { id: 4, type: "job4", parents: [3] },
+                    { id: 5, type: "job5", parents: [4] },
+                    { id: 6, type: "job6", parents: [4] }
                 ])
             )
-            .then(([jobID1, jobID2]) => {
-                Object.assign(this, {
-                    jobID1,
-                    jobID2
-                });
+            .then(jobs => jobs.map(job => job.id))
+            .then(ids => {
+                this.jobIDs = ids;
             });
     });
 
-    describe("getJobChildren", function() {});
+    describe("getJobChildren", function() {
+        it("gets only the first set of children when fullProgeny not set", function() {
+            return this.service.getJobChildren(this.jobIDs[3] /* job4 */).then(children => {
+                expect(children).to.have.lengthOf(2);
+                const foundJobs = children.map(job => job.type).sort();
+                expect(foundJobs).to.deep.equal(["job5", "job6"]);
+            });
+        });
+
+        it("gets all children of a root job", function() {
+            return this.service
+                .getJobChildren(this.jobIDs[0], { fullProgeny: true })
+                .then(children => {
+                    expect(children).to.have.lengthOf(5);
+                    const foundJobs = children.map(job => job.type).sort();
+                    expect(foundJobs).to.deep.equal(["job2", "job3", "job4", "job5", "job6"]);
+                });
+        });
+
+        it("gets all children of job with parents and children", function() {
+            return this.service
+                .getJobChildren(this.jobIDs[2] /* job3 */, { fullProgeny: true })
+                .then(children => {
+                    expect(children).to.have.lengthOf(3);
+                    const foundJobs = children.map(job => job.type).sort();
+                    expect(foundJobs).to.deep.equal(["job4", "job5", "job6"]);
+                });
+        });
+    });
+
+    describe("getJobParents", function() {
+        it("gets all parents of a tail job", function() {
+            return this.service
+                .getJobParents(this.jobIDs[5] /* job6 */, { fullAncestry: true })
+                .then(parents => {
+                    expect(parents).to.have.lengthOf(4);
+                    const foundJobs = parents.map(job => job.type).sort();
+                    expect(foundJobs).to.deep.equal(["job1", "job2", "job3", "job4"]);
+                });
+        });
+
+        it("gets only the first set of parents when fullAncestry not set", function() {
+            return this.service.getJobParents(this.jobIDs[2] /* job3 */).then(parents => {
+                expect(parents).to.have.lengthOf(2);
+                const foundJobs = parents.map(job => job.type).sort();
+                expect(foundJobs).to.deep.equal(["job1", "job2"]);
+            });
+        });
+    });
 });

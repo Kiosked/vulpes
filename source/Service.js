@@ -210,9 +210,10 @@ class Service extends EventEmitter {
             parents: parents => parents.includes(jobID)
         });
         if (fullProgeny) {
+            const [, options] = arguments;
             await Promise.all(
                 children.map(async child => {
-                    const childJobs = await this.getJobChildren(child.id);
+                    const childJobs = await this.getJobChildren(child.id, options);
                     children.push(...childJobs);
                 })
             );
@@ -242,8 +243,9 @@ class Service extends EventEmitter {
         }
         const parents = await Promise.all(job.parents.map(parentID => this.getJob(parentID)));
         if (fullAncestry) {
+            const [, options] = arguments;
             const parentsParents = await Promise.all(
-                job.parents.map(parentID => this.getJobParents(parentID))
+                job.parents.map(parentID => this.getJobParents(parentID, options))
             );
             parentsParents.forEach(jobs => {
                 parents.push(...jobs);
