@@ -41,6 +41,8 @@ const JOB_STATUS_STOPPED = "job/status/stopped";
 
 const JOB_TIMELIMIT_DEFAULT = ms("10m");
 
+const UUID_REXP = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/;
+
 module.exports = {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_CANNOT_RESTART,
@@ -62,5 +64,6 @@ module.exports = {
     JOB_STATUS_PENDING,
     JOB_STATUS_RUNNING,
     JOB_STATUS_STOPPED,
-    JOB_TIMELIMIT_DEFAULT
+    JOB_TIMELIMIT_DEFAULT,
+    UUID_REXP
 };

@@ -1,4 +1,4 @@
-const { sortJobsByPriority } = require("../../dist/jobSorting.js");
+const { filterDuplicateJobs, sortJobsByPriority } = require("../../dist/jobSorting.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
@@ -6,6 +6,24 @@ const {
 } = require("../../dist/symbols.js");
 
 describe("jobSorting", function() {
+    describe("filterDuplicateJobs", function() {
+        beforeEach(function() {
+            this.jobs = [
+                { id: "1000", type: "job1" },
+                { id: "1000", type: "job2" },
+                { id: "1001", type: "job3" }
+            ];
+        });
+
+        it("removes duplicates", function() {
+            const dedupedJobs = filterDuplicateJobs(this.jobs);
+            expect(dedupedJobs).to.deep.equal([
+                { id: "1000", type: "job1" },
+                { id: "1001", type: "job3" }
+            ]);
+        });
+    });
+
     describe("sortJobsByPriority", function() {
         beforeEach(function() {
             const now = Date.now();

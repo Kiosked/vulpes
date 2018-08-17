@@ -8,12 +8,13 @@ const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
 const { selectJobs } = require("./jobQuery.js");
 const {
+    addJobBatch,
     ensureParentsComplete,
     jobCanBeRestarted,
     prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
-const { sortJobsByPriority } = require("./jobSorting.js");
+const { filterDuplicateJobs, sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_CANNOT_RESTART,
@@ -148,24 +149,28 @@ class Service extends EventEmitter {
      * @returns {Promise.<String>} A promise that resolves with the job's ID
      * @memberof Service
      */
-    addJob(properties = {}) {
+    async addJob(properties = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.jobQueue.enqueue(() =>
-            Promise.resolve().then(() => {
-                const initProps = filterJobInitObject(properties);
-                const job = merge.recursive(
-                    generateEmptyJob(),
-                    { timeLimit: this.timeLimit },
-                    initProps
-                );
-                return this.storage.setItem(`job/${job.id}`, job).then(() => {
-                    this.emit("jobAdded", { id: job.id });
-                    return job.id;
-                });
-            })
-        );
+        return this.jobQueue.enqueue(async () => {
+            const initProps = filterJobInitObject(properties);
+            const job = merge.recursive(
+                generateEmptyJob(),
+                { timeLimit: this.timeLimit },
+                initProps
+            );
+            await this.storage.setItem(`job/${job.id}`, job);
+            this.emit("jobAdded", { id: job.id });
+            return job.id;
+        });
+    }
+
+    async addJobs(jobs) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
+        return await addJobBatch(this, jobs);
     }
 
     /**
@@ -175,16 +180,109 @@ class Service extends EventEmitter {
      *  or null if not found
      * @memberof Service
      */
-    getJob(jobID) {
+    async getJob(jobID) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return (
-            this.storage
-                .getItem(`job/${jobID}`)
-                // Clone job
-                .then(job => (job ? merge(true, job) : null))
-        );
+        return await this.storage
+            .getItem(`job/${jobID}`)
+            // Clone job
+            .then(job => (job ? merge(true, job) : null));
+    }
+
+    /**
+     * Options for fetching job children
+     * @typedef {Object} GetJobChildrenOptions
+     * @property {Boolean=} fullProgeny - Fetch the full progeny of the job
+     *  (all of the children and their children)
+     */
+
+    /**
+     * Get a job's children (shallow)
+     * @param {String} jobID The job ID
+     * @param {GetJobChildrenOptions=} options Options for fetching
+     * @returns {Promise.<Array.<Job>>} A promise that resolves with an array
+     *  of child jobs
+     * @memberof Service
+     */
+    async getJobChildren(jobID, { fullProgeny = false } = {}) {
+        const children = await this.queryJobs({
+            parents: parents => parents.includes(jobID)
+        });
+        if (fullProgeny) {
+            const [, options] = arguments;
+            await Promise.all(
+                children.map(async child => {
+                    const childJobs = await this.getJobChildren(child.id, options);
+                    children.push(...childJobs);
+                })
+            );
+        }
+        return filterDuplicateJobs(children);
+    }
+
+    /**
+     * Options for fetching job parents
+     * @typedef {Object} GetJobParentsOptions
+     * @property {Boolean=} fullAncestry - Fetch the full fullAncestry of the job
+     *  (all of the parents and their parents)
+     */
+
+    /**
+     * Get the parents of a job
+     * @param {String} jobID The ID of the job
+     * @param {GetJobParentsOptions=} options Job fetching options
+     * @returns {Promise.<Array.<Job>>} A promise that resolves with an array of
+     *  jobs
+     * @memberof Service
+     */
+    async getJobParents(jobID, { fullAncestry = false } = {}) {
+        const job = await this.getJob(jobID);
+        if (job.parents.length <= 0) {
+            return Promise.resolve([]);
+        }
+        const parents = await Promise.all(job.parents.map(parentID => this.getJob(parentID)));
+        if (fullAncestry) {
+            const [, options] = arguments;
+            const parentsParents = await Promise.all(
+                job.parents.map(parentID => this.getJobParents(parentID, options))
+            );
+            parentsParents.forEach(jobs => {
+                parents.push(...jobs);
+            });
+        }
+        return filterDuplicateJobs(parents);
+    }
+
+    /**
+     * Options for fetching a job tree
+     * @typedef {Object} GetJobTreeOptions
+     * @property {Boolean=} resolveParents - Fetch the ancestry of the specified
+     *  job, not just the children. Defaults to true (full tree).
+     */
+
+    /**
+     * Get a job tree
+     * Fetches an array of jobs that form the relationship tree
+     * (parents-children) of a certain job.
+     * @param {String} jobID The job ID to branch from
+     * @param {GetJobTreeOptions=} options Fetch options for the tree
+     *  processing
+     * @returns {Promise.<Array.<Job>>} A deduplicated array of jobs containing,
+     *  if configured, all of the job's ancestry and progeny. Will also contain
+     *  the job itself.
+     * @memberof Service
+     */
+    async getJobTree(jobID, { resolveParents = true } = {}) {
+        const job = await this.getJob(jobID);
+        const tree = [job];
+        if (resolveParents) {
+            const parents = await this.getJobParents(jobID, { fullAncestry: true });
+            tree.push(...parents);
+        }
+        const children = await this.getJobChildren(jobID, { fullProgeny: true });
+        tree.push(...children);
+        return filterDuplicateJobs(tree);
     }
 
     /**
@@ -236,7 +334,7 @@ class Service extends EventEmitter {
      *  has been completed
      * @memberof Service
      */
-    initialise() {
+    async initialise() {
         if (this._initialised) {
             return Promise.reject(
                 new VError(
@@ -246,7 +344,7 @@ class Service extends EventEmitter {
             );
         }
         this._initialised = true;
-        return this.storage.initialise();
+        await this.storage.initialise();
     }
 
     /**
