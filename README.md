@@ -56,6 +56,43 @@ A job will not execute if its parents have not been completed. Providing the `pa
 
 More information is found in the [API documentation](API.md).
 
+### Job trees
+You can fetch jobs that are connected to a certain job using `getJobChildren`, `getJobParents` and `getJobTree`.
+
+```javascript
+// Get all children:
+const allChildren = await service.getJobChildren(job.id, { fullProgeny: true });
+// `allChildren` will be a flat array of jobs that are descendants of the
+// provided job ID. It will not include the provided job.
+
+// Default behaviour is to get only the immediate children, without full progeny:
+const immediateChildren = await service.getJobChildren(job.id);
+
+// Get all parents:
+const allParents = await service.getJobParents(job.id, { fullAncestry: true });
+// `allParents` will be a flat array of jobs that are ancestors of the
+// provided job ID. It will not include the provided job.
+
+// Default behaviour is to get only the immediate parents, without full ancestry:
+const immediateParents = await service.getJobParents(job.id);
+
+// Get a full tree:
+const jobsTree = await service.getJobTree(job.id);
+// `jobsTree` is an array of all jobs connected to the target job, including the
+// target job itself.
+```
+
+A job tree contains all parents (under default configuration) and children of a job. It will not contain jobs that do not directly relate to it via a parent of a parent or a child of a child. A child's non-connecting parent is not included, for instance:
+
+```
+A    B
+ \  /
+  \/
+   C
+```
+
+Taking the tree of B will result in [B, C] and will not include A. Taking the tree of C would result in [C, A, B].
+
 ## Developing
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
 

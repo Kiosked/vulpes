@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.4.0
+_2018-08-17_
+
+ * Job tree methods: parents/children/full-tree
+
 ## v0.3.0
 _2018-08-15_
 

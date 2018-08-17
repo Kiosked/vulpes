@@ -44,6 +44,15 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Job">Job</a> : <code>Object</code></dt>
 <dd><p>A job</p>
 </dd>
+<dt><a href="#GetJobChildrenOptions">GetJobChildrenOptions</a> : <code>Object</code></dt>
+<dd><p>Options for fetching job children</p>
+</dd>
+<dt><a href="#GetJobParentsOptions">GetJobParentsOptions</a> : <code>Object</code></dt>
+<dd><p>Options for fetching job parents</p>
+</dd>
+<dt><a href="#GetJobTreeOptions">GetJobTreeOptions</a> : <code>Object</code></dt>
+<dd><p>Options for fetching a job tree</p>
+</dd>
 <dt><a href="#ResultType">ResultType</a> : <code>String</code></dt>
 <dd><p>Job result type</p>
 </dd>
@@ -115,6 +124,9 @@ Service for managing jobs
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
         * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
         * [.getJob(jobID)](#Service+getJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
+        * [.getJobChildren(jobID, [options])](#Service+getJobChildren) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.getJobTree(jobID, [options])](#Service+getJobTree) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
         * [.queryJobs(query)](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
@@ -180,6 +192,51 @@ Get a job by its ID
 | Param | Type | Description |
 | --- | --- | --- |
 | jobID | <code>String</code> | The job ID |
+
+<a name="Service+getJobChildren"></a>
+
+### service.getJobChildren(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+Get a job's children (shallow)
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A promise that resolves with an array
+ of child jobs  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID |
+| [options] | [<code>GetJobChildrenOptions</code>](#GetJobChildrenOptions) | Options for fetching |
+
+<a name="Service+getJobParents"></a>
+
+### service.getJobParents(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+Get the parents of a job
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A promise that resolves with an array of
+ jobs  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job |
+| [options] | [<code>GetJobParentsOptions</code>](#GetJobParentsOptions) | Job fetching options |
+
+<a name="Service+getJobTree"></a>
+
+### service.getJobTree(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+Get a job tree
+Fetches an array of jobs that form the relationship tree
+(parents-children) of a certain job.
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A deduplicated array of jobs containing,
+ if configured, all of the job's ancestry and progeny. Will also contain
+ the job itself.  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID to branch from |
+| [options] | [<code>GetJobTreeOptions</code>](#GetJobTreeOptions) | Fetch options for the tree  processing |
 
 <a name="Service+getNextJob"></a>
 
@@ -676,7 +733,6 @@ A job
 | Name | Type | Description |
 | --- | --- | --- |
 | id | <code>String</code> | The job's ID |
-| chain | <code>Array.&lt;String&gt;</code> | An array of IDs that form the job's chain |
 | type | <code>String</code> | The job type (consumer controlled) |
 | status | [<code>Status</code>](#Status) | The current job state |
 | priority | [<code>Priority</code>](#Priority) | The job's priority |
@@ -695,6 +751,42 @@ A job
 | timeLimit | <code>Number</code> \| <code>null</code> | Time limitation for the job's  execution. null means no limit. |
 | attempts | <code>Number</code> | Number of attempts the job has had |
 | attemptsMax | <code>Number</code> | Maximum attempts that can be undertaken  on the job before it is failed |
+
+<a name="GetJobChildrenOptions"></a>
+
+## GetJobChildrenOptions : <code>Object</code>
+Options for fetching job children
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [fullProgeny] | <code>Boolean</code> | Fetch the full progeny of the job  (all of the children and their children) |
+
+<a name="GetJobParentsOptions"></a>
+
+## GetJobParentsOptions : <code>Object</code>
+Options for fetching job parents
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [fullAncestry] | <code>Boolean</code> | Fetch the full fullAncestry of the job  (all of the parents and their parents) |
+
+<a name="GetJobTreeOptions"></a>
+
+## GetJobTreeOptions : <code>Object</code>
+Options for fetching a job tree
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [resolveParents] | <code>Boolean</code> | Fetch the ancestry of the specified  job, not just the children. Defaults to true (full tree). |
 
 <a name="ResultType"></a>
 
