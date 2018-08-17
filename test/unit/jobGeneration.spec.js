@@ -1,6 +1,5 @@
 const { generateEmptyJob } = require("../../dist/jobGeneration.js");
-
-const UUID_REXP = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/;
+const { UUID_REXP } = require("../../dist/symbols.js");
 
 describe("jobGeneration", function() {
     describe("generateEmptyJob", function() {

@@ -1,5 +1,4 @@
 const VError = require("verror");
-const merge = require("merge");
 const {
     ERROR_CODE_PARENTS_INCOMPLETE,
     JOB_RESULT_TYPE_SUCCESS,
@@ -9,8 +8,9 @@ const {
 } = require("./symbols.js");
 
 async function addJobBatch(service, jobs) {
-    const results = merge(true, jobs);
-    const resolvedIDs = [];
+    const results = JSON.parse(JSON.stringify(jobs));
+    // Create empty array to track resolutions
+    const resolvedIDs = jobs.map(() => "");
     jobs.forEach(job => {
         if (typeof job.id === "undefined" || job.id === null) {
             return Promise.reject(
@@ -18,11 +18,11 @@ async function addJobBatch(service, jobs) {
             );
         }
     });
-    let work = Promise.resolve();
     const processBatch = async () => {
-        let workPerformed = false;
+        let workPerformed = false,
+            work = Promise.resolve();
         results.filter((pendingJob, index) => !resolvedIDs[index]).forEach(pendingJob => {
-            const { id, parents: parentsRaw } = pendingJob;
+            const { id, parents: parentsRaw = [] } = pendingJob;
             let parents = parentsRaw;
             if (UUID_REXP.test(id)) {
                 throw new Error(
@@ -35,7 +35,7 @@ async function addJobBatch(service, jobs) {
                     if (UUID_REXP.test(parentID) === false) {
                         // Try to find job in resolved IDs
                         const targetIndex = jobs.findIndex(job => job.id === parentID);
-                        if (targetIndex >= 0 === false || !resolvedIDs[targetIndex]) {
+                        if (targetIndex >= 0 === false && !resolvedIDs[targetIndex]) {
                             throw new Error(
                                 `Failed adding job batch: Failed resolving parent ID: ${parentID}`
                             );
@@ -67,6 +67,12 @@ async function addJobBatch(service, jobs) {
         });
         if (!workPerformed) {
             throw new Error("Failed adding job batch: Stalled while resolving dependencies");
+        }
+        // Wait for all work to complete
+        await work;
+        if (resolvedIDs.every(id => !!id) === false) {
+            // Not all IDs resolved, so run again
+            await processBatch();
         }
     };
     await processBatch();
