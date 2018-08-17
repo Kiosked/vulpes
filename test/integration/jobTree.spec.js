@@ -70,4 +70,22 @@ describe("Service", function() {
             });
         });
     });
+
+    describe("getJobTree", function() {
+        it("returns the full tree, top-down", function() {
+            return this.service.getJobTree(this.jobIDs[0] /* job1 */).then(jobs => {
+                expect(jobs).to.have.lengthOf(6);
+                const foundJobs = jobs.map(job => job.type).sort();
+                expect(foundJobs).to.deep.equal(["job1", "job2", "job3", "job4", "job5", "job6"]);
+            });
+        });
+
+        it("returns the full tree, bottom-up", function() {
+            return this.service.getJobTree(this.jobIDs[5] /* job6 */).then(jobs => {
+                expect(jobs).to.have.lengthOf(5);
+                const foundJobs = jobs.map(job => job.type).sort();
+                expect(foundJobs).to.deep.equal(["job1", "job2", "job3", "job4", "job6"]);
+            });
+        });
+    });
 });
