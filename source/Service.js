@@ -148,24 +148,21 @@ class Service extends EventEmitter {
      * @returns {Promise.<String>} A promise that resolves with the job's ID
      * @memberof Service
      */
-    addJob(properties = {}) {
+    async addJob(properties = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.jobQueue.enqueue(() =>
-            Promise.resolve().then(() => {
-                const initProps = filterJobInitObject(properties);
-                const job = merge.recursive(
-                    generateEmptyJob(),
-                    { timeLimit: this.timeLimit },
-                    initProps
-                );
-                return this.storage.setItem(`job/${job.id}`, job).then(() => {
-                    this.emit("jobAdded", { id: job.id });
-                    return job.id;
-                });
-            })
-        );
+        return this.jobQueue.enqueue(async () => {
+            const initProps = filterJobInitObject(properties);
+            const job = merge.recursive(
+                generateEmptyJob(),
+                { timeLimit: this.timeLimit },
+                initProps
+            );
+            await this.storage.setItem(`job/${job.id}`, job);
+            this.emit("jobAdded", { id: job.id });
+            return job.id;
+        });
     }
 
     /**
