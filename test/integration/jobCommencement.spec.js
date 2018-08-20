@@ -93,4 +93,30 @@ describe("Service", function() {
                 });
         });
     });
+
+    describe("when stopping jobs", function() {
+        beforeEach(function() {
+            return this.service.startJob(this.jobID1);
+        });
+
+        it("sets the job result type", function() {
+            return this.service
+                .stopJob(this.jobID1, Service.JobResult.Success, { value: 42 })
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.result.type).to.equal(Service.JobResult.Success);
+                });
+        });
+
+        it("sets the job result data", function() {
+            return this.service
+                .stopJob(this.jobID1, Service.JobResult.Success, { value: 42 })
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.result.data).to.deep.equal({
+                        value: 42
+                    });
+                });
+        });
+    });
 });
