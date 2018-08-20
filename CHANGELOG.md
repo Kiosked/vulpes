@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.5.0
+_2018-08-20_
+
+ * Overwrite support for job result data
+
 ## v0.4.1
 _2018-08-17_
 
