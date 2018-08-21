@@ -87,5 +87,11 @@ describe("Service", function() {
                 expect(foundJobs).to.deep.equal(["job1", "job2", "job3", "job4", "job6"]);
             });
         });
+
+        it("returns an empty array if no job found", function() {
+            return this.service.getJobTree("abc").then(jobs => {
+                expect(jobs).to.deep.equal([]);
+            });
+        });
     });
 });

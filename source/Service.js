@@ -275,6 +275,9 @@ class Service extends EventEmitter {
      */
     async getJobTree(jobID, { resolveParents = true } = {}) {
         const job = await this.getJob(jobID);
+        if (!job) {
+            return [];
+        }
         const tree = [job];
         if (resolveParents) {
             const parents = await this.getJobParents(jobID, { fullAncestry: true });
