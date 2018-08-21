@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.5.1
+_2018-08-21_
+
+ * **Bugfix**:
+   * Remove `restart` parameter from `Service#startJob` (broke dynamic job-starting functionaliy)
+
 ## v0.5.0
 _2018-08-20_
 

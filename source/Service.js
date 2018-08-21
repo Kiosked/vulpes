@@ -361,6 +361,13 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Start job options
+     * @typedef {Object} StartJobOptions
+     * @property {Boolean=} executePredicate - Execute the predicate function
+     *  before running the task
+     */
+
+    /**
      * Start a job
      * @param {String=} jobID The job ID to start. If none provided the Service
      *  will attempt to start the next job by priority. If none is found it
@@ -371,7 +378,7 @@ class Service extends EventEmitter {
      *  worker
      * @memberof Service
      */
-    async startJob(jobID = null, { executePredicate = false, restart = false } = {}) {
+    async startJob(jobID = null, { executePredicate = true } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
@@ -390,10 +397,7 @@ class Service extends EventEmitter {
                         `No job found for ID: ${jobID}`
                     );
                 }
-                if (
-                    (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) ||
-                    restart === true
-                ) {
+                if (job.status === JOB_STATUS_STOPPED && jobCanBeRestarted(job) === false) {
                     throw new VError(
                         { info: { code: ERROR_CODE_CANNOT_RESTART } },
                         `Job not valid to restart: ${job.id}`
