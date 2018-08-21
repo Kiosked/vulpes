@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.5.2
+_2018-08-21_
+
+ * **Bugfix**:
+   * Unexpected result when calling `Service#getJobTree` when job not found (now returns empty array)
+
 ## v0.5.1
 _2018-08-21_
 
