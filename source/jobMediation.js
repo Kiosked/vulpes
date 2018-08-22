@@ -113,6 +113,37 @@ function jobCanBeRestarted(job) {
     );
 }
 
+function jobSatisfiesPredicates(service, job) {
+    return Promise.resolve().then(() => {
+        const { attemptsMax, timeBetweenRetries } = job.predicate;
+        const { attempts } = job;
+        const { stopped: lastStopped } = job.times;
+        const now = Date.now();
+        if (typeof attemptsMax === "number" && attempts >= attemptsMax) {
+            return false;
+        }
+        if (attempts > 0 && now - lastStopped < timeBetweenRetries) {
+            return false;
+        }
+        // @todo CRON timings
+        return true;
+    });
+}
+
+function pickFirstJob(service, jobs) {
+    const jobsCollection = [...jobs];
+    const tryNext = () => {
+        const job = jobsCollection.shift();
+        if (!job) {
+            return Promise.resolve(null);
+        }
+        return jobSatisfiesPredicates(service, job).then(
+            satisfies => (satisfies ? job : tryNext())
+        );
+    };
+    return tryNext();
+}
+
 function prepareJobForWorker(service, job) {
     const { id, type, data, parents, priority, status, timeLimit } = job;
     const workerJob = {
@@ -144,5 +175,7 @@ module.exports = {
     addJobBatch,
     ensureParentsComplete,
     jobCanBeRestarted,
+    jobSatisfiesPredicates,
+    pickFirstJob,
     prepareJobForWorker
 };

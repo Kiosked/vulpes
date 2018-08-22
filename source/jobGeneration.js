@@ -1,4 +1,5 @@
 const uuid = require("uuid/v4");
+const ms = require("ms");
 const { getTimestamp } = require("./time.js");
 const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
 
@@ -17,6 +18,7 @@ const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
  *  before this job
  */
 
+const CRON_ANY_TIME = "* * * * * *";
 const CONFIGURABLE_JOB_KEYS = [
     "type",
     "priority",
@@ -45,7 +47,13 @@ function filterJobInitObject(info) {
  * @property {Priority} priority - The job's priority
  * @property {Number} created - The creation timestamp of the job
  * @property {Array.<String>} parents - An array of IDs of the job's parents
- * @property {String} predicate - Predicate function for the job
+ * @property {Object} predicate - Predicate restraints for the job
+ * @property {Number} predicate.attemptsMax - Maximum attempts that can be undertaken
+ *  on the job before it is failed
+ * @property {String} predicate.runAt - CRON-based schedule by which the job can be
+ *  run
+ * @property {Number} predicate.timeBetweenRetries - Milliseconds between retries
+ *  (minimum)
  * @property {Object} data - The data for the job (incoming)
  * @property {Object} result - Result information
  * @property {ResultType|null} result.type - The type of result (null if not
@@ -64,8 +72,6 @@ function filterJobInitObject(info) {
  * @property {Number|null} timeLimit - Time limitation for the job's
  *  execution. null means no limit.
  * @property {Number} attempts - Number of attempts the job has had
- * @property {Number} attemptsMax - Maximum attempts that can be undertaken
- *  on the job before it is failed
  */
 
 /**
@@ -82,7 +88,11 @@ function generateEmptyJob() {
         priority: JOB_PRIORITY_NORMAL,
         created: getTimestamp(),
         parents: [],
-        predicate: "",
+        predicate: {
+            attemptsMax: null,
+            runAt: CRON_ANY_TIME,
+            timeBetweenRetries: ms("15m")
+        },
         data: {},
         result: {
             data: {},
@@ -95,8 +105,7 @@ function generateEmptyJob() {
             completed: null
         },
         timeLimit: null,
-        attempts: 0,
-        attemptsMax: 1
+        attempts: 0
     };
 }
 

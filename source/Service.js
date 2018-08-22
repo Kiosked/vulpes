@@ -11,6 +11,8 @@ const {
     addJobBatch,
     ensureParentsComplete,
     jobCanBeRestarted,
+    jobSatisfiesPredicates,
+    pickFirstJob,
     prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
@@ -302,7 +304,8 @@ class Service extends EventEmitter {
             "result.type": type => !type || type === JOB_RESULT_TYPE_FAILURE_SOFT
         })
             .then(sortJobsByPriority)
-            .then(jobs => jobs[0] || null);
+            .then(jobs => pickFirstJob(this, jobs))
+            .then(job => job || null);
     }
 
     /**
