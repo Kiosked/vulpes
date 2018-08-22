@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.6.0
+_2018-08-22_
+
+ * Jobs can be reset (after full-failure)
+ * Improved predicate restrictions
+
 ## v0.5.2
 _2018-08-21_
 

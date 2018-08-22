@@ -53,6 +53,9 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#GetJobTreeOptions">GetJobTreeOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching a job tree</p>
 </dd>
+<dt><a href="#StartJobOptions">StartJobOptions</a> : <code>Object</code></dt>
+<dd><p>Start job options</p>
+</dd>
 <dt><a href="#ResultType">ResultType</a> : <code>String</code></dt>
 <dd><p>Job result type</p>
 </dd>
@@ -130,6 +133,7 @@ Service for managing jobs
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
         * [.queryJobs(query)](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
+        * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
         * [.shutdown()](#Service+shutdown)
         * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.stopJob(jobID, resultType, [resultData])](#Service+stopJob) ⇒ <code>Promise</code>
@@ -274,6 +278,19 @@ Must be called before any other operation
 **Kind**: instance method of [<code>Service</code>](#Service)  
 **Returns**: <code>Promise</code> - A promise that resolves once initialisation
  has been completed  
+<a name="Service+resetJob"></a>
+
+### service.resetJob(jobID) ⇒ <code>Promise</code>
+Reset a failed job
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - A promise that resolves once the job has
+ been reset  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job to reset |
+
 <a name="Service+shutdown"></a>
 
 ### service.shutdown()
@@ -738,7 +755,10 @@ A job
 | priority | [<code>Priority</code>](#Priority) | The job's priority |
 | created | <code>Number</code> | The creation timestamp of the job |
 | parents | <code>Array.&lt;String&gt;</code> | An array of IDs of the job's parents |
-| predicate | <code>String</code> | Predicate function for the job |
+| predicate | <code>Object</code> | Predicate restraints for the job |
+| predicate.attemptsMax | <code>Number</code> | Maximum attempts that can be undertaken  on the job before it is failed |
+| predicate.runAt | <code>String</code> | CRON-based schedule by which the job can be  run |
+| predicate.timeBetweenRetries | <code>Number</code> | Milliseconds between retries  (minimum) |
 | data | <code>Object</code> | The data for the job (incoming) |
 | result | <code>Object</code> | Result information |
 | result.type | [<code>ResultType</code>](#ResultType) \| <code>null</code> | The type of result (null if not  stopped at least once) |
@@ -750,7 +770,6 @@ A job
 | times.completed | <code>Number</code> \| <code>null</code> | Timestamp for when the job was  completed successfully |
 | timeLimit | <code>Number</code> \| <code>null</code> | Time limitation for the job's  execution. null means no limit. |
 | attempts | <code>Number</code> | Number of attempts the job has had |
-| attemptsMax | <code>Number</code> | Maximum attempts that can be undertaken  on the job before it is failed |
 
 <a name="GetJobChildrenOptions"></a>
 
@@ -787,6 +806,18 @@ Options for fetching a job tree
 | Name | Type | Description |
 | --- | --- | --- |
 | [resolveParents] | <code>Boolean</code> | Fetch the ancestry of the specified  job, not just the children. Defaults to true (full tree). |
+
+<a name="StartJobOptions"></a>
+
+## StartJobOptions : <code>Object</code>
+Start job options
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [executePredicate] | <code>Boolean</code> | Execute the predicate function  before running the task |
 
 <a name="ResultType"></a>
 
