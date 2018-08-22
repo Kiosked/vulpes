@@ -23,6 +23,7 @@ const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
 const ERROR_CODE_NO_JOB_FOR_ID = "error/job/notfoundforid";
 const ERROR_CODE_NOT_INIT = "error/init/not-init";
 const ERROR_CODE_PARENTS_INCOMPLETE = "error/job/parents/incomplete";
+const ERROR_CODE_PREDICATE_NOT_SATISFIED = "error/job/predicate/not-satisfied";
 
 const JOB_PRIORITY_HIGH = 5;
 const JOB_PRIORITY_LOW = -5;
@@ -52,6 +53,7 @@ module.exports = {
     ERROR_CODE_NO_JOB_FOR_ID,
     ERROR_CODE_NOT_INIT,
     ERROR_CODE_PARENTS_INCOMPLETE,
+    ERROR_CODE_PREDICATE_NOT_SATISFIED,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
