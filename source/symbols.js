@@ -16,6 +16,7 @@ const ms = require("ms");
  */
 
 const ERROR_CODE_ALREADY_INIT = "error/init/multi-call";
+const ERROR_CODE_ALREADY_SUCCEEDED = "error/job/result/succeeded";
 const ERROR_CODE_CANNOT_RESTART = "error/job/restart/invalid";
 const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";
 const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
@@ -46,6 +47,7 @@ const UUID_REXP = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
 
 module.exports = {
     ERROR_CODE_ALREADY_INIT,
+    ERROR_CODE_ALREADY_SUCCEEDED,
     ERROR_CODE_CANNOT_RESTART,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,

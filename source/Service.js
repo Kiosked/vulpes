@@ -19,6 +19,7 @@ const { getTimestamp } = require("./time.js");
 const { filterDuplicateJobs, sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
+    ERROR_CODE_ALREADY_SUCCEEDED,
     ERROR_CODE_CANNOT_RESTART,
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
@@ -355,6 +356,36 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Reset a failed job
+     * @param {String} jobID The ID of the job to reset
+     * @returns {Promise} A promise that resolves once the job has
+     *  been reset
+     * @memberof Service
+     */
+    async resetJob(jobID) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
+        const job = await this.getJob(jobID);
+        if (job.status !== JOB_STATUS_STOPPED) {
+            throw new VError(
+                { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
+                `Invalid job status (${job.status}): ${job.id}`
+            );
+        } else if (job.result.type === JOB_RESULT_TYPE_SUCCESS) {
+            throw new VError(
+                { info: { code: ERROR_CODE_ALREADY_SUCCEEDED } },
+                `Job already succeeded: ${job.id}`
+            );
+        }
+        if (job.attempts >= job.predicate.attemptsMax) {
+            job.predicate.attemptsMax += 1;
+        }
+        job.status = JOB_STATUS_PENDING;
+        await this.storage.setItem(`job/${job.id}`, job);
+    }
+
+    /**
      * Shutdown the instance
      * @memberof Service
      */
@@ -499,6 +530,34 @@ class Service extends EventEmitter {
                 })
         );
     }
+
+    // updateJob(jobID, mergedProperties = {}, { filterProps = true } = {}) {
+    //     if (!this._initialised) {
+    //         return Promise.reject(newNotInitialisedError());
+    //     }
+    //     return this.jobQueue.enqueue(() =>
+    //         this.getJob(jobID)
+    //             .then(async job => {
+    //                 const updateProps = filterProps
+    //                     ? filterJobInitObject(mergedProperties)
+    //                     : mergedProperties;
+    //                 const updatedJob = merge.recursive(
+    //                     {},
+    //                     job,
+    //                     updateProps
+    //                 );
+    //                 await this.storage.setItem(`job/${job.id}`, updatedJob);
+    //                 this.emit("jobUpdated", {
+    //                     id: job.id,
+    //                     original: job,
+    //                     updated: updatedJob
+    //                 });
+    //             })
+    //             .catch(err => {
+    //                 throw new VError(err, `Failed updating job (${jobID})`);
+    //             })
+    //     );
+    // }
 
     /**
      * Attach a helper to the Service instance
