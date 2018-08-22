@@ -115,7 +115,7 @@ function jobCanBeRestarted(job) {
 
 function jobSatisfiesPredicates(service, job) {
     return Promise.resolve().then(() => {
-        const { attemptsMax, timeBetweenRetries } = job.predicate;
+        const { attemptsMax, locked, timeBetweenRetries } = job.predicate;
         const { attempts } = job;
         const { stopped: lastStopped } = job.times;
         const now = Date.now();
@@ -126,7 +126,7 @@ function jobSatisfiesPredicates(service, job) {
             return false;
         }
         // @todo CRON timings
-        return true;
+        return !locked;
     });
 }
 

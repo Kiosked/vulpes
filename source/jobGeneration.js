@@ -90,6 +90,7 @@ function generateEmptyJob() {
         parents: [],
         predicate: {
             attemptsMax: null,
+            locked: false,
             runAt: CRON_ANY_TIME,
             timeBetweenRetries: ms("15m")
         },

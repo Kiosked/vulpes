@@ -92,6 +92,13 @@ describe("Service", function() {
                     expect(job).to.be.null;
                 });
         });
+
+        it("fails if a predicate is unsatisfied", function() {
+            return this.service.addJob({ predicate: { locked: true } }).then(jobID => {
+                const startProm = this.service.startJob(jobID);
+                return expect(startProm).to.eventually.be.rejectedWith(/Predicate not satisfied/i);
+            });
+        });
     });
 
     describe("when stopping jobs", function() {
