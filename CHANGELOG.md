@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.6.2
+_2018-08-28_
+
+ * **Bugfix**:
+   * `TimeoutHelper` does not fire immediately when attaching
+
 ## v0.6.1
 _2018-08-28_
 

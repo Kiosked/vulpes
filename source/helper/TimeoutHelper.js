@@ -19,6 +19,7 @@ class TimeoutHelper extends Helper {
     attach(service) {
         super.attach(service);
         this._timer = setInterval(this.checkJobs.bind(this), this._interval);
+        setTimeout(() => this.checkJobs(), 0);
     }
 
     checkJobs() {
