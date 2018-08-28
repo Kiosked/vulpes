@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.6.1
+_2018-08-28_
+
+ * **Bugfix**:
+   * `getNextJob` returns jobs that are blocked by parent statuses
+
 ## v0.6.0
 _2018-08-22_
 
