@@ -79,9 +79,9 @@ async function addJobBatch(service, jobs) {
     return results;
 }
 
-function ensureParentsComplete(service, job) {
+function checkParentsComplete(service, job) {
     if (job.parents.length === 0) {
-        return Promise.resolve();
+        return Promise.resolve(true);
     }
     return Promise.all(
         job.parents.map(parentID =>
@@ -90,20 +90,23 @@ function ensureParentsComplete(service, job) {
                 result: job.result.type
             }))
         )
-    ).then(jobStates => {
-        if (
-            !jobStates.every(
-                jobState =>
-                    jobState.status === JOB_STATUS_STOPPED &&
-                    jobState.result === JOB_RESULT_TYPE_SUCCESS
-            )
-        ) {
-            throw new VError(
-                { info: { code: ERROR_CODE_PARENTS_INCOMPLETE } },
-                `Job ${job.id} has parents that have not completed successfully`
-            );
-        }
-    });
+    ).then(jobStates =>
+        jobStates.every(
+            jobState =>
+                jobState.status === JOB_STATUS_STOPPED &&
+                jobState.result === JOB_RESULT_TYPE_SUCCESS
+        )
+    );
+}
+
+async function ensureParentsComplete(service, job) {
+    const complete = await checkParentsComplete(service, job);
+    if (!complete) {
+        throw new VError(
+            { info: { code: ERROR_CODE_PARENTS_INCOMPLETE } },
+            `Job ${job.id} has parents that have not completed successfully`
+        );
+    }
 }
 
 function jobCanBeRestarted(job) {
@@ -132,14 +135,20 @@ function jobSatisfiesPredicates(service, job) {
 
 function pickFirstJob(service, jobs) {
     const jobsCollection = [...jobs];
-    const tryNext = () => {
+    const tryNext = async () => {
         const job = jobsCollection.shift();
         if (!job) {
             return Promise.resolve(null);
         }
-        return jobSatisfiesPredicates(service, job).then(
-            satisfies => (satisfies ? job : tryNext())
-        );
+        const satisfiesPredicates = await jobSatisfiesPredicates(service, job);
+        if (!satisfiesPredicates) {
+            return await tryNext();
+        }
+        const parentsComplete = await checkParentsComplete(service, job);
+        if (!parentsComplete) {
+            return await tryNext();
+        }
+        return Promise.resolve(job);
     };
     return tryNext();
 }
