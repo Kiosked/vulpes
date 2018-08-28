@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.7.0
+_2018-08-28_
+
+ * Add `jobReset` event to `Service`
+
 ## v0.6.2
 _2018-08-28_
 

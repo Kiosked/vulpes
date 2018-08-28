@@ -383,6 +383,7 @@ class Service extends EventEmitter {
         }
         job.status = JOB_STATUS_PENDING;
         await this.storage.setItem(`job/${job.id}`, job);
+        this.emit("jobReset", { id: job.id });
     }
 
     /**
