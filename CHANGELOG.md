@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.7.1
+_2018-08-29_
+
+ * **Bugfix**:
+   * `Service#startJob` would not restart timed-out jobs after they've been reset with `resetJob`
+
 ## v0.7.0
 _2018-08-28_
 
