@@ -126,4 +126,21 @@ describe("Service", function() {
                 });
         });
     });
+
+    describe("when resetting jobs", function() {
+        beforeEach(function() {
+            return this.service
+                .startJob(this.jobID1)
+                .then(() => this.service.stopJob(this.jobID1, Service.JobResult.Timeout));
+        });
+
+        it("changes timeout result types to soft fails", function() {
+            return this.service
+                .resetJob(this.jobID1)
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.result.type).to.equal(Service.JobResult.SoftFailure);
+                });
+        });
+    });
 });
