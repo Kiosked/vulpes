@@ -316,7 +316,7 @@ class Service extends EventEmitter {
      * called simple-object-query to query each job. This method uses the
      * library's `find` method.
      * @see https://www.npmjs.com/package/simple-object-query
-     * @param {Object} query The object query to perform
+     * @param {Object=} query The object query to perform
      * @returns {Promise.<Array.<Job>>} Returns a promise that resolves with
      *  an array of jobs
      * @memberof Service

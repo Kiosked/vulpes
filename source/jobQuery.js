@@ -1,15 +1,13 @@
 const { find } = require("simple-object-query");
 
-function selectJob(jobs, query) {
+function selectJob(jobs, query = {}) {
     const [job] = selectJobs(jobs, query);
     return job || null;
 }
 
-function selectJobs(jobs, query) {
-    if (Object.keys(query).length <= 0) {
-        throw new Error("Invalid query: Query parameter cannot be empty");
-    }
-    return find(jobs, query);
+function selectJobs(jobs, query = {}) {
+    const results = find(jobs, query);
+    return results.length > 0 && Array.isArray(results[0]) ? results[0] : results;
 }
 
 module.exports = {
