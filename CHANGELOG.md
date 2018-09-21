@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.8.0
+_2018-09-21_
+
+ * Make query parameter for `Service#queryJobs` optional
+
 ## v0.7.1
 _2018-08-29_
 
