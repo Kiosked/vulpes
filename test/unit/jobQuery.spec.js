@@ -25,10 +25,9 @@ describe("jobGeneration", function() {
             expect(job).to.be.null;
         });
 
-        it("throws if no query provided", function() {
-            expect(() => {
-                selectJob(this.jobs, {});
-            }).to.throw(/cannot be empty/i);
+        it("returns a job even if no query provided", function() {
+            const job = selectJob(this.jobs);
+            expect(job).to.be.an("object");
         });
 
         it("returns jobs that match a deep-query", function() {
@@ -50,10 +49,9 @@ describe("jobGeneration", function() {
             expect(jobs).to.deep.equal([]);
         });
 
-        it("throws if no query provided", function() {
-            expect(() => {
-                selectJobs(this.jobs, {});
-            }).to.throw(/cannot be empty/i);
+        it("returns jobs even if no query provided", function() {
+            const jobs = selectJobs(this.jobs);
+            expect(jobs).to.have.length.above(0);
         });
 
         it("returns jobs that match a deep-query", function() {
