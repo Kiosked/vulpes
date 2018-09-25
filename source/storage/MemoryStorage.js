@@ -27,6 +27,7 @@ class MemoryStorage extends Storage {
      * Get all items in the storage
      * @returns {Promise.<Array.<*>>} A promise that resolves with all items
      * @memberof MemoryStorage
+     * @deprecated Will be replaced with streams later
      */
     getAllItems() {
         return this.getAllKeys().then(keys =>

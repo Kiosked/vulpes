@@ -1,9 +1,24 @@
 const multisort = require("multisort");
 
-const JOB_PRIORITY_SORT_CRITERIA = [
-    "!priority", // Priority is descending (higher prio first)
-    "created" // Created is ascending (older timestamp first)
-];
+const SORT_MAP = {
+    created: {
+        asc: "created",
+        desc: "!created"
+    },
+    priority: {
+        asc: "priority",
+        desc: "!priority"
+    },
+    type: {
+        asc: "type",
+        desc: "!type"
+    }
+};
+
+// const JOB_PRIORITY_SORT_CRITERIA = [
+//     "!priority", // Priority is descending (higher prio first)
+//     "created" // Created is ascending (older timestamp first)
+// ];
 
 function filterDuplicateJobs(jobs) {
     return jobs.filter((job, index, original) => {
@@ -12,11 +27,11 @@ function filterDuplicateJobs(jobs) {
     });
 }
 
-function sortJobsByPriority(jobs) {
-    return multisort([...jobs], JOB_PRIORITY_SORT_CRITERIA);
-}
+// function sortJobsByPriority(jobs) {
+//     return multisort([...jobs], JOB_PRIORITY_SORT_CRITERIA);
+// }
 
 module.exports = {
-    filterDuplicateJobs,
-    sortJobsByPriority
+    filterDuplicateJobs
+    // sortJobsByPriority
 };

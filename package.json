@@ -45,6 +45,7 @@
   "homepage": "https://github.com/Kiosked/vulpes#readme",
   "dependencies": {
     "@buttercup/channel-queue": "^0.3.0",
+    "assert": "^1.4.1",
     "babel-polyfill": "^6.26.0",
     "debounce": "^1.1.0",
     "eventemitter3": "^3.1.0",

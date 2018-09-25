@@ -321,7 +321,7 @@ class Service extends EventEmitter {
      *  an array of jobs
      * @memberof Service
      */
-    queryJobs(query) {
+    queryJobs(query, { limit = Infinity, sort = "created", order = "desc" } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
