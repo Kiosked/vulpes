@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.9.0
+_2018-09-26_
+
+ * Add `alive` and `initialised` properties to the `Service` instance
+
 ## v0.8.0
 _2018-09-21_
 
