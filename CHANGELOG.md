@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.11.0
+_2018-09-26_
+
+ * Add `Service#updateJob` method for updating job properties
+
 ## v0.10.0
 _2018-09-26_
 

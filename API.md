@@ -67,6 +67,9 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#StartJobOptions">StartJobOptions</a> : <code>Object</code></dt>
 <dd><p>Start job options</p>
 </dd>
+<dt><a href="#UpdateJobOptions">UpdateJobOptions</a> : <code>Object</code></dt>
+<dd><p>Update job options</p>
+</dd>
 <dt><a href="#ResultType">ResultType</a> : <code>String</code></dt>
 <dd><p>Job result type</p>
 </dd>
@@ -150,6 +153,7 @@ Service for managing jobs
         * [.shutdown()](#Service+shutdown)
         * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.stopJob(jobID, resultType, [resultData])](#Service+stopJob) ⇒ <code>Promise</code>
+        * [.updateJob(jobID, mergedProperties, [options])](#Service+updateJob)
         * [.use(helper)](#Service+use) ⇒ [<code>Service</code>](#Service)
     * _static_
         * [.JobPriority](#Service.JobPriority) : [<code>JobPriorities</code>](#JobPriorities)
@@ -353,6 +357,19 @@ Stop a job
 | jobID | <code>String</code> | The job's ID to stop |
 | resultType | [<code>ResultType</code>](#ResultType) | The result type to set |
 | [resultData] | <code>Object</code> | Optional results data |
+
+<a name="Service+updateJob"></a>
+
+### service.updateJob(jobID, mergedProperties, [options])
+Update a job's properties
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID |
+| mergedProperties | <code>Object</code> | The properties to merge (overwrite) |
+| [options] | [<code>UpdateJobOptions</code>](#UpdateJobOptions) | Update method options |
 
 <a name="Service+use"></a>
 
@@ -916,6 +933,18 @@ Start job options
 | Name | Type | Description |
 | --- | --- | --- |
 | [executePredicate] | <code>Boolean</code> | Execute the predicate function  before running the task |
+
+<a name="UpdateJobOptions"></a>
+
+## UpdateJobOptions : <code>Object</code>
+Update job options
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [filterProps] | <code>Boolean</code> | Filter all properties that should  NOT be overwritten. This is true by default. Using 'false' here may  result in unpredictable and dangerous behaviour. Use at our own  peril. |
 
 <a name="ResultType"></a>
 
