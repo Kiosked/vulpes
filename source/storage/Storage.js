@@ -10,6 +10,7 @@ class Storage {
      * EXPENSIVE: Returns all items in storage
      * @returns {Promise.<Array.<*>>} A promise that resolves with all items
      * @memberof Storage
+     * @deprecated Will be replaced with streams later
      */
     getAllItems() {
         return Promise.resolve([]);

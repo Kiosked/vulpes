@@ -1,8 +1,11 @@
-const { filterDuplicateJobs, sortJobsByPriority } = require("../../dist/jobSorting.js");
+const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("../../dist/jobSorting.js");
 const {
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
-    JOB_PRIORITY_NORMAL
+    JOB_PRIORITY_NORMAL,
+    JOB_STATUS_PENDING,
+    JOB_STATUS_RUNNING,
+    JOB_STATUS_STOPPED
 } = require("../../dist/symbols.js");
 
 describe("jobSorting", function() {
@@ -21,6 +24,79 @@ describe("jobSorting", function() {
                 { id: "1000", type: "job1" },
                 { id: "1001", type: "job3" }
             ]);
+        });
+    });
+
+    describe("sortJobs", function() {
+        beforeEach(function() {
+            const now = Date.now();
+            this.jobs = [
+                {
+                    priority: JOB_PRIORITY_NORMAL,
+                    status: JOB_STATUS_PENDING,
+                    created: now,
+                    type: "job1"
+                },
+                {
+                    priority: JOB_PRIORITY_NORMAL,
+                    status: JOB_STATUS_RUNNING,
+                    created: now - 10,
+                    type: "job3"
+                },
+                {
+                    priority: JOB_PRIORITY_HIGH,
+                    status: JOB_STATUS_PENDING,
+                    created: now - 5,
+                    type: "job2"
+                },
+                {
+                    priority: JOB_PRIORITY_LOW,
+                    status: JOB_STATUS_STOPPED,
+                    created: now - 20,
+                    type: "job5"
+                },
+                {
+                    priority: JOB_PRIORITY_LOW,
+                    status: JOB_STATUS_PENDING,
+                    created: now - 2,
+                    type: "job4"
+                }
+            ];
+        });
+
+        it("sorts by created/descending by default", function() {
+            const sorted = sortJobs(this.jobs);
+            expect(sorted[0].type).to.equal("job1");
+            expect(sorted[1].type).to.equal("job4");
+            expect(sorted[2].type).to.equal("job2");
+        });
+
+        it("can sort by multiple properties", function() {
+            const sorted = sortJobs(this.jobs, [
+                { property: "status", direction: "asc" },
+                { property: "type", direction: "desc" }
+            ]);
+            expect(sorted[0].type).to.equal("job4");
+            expect(sorted[1].type).to.equal("job2");
+            expect(sorted[2].type).to.equal("job1");
+        });
+
+        it("throws if the property is not recognised", function() {
+            expect(() => {
+                sortJobs(this.jobs, [
+                    { property: "status", direction: "asc" },
+                    { property: "wrong", direction: "desc" }
+                ]);
+            }).to.throw(/Invalid sort property/i);
+        });
+
+        it("throws if the direction is invalid", function() {
+            expect(() => {
+                sortJobs(this.jobs, [
+                    { property: "status", direction: "asc" },
+                    { property: "type", direction: "descending" }
+                ]);
+            }).to.throw(/Invalid sort direction/i);
         });
     });
 

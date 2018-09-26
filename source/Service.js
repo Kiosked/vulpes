@@ -16,7 +16,7 @@ const {
     prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
-const { filterDuplicateJobs, sortJobsByPriority } = require("./jobSorting.js");
+const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -331,17 +331,27 @@ class Service extends EventEmitter {
     }
 
     /**
+     * @typedef {Object} QueryJobsOptions
+     * @property {Number=} limit - Limit the number of jobs that are returned by the
+     *  query. Defaults to Infinity.
+     * @property {String=} sort - Property to sort by. Defaults to "created". Can be
+     *  set to created/status/priority/type.
+     * @property {String=} order - Sorting order: asc/desc (default "desc")
+     */
+
+    /**
      * Perform a jobs query
      * Query for an array of jobs by the job's properties. This uses a library
      * called simple-object-query to query each job. This method uses the
      * library's `find` method.
      * @see https://www.npmjs.com/package/simple-object-query
      * @param {Object=} query The object query to perform
+     * @param {QueryJobsOptions=} options Options for querying jobs, like sorting
      * @returns {Promise.<Array.<Job>>} Returns a promise that resolves with
      *  an array of jobs
      * @memberof Service
      */
-    queryJobs(query) {
+    queryJobs(query, { limit = Infinity, sort = "created", order = "desc" } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
@@ -350,8 +360,19 @@ class Service extends EventEmitter {
                 .getAllItems()
                 // Search
                 .then(items => selectJobs(items, query))
+                // Limit
+                .then(items => (limit !== Infinity ? items.slice(0, limit) : items))
                 // Clone
                 .then(items => items.map(item => merge(true, item)))
+                // Sort
+                .then(items =>
+                    sortJobs(items, [
+                        {
+                            property: sort,
+                            direction: order
+                        }
+                    ])
+                )
         );
     }
 
