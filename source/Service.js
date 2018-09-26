@@ -100,6 +100,16 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Check that the instance is alive and not shut down
+     * @type {Boolean}
+     * @readonly
+     * @memberof Service
+     */
+    get alive() {
+        return !this._shutdown;
+    }
+
+    /**
      * Helpers attached to the Service
      * @type {Array.<Helper>}
      * @readonly
@@ -107,6 +117,16 @@ class Service extends EventEmitter {
      */
     get helpers() {
         return this._helpers;
+    }
+
+    /**
+     * Whether the instance is initialised or not
+     * @type {Boolean}
+     * @readonly
+     * @memberof Service
+     */
+    get initialised() {
+        return this._initialised;
     }
 
     /**
