@@ -576,33 +576,45 @@ class Service extends EventEmitter {
         );
     }
 
-    // updateJob(jobID, mergedProperties = {}, { filterProps = true } = {}) {
-    //     if (!this._initialised) {
-    //         return Promise.reject(newNotInitialisedError());
-    //     }
-    //     return this.jobQueue.enqueue(() =>
-    //         this.getJob(jobID)
-    //             .then(async job => {
-    //                 const updateProps = filterProps
-    //                     ? filterJobInitObject(mergedProperties)
-    //                     : mergedProperties;
-    //                 const updatedJob = merge.recursive(
-    //                     {},
-    //                     job,
-    //                     updateProps
-    //                 );
-    //                 await this.storage.setItem(`job/${job.id}`, updatedJob);
-    //                 this.emit("jobUpdated", {
-    //                     id: job.id,
-    //                     original: job,
-    //                     updated: updatedJob
-    //                 });
-    //             })
-    //             .catch(err => {
-    //                 throw new VError(err, `Failed updating job (${jobID})`);
-    //             })
-    //     );
-    // }
+    /**
+     * Update job options
+     * @typedef {Object} UpdateJobOptions
+     * @property {Boolean=} filterProps - Filter all properties that should
+     *  NOT be overwritten. This is true by default. Using 'false' here may
+     *  result in unpredictable and dangerous behaviour. Use at our own
+     *  peril.
+     */
+
+    /**
+     * Update a job's properties
+     * @param {String} jobID The job ID
+     * @param {Object} mergedProperties The properties to merge (overwrite)
+     * @param {UpdateJobOptions=} options Update method options
+     * @memberof Service
+     */
+    updateJob(jobID, mergedProperties = {}, { filterProps = true } = {}) {
+        if (!this._initialised) {
+            return Promise.reject(newNotInitialisedError());
+        }
+        return this.jobQueue.enqueue(() =>
+            this.getJob(jobID)
+                .then(async job => {
+                    const updateProps = filterProps
+                        ? filterJobInitObject(mergedProperties)
+                        : mergedProperties;
+                    const updatedJob = merge.recursive({}, job, updateProps);
+                    await this.storage.setItem(`job/${job.id}`, updatedJob);
+                    this.emit("jobUpdated", {
+                        id: job.id,
+                        original: job,
+                        updated: updatedJob
+                    });
+                })
+                .catch(err => {
+                    throw new VError(err, `Failed updating job (${jobID})`);
+                })
+        );
+    }
 
     /**
      * Attach a helper to the Service instance
