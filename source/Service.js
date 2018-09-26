@@ -330,8 +330,19 @@ class Service extends EventEmitter {
                 .getAllItems()
                 // Search
                 .then(items => selectJobs(items, query))
+                // Limit
+                .then(items => (limit !== Infinity ? items.slice(0, limit) : items))
                 // Clone
                 .then(items => items.map(item => merge(true, item)))
+                // Sort
+                .then(items =>
+                    sortJobs(items, [
+                        {
+                            property: sort,
+                            direction: order
+                        }
+                    ])
+                )
         );
     }
 
