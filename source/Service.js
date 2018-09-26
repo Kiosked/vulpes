@@ -16,7 +16,7 @@ const {
     prepareJobForWorker
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
-const { filterDuplicateJobs, sortJobsByPriority } = require("./jobSorting.js");
+const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
