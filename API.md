@@ -33,6 +33,12 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#generateEmptyJob">generateEmptyJob()</a> ⇒ <code><a href="#Job">Job</a></code></dt>
 <dd><p>Generate an empty job</p>
 </dd>
+<dt><a href="#sortJobs">sortJobs(jobs, [sortSteps])</a> ⇒ <code><a href="#Job">Array.&lt;Job&gt;</a></code></dt>
+<dd><p>Sort jobs by some criteria</p>
+</dd>
+<dt><a href="#sortJobsByPriority">sortJobsByPriority(jobs)</a> ⇒ <code><a href="#Job">Array.&lt;Job&gt;</a></code></dt>
+<dd><p>Sort jobs by priority</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -44,6 +50,9 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Job">Job</a> : <code>Object</code></dt>
 <dd><p>A job</p>
 </dd>
+<dt><a href="#JobSortingStep">JobSortingStep</a> : <code>Object</code></dt>
+<dd><p>Job sorting step configuration</p>
+</dd>
 <dt><a href="#GetJobChildrenOptions">GetJobChildrenOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching job children</p>
 </dd>
@@ -53,6 +62,8 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#GetJobTreeOptions">GetJobTreeOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching a job tree</p>
 </dd>
+<dt><a href="#QueryJobsOptions">QueryJobsOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#StartJobOptions">StartJobOptions</a> : <code>Object</code></dt>
 <dd><p>Start job options</p>
 </dd>
@@ -133,7 +144,7 @@ Service for managing jobs
         * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJobTree(jobID, [options])](#Service+getJobTree) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-        * [.queryJobs([query])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
         * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
         * [.shutdown()](#Service+shutdown)
@@ -270,7 +281,7 @@ before returning the very next job that should be started.
  or null if none available  
 <a name="Service+queryJobs"></a>
 
-### service.queryJobs([query]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+### service.queryJobs([query], [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
 Perform a jobs query
 Query for an array of jobs by the job's properties. This uses a library
 called simple-object-query to query each job. This method uses the
@@ -284,6 +295,7 @@ library's `find` method.
 | Param | Type | Description |
 | --- | --- | --- |
 | [query] | <code>Object</code> | The object query to perform |
+| [options] | [<code>QueryJobsOptions</code>](#QueryJobsOptions) | Options for querying jobs, like sorting |
 
 <a name="Service+initialise"></a>
 
@@ -395,7 +407,7 @@ full copy of all jobs is kept on-disk.
         * [.setItem(key, value)](#FileStorage+setItem) ⇒ <code>Promise</code>
         * [._getSerialisedState()](#FileStorage+_getSerialisedState) ⇒ <code>String</code>
         * [._writeStateToFile()](#FileStorage+_writeStateToFile)
-        * [.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+        * ~~[.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
         * [.getAllKeys()](#MemoryStorage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
         * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
         * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
@@ -476,7 +488,9 @@ the specified file
 **Access**: protected  
 <a name="MemoryStorage+getAllItems"></a>
 
-### fileStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+### ~~fileStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
+***Deprecated***
+
 Get all items in the storage
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
@@ -528,7 +542,7 @@ purged - do not use this storage if you desire persistence.
 
 * [MemoryStorage](#MemoryStorage) ⇐ [<code>Storage</code>](#Storage)
     * [.store](#MemoryStorage+store) : <code>Object</code>
-    * [.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+    * ~~[.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
     * [.getAllKeys()](#MemoryStorage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
     * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
     * [.removeItem(key)](#MemoryStorage+removeItem) ⇒ <code>Promise</code>
@@ -544,7 +558,9 @@ The job store
 **Kind**: instance property of [<code>MemoryStorage</code>](#MemoryStorage)  
 <a name="MemoryStorage+getAllItems"></a>
 
-### memoryStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+### ~~memoryStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
+***Deprecated***
+
 Get all items in the storage
 
 **Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
@@ -629,7 +645,7 @@ interface and does not actually perform any operations.
 **Kind**: global class  
 
 * [Storage](#Storage)
-    * [.getAllItems()](#Storage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+    * ~~[.getAllItems()](#Storage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
     * [.getAllKeys()](#Storage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
     * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
     * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
@@ -639,7 +655,9 @@ interface and does not actually perform any operations.
 
 <a name="Storage+getAllItems"></a>
 
-### storage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>
+### ~~storage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
+***Deprecated***
+
 Get all items in the storage
 EXPENSIVE: Returns all items in storage
 
@@ -737,6 +755,45 @@ Generate an empty job
 
 **Kind**: global function  
 **Returns**: [<code>Job</code>](#Job) - A new empty job  
+<a name="sortJobs"></a>
+
+## sortJobs(jobs, [sortSteps]) ⇒ [<code>Array.&lt;Job&gt;</code>](#Job)
+Sort jobs by some criteria
+
+**Kind**: global function  
+**Returns**: [<code>Array.&lt;Job&gt;</code>](#Job) - An array of sorted jobs  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobs | [<code>Array.&lt;Job&gt;</code>](#Job) | The jobs to sort |
+| [sortSteps] | [<code>JobSortingStep</code>](#JobSortingStep) | Sorting criteia for sorting the jobs |
+
+**Example**  
+```js
+// Sort jobs by priority:
+ sortJobs(
+     [{ id: "some job" }],
+     [
+         { property: "priority", direction: "desc" },
+         { property: "created", direction: "asc" }
+     ]
+ );
+ // This sorts the jobs by priority (highest) first, and then by created
+ // (oldest) second..
+```
+<a name="sortJobsByPriority"></a>
+
+## sortJobsByPriority(jobs) ⇒ [<code>Array.&lt;Job&gt;</code>](#Job)
+Sort jobs by priority
+
+**Kind**: global function  
+**Returns**: [<code>Array.&lt;Job&gt;</code>](#Job) - An array of sorted jobs  
+**See**: sortJobs  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobs | [<code>Array.&lt;Job&gt;</code>](#Job) | An array of jobs |
+
 <a name="NewJob"></a>
 
 ## NewJob : <code>Object</code>
@@ -787,6 +844,19 @@ A job
 | timeLimit | <code>Number</code> \| <code>null</code> | Time limitation for the job's  execution. null means no limit. |
 | attempts | <code>Number</code> | Number of attempts the job has had |
 
+<a name="JobSortingStep"></a>
+
+## JobSortingStep : <code>Object</code>
+Job sorting step configuration
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| property | <code>String</code> | The job property to sort by |
+| direction | <code>String</code> | The direction to sort in (desc/asc) |
+
 <a name="GetJobChildrenOptions"></a>
 
 ## GetJobChildrenOptions : <code>Object</code>
@@ -822,6 +892,18 @@ Options for fetching a job tree
 | Name | Type | Description |
 | --- | --- | --- |
 | [resolveParents] | <code>Boolean</code> | Fetch the ancestry of the specified  job, not just the children. Defaults to true (full tree). |
+
+<a name="QueryJobsOptions"></a>
+
+## QueryJobsOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [limit] | <code>Number</code> | Limit the number of jobs that are returned by the  query. Defaults to Infinity. |
+| [sort] | <code>String</code> | Property to sort by. Defaults to "created". Can be  set to created/status/priority/type. |
+| [order] | <code>String</code> | Sorting order: asc/desc (default "desc") |
 
 <a name="StartJobOptions"></a>
 
