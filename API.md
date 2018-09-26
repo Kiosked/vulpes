@@ -121,7 +121,9 @@ Service for managing jobs
 
 * [Service](#Service) ⇐ <code>EventEmitter</code>
     * _instance_
+        * [.alive](#Service+alive) : <code>Boolean</code>
         * [.helpers](#Service+helpers) : [<code>Array.&lt;Helper&gt;</code>](#Helper)
+        * [.initialised](#Service+initialised) : <code>Boolean</code>
         * [.jobQueue](#Service+jobQueue) : <code>Channel</code>
         * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
@@ -131,7 +133,7 @@ Service for managing jobs
         * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJobTree(jobID, [options])](#Service+getJobTree) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-        * [.queryJobs(query)](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.queryJobs([query])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
         * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
         * [.shutdown()](#Service+shutdown)
@@ -143,10 +145,24 @@ Service for managing jobs
         * [.JobResult](#Service.JobResult) : [<code>JobResultTypes</code>](#JobResultTypes)
         * [.JobStatus](#Service.JobStatus) : <code>JobStatus</code>
 
+<a name="Service+alive"></a>
+
+### service.alive : <code>Boolean</code>
+Check that the instance is alive and not shut down
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
 <a name="Service+helpers"></a>
 
 ### service.helpers : [<code>Array.&lt;Helper&gt;</code>](#Helper)
 Helpers attached to the Service
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
+<a name="Service+initialised"></a>
+
+### service.initialised : <code>Boolean</code>
+Whether the instance is initialised or not
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
 **Read only**: true  
@@ -254,7 +270,7 @@ before returning the very next job that should be started.
  or null if none available  
 <a name="Service+queryJobs"></a>
 
-### service.queryJobs(query) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+### service.queryJobs([query]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
 Perform a jobs query
 Query for an array of jobs by the job's properties. This uses a library
 called simple-object-query to query each job. This method uses the
@@ -267,7 +283,7 @@ library's `find` method.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| query | <code>Object</code> | The object query to perform |
+| [query] | <code>Object</code> | The object query to perform |
 
 <a name="Service+initialise"></a>
 
