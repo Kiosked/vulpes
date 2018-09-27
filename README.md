@@ -11,6 +11,10 @@ Vulpes does not do any job processing itself - it is merely a _service_ designed
 
 Check out the [API documentation](API.md).
 
+Vulpes has helper libraries to assist you in building complete job management systems, such as:
+ * [Vulpes-UI](https://github.com/Kiosked/vulpes-ui) - A user interface for job monitoring and management, built on Express.
+ * [Vulpes-API](https://github.com/Kiosked/vulpes-api) - A drop-in API generator for Express.
+
 ## Installation
 Install Vulpes as a dependency by running the following:
 
