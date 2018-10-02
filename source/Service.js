@@ -528,7 +528,7 @@ class Service extends EventEmitter {
      *  stopped successfully
      * @memberof Service
      */
-    stopJob(jobID, resultType, resultData = {}, merge = true) {
+    stopJob(jobID, resultType, resultData = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
@@ -549,11 +549,8 @@ class Service extends EventEmitter {
                     }
                     job.status = JOB_STATUS_STOPPED;
                     job.result.type = resultType;
-                    if (merge) {
-                        Object.assign(job.result.data, resultData);
-                    } else {
-                        job.result.data = Object.assign({}, resultData);
-                    }
+                    // Merge data payloads
+                    Object.assign(job.result.data, job.data, resultData);
                     job.times.stopped = getTimestamp();
                     if (resultType === JOB_RESULT_TYPE_SUCCESS) {
                         job.times.completed = job.times.stopped;

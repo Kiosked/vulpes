@@ -115,12 +115,13 @@ describe("Service", function() {
                 });
         });
 
-        it("sets the job result data", function() {
+        it("merges the job result data correctly", function() {
             return this.service
                 .stopJob(this.jobID1, Service.JobResult.Success, { value: 42 })
                 .then(() => this.service.getJob(this.jobID1))
                 .then(job => {
                     expect(job.result.data).to.deep.equal({
+                        name: "test1", // merged from data
                         value: 42
                     });
                 });
