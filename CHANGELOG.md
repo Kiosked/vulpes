@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.12.1
+_2018-10-02_
+
+ * **Bugfix**: Error thrown in `Service#addJobs` was outside of execution path and not catchable
+
 ## v0.12.0
 _2018-10-02_
 
