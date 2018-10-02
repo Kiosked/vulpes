@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.12.0
+_2018-10-02_
+
+ * Remove `merge` option for `Service#stopJob`
+   * Merge job data **and** job result upon completion
+
 ## v0.11.0
 _2018-09-26_
 
