@@ -11,13 +11,11 @@ async function addJobBatch(service, jobs) {
     const results = JSON.parse(JSON.stringify(jobs));
     // Create empty array to track resolutions
     const resolvedIDs = jobs.map(() => "");
-    jobs.forEach(job => {
-        if (typeof job.id === "undefined" || job.id === null) {
-            return Promise.reject(
-                new Error("Failed adding job batch: All jobs must have an ID (non-UUID)")
-            );
+    for (let i = 0; i < jobs.length; i += 1) {
+        if (typeof jobs[i].id === "undefined" || jobs[i].id === null) {
+            throw new Error("Failed adding job batch: All jobs must have an ID (non-UUID)");
         }
-    });
+    }
     const processBatch = async () => {
         let workPerformed = false,
             work = Promise.resolve();
