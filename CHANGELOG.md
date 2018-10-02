@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.13.0
+_2018-10-02_
+
+ * Error codes for job batch processing
+ * Error codes include "vulpes"
+
 ## v0.12.1
 _2018-10-02_
 
