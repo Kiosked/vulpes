@@ -1,5 +1,9 @@
 const VError = require("verror");
 const {
+    ERROR_CODE_JOB_BATCH_DEPENDENCIES,
+    ERROR_CODE_JOB_BATCH_IDS,
+    ERROR_CODE_JOB_BATCH_ID_FORMAT,
+    ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION,
     ERROR_CODE_PARENTS_INCOMPLETE,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPES_RESTARTABLE_REXP,
@@ -13,7 +17,10 @@ async function addJobBatch(service, jobs) {
     const resolvedIDs = jobs.map(() => "");
     for (let i = 0; i < jobs.length; i += 1) {
         if (typeof jobs[i].id === "undefined" || jobs[i].id === null) {
-            throw new Error("Failed adding job batch: All jobs must have an ID (non-UUID)");
+            throw new VError(
+                { info: { code: ERROR_CODE_JOB_BATCH_IDS } },
+                "Failed adding job batch: All jobs must have an ID (non-UUID)"
+            );
         }
     }
     const processBatch = async () => {
@@ -23,7 +30,8 @@ async function addJobBatch(service, jobs) {
             const { id, parents: parentsRaw = [] } = pendingJob;
             let parents = parentsRaw;
             if (UUID_REXP.test(id)) {
-                throw new Error(
+                throw new VError(
+                    { info: { code: ERROR_CODE_JOB_BATCH_ID_FORMAT } },
                     `Failed adding job batch: Cannot add jobs with pre-set UUID: ${id}`
                 );
             }
@@ -34,7 +42,8 @@ async function addJobBatch(service, jobs) {
                         // Try to find job in resolved IDs
                         const targetIndex = jobs.findIndex(job => job.id === parentID);
                         if (targetIndex >= 0 === false && !resolvedIDs[targetIndex]) {
-                            throw new Error(
+                            throw new VError(
+                                { info: { code: ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION } },
                                 `Failed adding job batch: Failed resolving parent ID: ${parentID}`
                             );
                         }
@@ -64,7 +73,10 @@ async function addJobBatch(service, jobs) {
             });
         });
         if (!workPerformed) {
-            throw new Error("Failed adding job batch: Stalled while resolving dependencies");
+            throw new VError(
+                { info: { code: ERROR_CODE_JOB_BATCH_DEPENDENCIES } },
+                "Failed adding job batch: Stalled while resolving dependencies"
+            );
         }
         // Wait for all work to complete
         await work;

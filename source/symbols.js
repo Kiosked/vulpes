@@ -15,16 +15,20 @@ const ms = require("ms");
  * @typedef {String} Priority
  */
 
-const ERROR_CODE_ALREADY_INIT = "error/init/multi-call";
-const ERROR_CODE_ALREADY_SUCCEEDED = "error/job/result/succeeded";
-const ERROR_CODE_CANNOT_RESTART = "error/job/restart/invalid";
-const ERROR_CODE_HELPER_INVALID = "error/helper/invalid";
-const ERROR_CODE_INVALID_JOB_RESULT = "error/job/result";
-const ERROR_CODE_INVALID_JOB_STATUS = "error/job/status";
-const ERROR_CODE_NO_JOB_FOR_ID = "error/job/notfoundforid";
-const ERROR_CODE_NOT_INIT = "error/init/not-init";
-const ERROR_CODE_PARENTS_INCOMPLETE = "error/job/parents/incomplete";
-const ERROR_CODE_PREDICATE_NOT_SATISFIED = "error/job/predicate/not-satisfied";
+const ERROR_CODE_ALREADY_INIT = "vuples/error/init/multi-call";
+const ERROR_CODE_ALREADY_SUCCEEDED = "vuples/error/job/result/succeeded";
+const ERROR_CODE_CANNOT_RESTART = "vuples/error/job/restart/invalid";
+const ERROR_CODE_HELPER_INVALID = "vuples/error/helper/invalid";
+const ERROR_CODE_INVALID_JOB_RESULT = "vuples/error/job/result";
+const ERROR_CODE_INVALID_JOB_STATUS = "vuples/error/job/status";
+const ERROR_CODE_JOB_BATCH_DEPENDENCIES = "vulpes/error/job-batch/dep-res";
+const ERROR_CODE_JOB_BATCH_IDS = "vulpes/error/job-batch/ids";
+const ERROR_CODE_JOB_BATCH_ID_FORMAT = "vulpes/error/job-batch/id-format";
+const ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION = "vulpes/error/job-batch/parent-res";
+const ERROR_CODE_NO_JOB_FOR_ID = "vuples/error/job/notfoundforid";
+const ERROR_CODE_NOT_INIT = "vuples/error/init/not-init";
+const ERROR_CODE_PARENTS_INCOMPLETE = "vuples/error/job/parents/incomplete";
+const ERROR_CODE_PREDICATE_NOT_SATISFIED = "vuples/error/job/predicate/not-satisfied";
 
 const JOB_PRIORITY_HIGH = 5;
 const JOB_PRIORITY_LOW = -5;
@@ -52,6 +56,10 @@ module.exports = {
     ERROR_CODE_HELPER_INVALID,
     ERROR_CODE_INVALID_JOB_RESULT,
     ERROR_CODE_INVALID_JOB_STATUS,
+    ERROR_CODE_JOB_BATCH_DEPENDENCIES,
+    ERROR_CODE_JOB_BATCH_IDS,
+    ERROR_CODE_JOB_BATCH_ID_FORMAT,
+    ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION,
     ERROR_CODE_NO_JOB_FOR_ID,
     ERROR_CODE_NOT_INIT,
     ERROR_CODE_PARENTS_INCOMPLETE,
