@@ -1,5 +1,6 @@
 const uuid = require("uuid/v4");
 const ms = require("ms");
+const parse = require("obj-parse");
 const { getTimestamp } = require("./time.js");
 const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
 
@@ -30,8 +31,9 @@ const CONFIGURABLE_JOB_KEYS = [
 ];
 
 function filterJobInitObject(info) {
+    const resultDataGetter = parse("result.data");
     return Object.keys(info).reduce((output, nextKey) => {
-        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0) {
+        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0 || resultDataGetter(info)) {
             output[nextKey] = info[nextKey];
         }
         return output;
