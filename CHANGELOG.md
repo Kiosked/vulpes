@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.13.1
+_2018-10-12_
+
+ * **Bugfix**: Sorting of queried jobs was broken - Job limit was applied before sorting
+
 ## v0.13.0
 _2018-10-02_
 
