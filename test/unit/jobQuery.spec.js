@@ -1,6 +1,6 @@
 const { selectJob, selectJobs } = require("../../dist/jobQuery.js");
 
-describe("jobGeneration", function() {
+describe("jobQuery", function() {
     beforeEach(function() {
         this.jobs = [
             { id: "1000", type: "generic", data: { deep: { value: 1 } } },
@@ -59,6 +59,12 @@ describe("jobGeneration", function() {
                 "data.deep.value": /^\d+$/
             });
             expect(jobs).to.have.a.lengthOf(2);
+            expect(jobs[0])
+                .to.have.property("id")
+                .that.is.a("string");
+            expect(jobs[1])
+                .to.have.property("id")
+                .that.is.a("string");
         });
     });
 });
