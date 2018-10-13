@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.13.2
+_2018-10-13_
+
+ * **Bugfix**: Querying jobs via deep properties returned only partial job objects (due to dependent library functionality)
+
 ## v0.13.1
 _2018-10-12_
 
