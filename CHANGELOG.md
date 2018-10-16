@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.13.3
+_2018-10-16_
+
+ * **Bugfix**: Calls to Webpack'd module downstream threw on `pify` calls to stubbed (empty) `fs` module
+   * `pify(fs.readFile)` style calls moved into `FileStorage` instance
+
 ## v0.13.2
 _2018-10-13_
 
