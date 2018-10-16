@@ -8,9 +8,6 @@ const MemoryStorage = require("./MemoryStorage.js");
 
 const FILE_WRITE_DELAY = 500;
 
-const readFile = pify(fs.readFile);
-const writeFile = pify(fs.writeFile);
-
 /**
  * File storage interface
  * Extends memory storage with persistent disk writes so that a
@@ -27,6 +24,9 @@ class FileStorage extends MemoryStorage {
         super();
         this._filename = filename;
         this._queue = new ChannelQueue();
+
+        this._readFile = pify(fs.readFile);
+        this._writeFile = pify(fs.writeFile);
 
         /**
          * Debounced method for writing to the file
@@ -56,7 +56,7 @@ class FileStorage extends MemoryStorage {
                 if (!exists) {
                     return;
                 }
-                return readFile(this._filename, "utf8")
+                return this._readFile(this._filename, "utf8")
                     .then(JSON.parse)
                     .then(store => {
                         this._store = store;
@@ -106,7 +106,9 @@ class FileStorage extends MemoryStorage {
      */
     _writeStateToFile() {
         this._queue.channel("write").enqueue(() => {
-            return writeFile(this._filename, this._getSerialisedState()).then(() => sleep(100));
+            return this._writeFile(this._filename, this._getSerialisedState()).then(() =>
+                sleep(100)
+            );
         });
     }
 }
