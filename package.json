@@ -1,6 +1,6 @@
 {
   "name": "vulpes",
-  "version": "0.13.0",
+  "version": "0.13.3",
   "description": "Job management framework",
   "main": "dist/index.js",
   "scripts": {
@@ -53,9 +53,9 @@
     "ms": "^2.1.1",
     "multisort": "^0.5.3",
     "obj-parse": "^0.3.0",
+    "nested-property": "0.0.7",
     "p-limit": "^2.0.0",
     "pify": "^4.0.0",
-    "simple-object-query": "^1.6.1",
     "sleep-promise": "^8.0.1",
     "uuid": "^3.3.2",
     "verror": "^1.10.0"

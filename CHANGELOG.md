@@ -1,5 +1,21 @@
 # Vulpes Changelog
 
+## v0.13.3
+_2018-10-16_
+
+ * **Bugfix**: Calls to Webpack'd module downstream threw on `pify` calls to stubbed (empty) `fs` module
+   * `pify(fs.readFile)` style calls moved into `FileStorage` instance
+
+## v0.13.2
+_2018-10-13_
+
+ * **Bugfix**: Querying jobs via deep properties returned only partial job objects (due to dependent library functionality)
+
+## v0.13.1
+_2018-10-12_
+
+ * **Bugfix**: Sorting of queried jobs was broken - Job limit was applied before sorting
+
 ## v0.13.0
 _2018-10-02_
 
