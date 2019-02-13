@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.14.0
+_2019-02-13_
+
+ * Expose `Symbol` property in index
+
 ## v0.13.3
 _2018-10-16_
 

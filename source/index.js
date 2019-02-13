@@ -9,8 +9,11 @@ const Storage = require("./storage/Storage.js");
 const FileStorage = require("./storage/FileStorage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 
+const Symbol = require("./symbols.js");
+
 module.exports = {
     Service,
+    Symbol,
 
     Helper,
     TimeoutHelper,
