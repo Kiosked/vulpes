@@ -26,52 +26,54 @@ async function addJobBatch(service, jobs) {
     const processBatch = async () => {
         let workPerformed = false,
             work = Promise.resolve();
-        results.filter((pendingJob, index) => !resolvedIDs[index]).forEach(pendingJob => {
-            const { id, parents: parentsRaw = [] } = pendingJob;
-            let parents = parentsRaw;
-            if (UUID_REXP.test(id)) {
-                throw new VError(
-                    { info: { code: ERROR_CODE_JOB_BATCH_ID_FORMAT } },
-                    `Failed adding job batch: Cannot add jobs with pre-set UUID: ${id}`
-                );
-            }
-            // First check if the parents are resolved
-            if (parents && parents.length > 0) {
-                const resolvedParents = parents.map(parentID => {
-                    if (UUID_REXP.test(parentID) === false) {
-                        // Try to find job in resolved IDs
-                        const targetIndex = jobs.findIndex(job => job.id === parentID);
-                        if (targetIndex >= 0 === false && !resolvedIDs[targetIndex]) {
-                            throw new VError(
-                                { info: { code: ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION } },
-                                `Failed adding job batch: Failed resolving parent ID: ${parentID}`
-                            );
-                        }
-                        return resolvedIDs[targetIndex];
-                    }
-                    return parentID;
-                });
-                const allResolved = resolvedParents.every(parentID => UUID_REXP.test(parentID));
-                if (!allResolved) {
-                    // Some IDs could not be resolved
-                    return;
+        results
+            .filter((pendingJob, index) => !resolvedIDs[index])
+            .forEach(pendingJob => {
+                const { id, parents: parentsRaw = [] } = pendingJob;
+                let parents = parentsRaw;
+                if (UUID_REXP.test(id)) {
+                    throw new VError(
+                        { info: { code: ERROR_CODE_JOB_BATCH_ID_FORMAT } },
+                        `Failed adding job batch: Cannot add jobs with pre-set UUID: ${id}`
+                    );
                 }
-                parents = resolvedParents;
-            }
-            // Add this job to the service
-            workPerformed = true;
-            work = work.then(async () => {
-                const jobID = await service.addJob(
-                    Object.assign(pendingJob, {
-                        id: null,
-                        parents
-                    })
-                );
-                const index = jobs.findIndex(job => job.id === id);
-                resolvedIDs[index] = jobID;
-                results[index] = await service.getJob(jobID);
+                // First check if the parents are resolved
+                if (parents && parents.length > 0) {
+                    const resolvedParents = parents.map(parentID => {
+                        if (UUID_REXP.test(parentID) === false) {
+                            // Try to find job in resolved IDs
+                            const targetIndex = jobs.findIndex(job => job.id === parentID);
+                            if (targetIndex >= 0 === false && !resolvedIDs[targetIndex]) {
+                                throw new VError(
+                                    { info: { code: ERROR_CODE_JOB_BATCH_PARENT_RESOLUTION } },
+                                    `Failed adding job batch: Failed resolving parent ID: ${parentID}`
+                                );
+                            }
+                            return resolvedIDs[targetIndex];
+                        }
+                        return parentID;
+                    });
+                    const allResolved = resolvedParents.every(parentID => UUID_REXP.test(parentID));
+                    if (!allResolved) {
+                        // Some IDs could not be resolved
+                        return;
+                    }
+                    parents = resolvedParents;
+                }
+                // Add this job to the service
+                workPerformed = true;
+                work = work.then(async () => {
+                    const jobID = await service.addJob(
+                        Object.assign(pendingJob, {
+                            id: null,
+                            parents
+                        })
+                    );
+                    const index = jobs.findIndex(job => job.id === id);
+                    resolvedIDs[index] = jobID;
+                    results[index] = await service.getJob(jobID);
+                });
             });
-        });
         if (!workPerformed) {
             throw new VError(
                 { info: { code: ERROR_CODE_JOB_BATCH_DEPENDENCIES } },
