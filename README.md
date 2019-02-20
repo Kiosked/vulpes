@@ -97,6 +97,27 @@ A    B
 
 Taking the tree of B will result in [B, C] and will not include A. Taking the tree of C would result in [C, A, B].
 
+### Job data
+Job data is stored as a JSON object. Returning properties from job results is a great way to share information between jobs. Keys can be made up of any combination of characters and values should be of type `Number`/`String`/`Boolean`/`null` or basically anything serialisable.
+
+When a job starts, it merges data payloads to form the provided data for the starting job. It merges data and results from parent jobs as well. It merges in the following precedence, from first to last (last overwriting first):
+
+ 1. Parent original data
+ 2. Parent result data
+ 3. (Every other parent, steps 1 & 2)
+ 4. Target job data
+ 5. Target job _previous result_ *
+
+_* The previous result set can be merged in for the new job's payload if it contains sticky properties._
+
+#### Special Properties
+
+Special properties in job data can be used to change their behaviour. Special properties are denoted by a prefix:
+
+| Prefix    | Description                           | Example       |
+|-----------|---------------------------------------|---------------|
+| `$`       | Sticky property - will be sent to jobs even if in failed result set. | `$lastValue` |
+
 ## Developing
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
 
