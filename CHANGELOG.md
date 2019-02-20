@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.15.1
+_2019-02-20_
+
+ * **Bugfix**:
+   * Predicate check would pass by mistake when picking new job
+
 ## v0.15.0
 _2019-02-20_
 
