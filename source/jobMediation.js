@@ -145,6 +145,10 @@ function jobSatisfiesPredicates(service, job) {
     });
 }
 
+function normaliseJobData(data) {
+    return data && typeof data === "object" ? data : {};
+}
+
 function pickFirstJob(service, jobs) {
     const jobsCollection = [...jobs];
     const tryNext = async () => {
@@ -165,8 +169,14 @@ function pickFirstJob(service, jobs) {
     return tryNext();
 }
 
+function pickOnlySticky(data) {
+    return Object.keys(data)
+        .filter(key => /^\$/.test(key))
+        .reduce((output, key) => Object.assign(output, { [key]: data[key] }), {});
+}
+
 function prepareJobForWorker(service, job) {
-    const { id, type, data, parents, priority, status, timeLimit } = job;
+    const { id, type, data, result, parents, priority, status, timeLimit } = job;
     const workerJob = {
         id,
         type,
@@ -183,9 +193,10 @@ function prepareJobForWorker(service, job) {
             parentJobs.forEach(parentJob => {
                 workerJob.data = Object.assign(
                     {},
-                    parentJob.data,
-                    parentJob.result.data,
-                    workerJob.data
+                    normaliseJobData(parentJob.data),
+                    normaliseJobData(parentJob.result.data),
+                    normaliseJobData(workerJob.data),
+                    pickOnlySticky(normaliseJobData(result.data))
                 );
             });
             return workerJob;
