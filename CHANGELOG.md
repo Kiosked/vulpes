@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.15.0
+_2019-02-20_
+
+ * Sticky properties with `$` prefix
+
 ## v0.14.0
 _2019-02-13_
 

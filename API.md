@@ -33,6 +33,9 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#generateEmptyJob">generateEmptyJob()</a> ⇒ <code><a href="#Job">Job</a></code></dt>
 <dd><p>Generate an empty job</p>
 </dd>
+<dt><a href="#jobSatisfiesPredicates">jobSatisfiesPredicates(service, job)</a> ⇒ <code><a href="#PredicatesTestResult">PredicatesTestResult</a></code></dt>
+<dd><p>Test if a job satisfies all of its predicates</p>
+</dd>
 <dt><a href="#sortJobs">sortJobs(jobs, [sortSteps])</a> ⇒ <code><a href="#Job">Array.&lt;Job&gt;</a></code></dt>
 <dd><p>Sort jobs by some criteria</p>
 </dd>
@@ -50,6 +53,8 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Job">Job</a> : <code>Object</code></dt>
 <dd><p>A job</p>
 </dd>
+<dt><a href="#PredicatesTestResult">PredicatesTestResult</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#JobSortingStep">JobSortingStep</a> : <code>Object</code></dt>
 <dd><p>Job sorting step configuration</p>
 </dd>
@@ -772,6 +777,19 @@ Generate an empty job
 
 **Kind**: global function  
 **Returns**: [<code>Job</code>](#Job) - A new empty job  
+<a name="jobSatisfiesPredicates"></a>
+
+## jobSatisfiesPredicates(service, job) ⇒ [<code>PredicatesTestResult</code>](#PredicatesTestResult)
+Test if a job satisfies all of its predicates
+
+**Kind**: global function  
+**Returns**: [<code>PredicatesTestResult</code>](#PredicatesTestResult) - Test results  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| service | [<code>Service</code>](#Service) | The service |
+| job | [<code>Job</code>](#Job) | The job to test |
+
 <a name="sortJobs"></a>
 
 ## sortJobs(jobs, [sortSteps]) ⇒ [<code>Array.&lt;Job&gt;</code>](#Job)
@@ -860,6 +878,17 @@ A job
 | times.completed | <code>Number</code> \| <code>null</code> | Timestamp for when the job was  completed successfully |
 | timeLimit | <code>Number</code> \| <code>null</code> | Time limitation for the job's  execution. null means no limit. |
 | attempts | <code>Number</code> | Number of attempts the job has had |
+
+<a name="PredicatesTestResult"></a>
+
+## PredicatesTestResult : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| satisfies | <code>Boolean</code> | True if all predicates satisfied, false otherwise |
+| [predicate] | <code>String</code> | Name of the failing predicate |
 
 <a name="JobSortingStep"></a>
 
