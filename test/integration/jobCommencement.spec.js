@@ -10,10 +10,12 @@ describe("Service", function() {
                 Promise.all([
                     this.service.addJob({
                         data: { name: "test1" },
+                        predicate: { timeBetweenRetries: 0 },
                         priority: Service.JobPriority.High
                     }),
                     this.service.addJob({
                         data: { name: "test2" },
+                        predicate: { timeBetweenRetries: 0 },
                         priority: Service.JobPriority.Normal
                     })
                 ])
@@ -72,6 +74,41 @@ describe("Service", function() {
                 });
         });
 
+        it("merges sticky properties from failed result set", function() {
+            return this.service
+                .addJob({
+                    parents: [this.jobID1],
+                    data: { name: "test1-3" },
+                    predicate: { timeBetweenRetries: 0 }
+                })
+                .then(jobID => {
+                    this.jobID3 = jobID;
+                })
+                .then(() => this.service.startJob(this.jobID1))
+                .then(() =>
+                    this.service.stopJob(this.jobID1, Service.JobResult.Success, {
+                        name: "test1-2",
+                        value: 2
+                    })
+                )
+                .then(() => this.service.startJob(this.jobID3))
+                .then(() =>
+                    this.service.stopJob(this.jobID3, Service.JobResult.SoftFailure, {
+                        wontappear: 1,
+                        $special: 2
+                    })
+                )
+                .then(() => this.service.startJob(this.jobID3))
+                .then(workerJob => {
+                    const { data } = workerJob;
+                    expect(data).to.deep.equal({
+                        name: "test1-3",
+                        value: 2,
+                        $special: 2
+                    });
+                });
+        });
+
         it("fails if the job ID doesn't exist", function() {
             const work = this.service.startJob("notreal");
             return expect(work).to.be.rejectedWith(/No job found for ID/i);
@@ -96,7 +133,9 @@ describe("Service", function() {
         it("fails if a predicate is unsatisfied", function() {
             return this.service.addJob({ predicate: { locked: true } }).then(jobID => {
                 const startProm = this.service.startJob(jobID);
-                return expect(startProm).to.eventually.be.rejectedWith(/Predicate not satisfied/i);
+                return expect(startProm).to.eventually.be.rejectedWith(
+                    /Predicate 'locked' not satisfied/i
+                );
             });
         });
     });
