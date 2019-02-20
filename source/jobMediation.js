@@ -168,8 +168,8 @@ function pickFirstJob(service, jobs) {
         if (!job) {
             return Promise.resolve(null);
         }
-        const satisfiesPredicates = await jobSatisfiesPredicates(service, job);
-        if (!satisfiesPredicates) {
+        const { satisfies } = await jobSatisfiesPredicates(service, job);
+        if (!satisfies) {
             return await tryNext();
         }
         const parentsComplete = await checkParentsComplete(service, job);
