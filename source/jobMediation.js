@@ -128,6 +128,18 @@ function jobCanBeRestarted(job) {
     );
 }
 
+/**
+ * @typedef {Object} PredicatesTestResult
+ * @property {Boolean} satisfies - True if all predicates satisfied, false otherwise
+ * @property {String=} predicate - Name of the failing predicate
+ */
+
+/**
+ * Test if a job satisfies all of its predicates
+ * @param {Service} service The service
+ * @param {Job} job The job to test
+ * @returns {PredicatesTestResult} Test results
+ */
 function jobSatisfiesPredicates(service, job) {
     return Promise.resolve().then(() => {
         const { attemptsMax, locked, timeBetweenRetries } = job.predicate;
@@ -135,13 +147,13 @@ function jobSatisfiesPredicates(service, job) {
         const { stopped: lastStopped } = job.times;
         const now = Date.now();
         if (typeof attemptsMax === "number" && attempts >= attemptsMax) {
-            return false;
+            return { satisfies: false, predicate: "attemptsMax" };
         }
         if (attempts > 0 && now - lastStopped < timeBetweenRetries) {
-            return false;
+            return { satisfies: false, predicate: "timeBetweenRetries" };
         }
         // @todo CRON timings
-        return !locked;
+        return locked ? { satisfies: false, predicate: "locked" } : { satisfies: true };
     });
 }
 

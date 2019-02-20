@@ -493,11 +493,11 @@ class Service extends EventEmitter {
                 }
                 await ensureParentsComplete(this, job);
                 if (executePredicate) {
-                    const satisfiesPredicate = await jobSatisfiesPredicates(this, job);
-                    if (!satisfiesPredicate) {
+                    const { satisfies, predicate } = await jobSatisfiesPredicates(this, job);
+                    if (!satisfies) {
                         throw new VError(
-                            { info: { code: ERROR_CODE_PREDICATE_NOT_SATISFIED } },
-                            `Predicate not satisfied for job: ${job.id}`
+                            { info: { code: ERROR_CODE_PREDICATE_NOT_SATISFIED, predicate } },
+                            `Predicate '${predicate}' not satisfied for job: ${job.id}`
                         );
                     }
                 }
