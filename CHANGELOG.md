@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.16.0
+_2019-02-28_
+
+ * Permit jobs to be stopped when in pending state
+
 ## v0.15.1
 _2019-02-20_
 
