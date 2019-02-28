@@ -535,7 +535,7 @@ class Service extends EventEmitter {
         return this.jobQueue.enqueue(() =>
             this.getJob(jobID)
                 .then(job => {
-                    if (job.status !== JOB_STATUS_RUNNING) {
+                    if (job.status === JOB_STATUS_STOPPED) {
                         throw new VError(
                             { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
                             `Invalid job status: ${job.status}`
