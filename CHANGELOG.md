@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.16.1
+_2019-03-01_
+
+ * **Bugfix**:
+   * Downstream modules complain of an error while importing: `Error: only one instance of babel-polyfill is allowed` (conditionally include babel-polyfill)
+
 ## v0.16.0
 _2019-02-28_
 
