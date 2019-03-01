@@ -1,4 +1,4 @@
-require("babel-polyfill");
+require("./polyfill.js");
 
 const Service = require("./Service.js");
 
