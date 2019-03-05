@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.16.2
+
+ * **Bugfix**:
+   * Jobs that hard-failed were not possible to restart
+
 ## v0.16.1
 _2019-03-01_
 
