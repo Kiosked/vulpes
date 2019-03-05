@@ -33,8 +33,13 @@ const CONFIGURABLE_JOB_KEYS = [
 function filterJobInitObject(info) {
     const resultDataGetter = parse("result.data");
     return Object.keys(info).reduce((output, nextKey) => {
-        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0 || resultDataGetter(info)) {
+        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0) {
             output[nextKey] = info[nextKey];
+        } else {
+            if (resultDataGetter(info)) {
+                output[nextKey] = resultDataGetter(info);
+                console.log(output);
+            }
         }
         return output;
     }, {});
