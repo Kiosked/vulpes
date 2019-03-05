@@ -423,7 +423,7 @@ class Service extends EventEmitter {
             job.predicate.attemptsMax += 1;
         }
         job.status = JOB_STATUS_PENDING;
-        if (job.result.type === JOB_RESULT_TYPE_TIMEOUT) {
+        if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
             job.result.type = JOB_RESULT_TYPE_FAILURE_SOFT;
         }
         await this.storage.setItem(`job/${job.id}`, job);
