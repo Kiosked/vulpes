@@ -1,6 +1,7 @@
 const tmp = require("tmp");
 const Service = require("../../dist/Service.js");
 const FileStorage = require("../../dist/storage/FileStorage.js");
+const { JOB_PRIORITY_HIGH } = require("../../dist/symbols.js");
 
 function getTempFilePath() {
     return new Promise((resolve, reject) => {
@@ -44,5 +45,16 @@ describe("Service", function() {
         return this.service.queryJobs().then(jobs => {
             expect(jobs).to.have.lengthOf(6);
         });
+    });
+
+    it("updates jobs", function() {
+        const [firstJobID] = this.jobIDs;
+        return this.service
+            .updateJob(firstJobID, { type: "job1-1", priority: JOB_PRIORITY_HIGH })
+            .then(() => this.service.getJob(firstJobID))
+            .then(job => {
+                expect(job.type).to.equal("job1-1");
+                expect(job.priority).to.equal(JOB_PRIORITY_HIGH);
+            });
     });
 });
