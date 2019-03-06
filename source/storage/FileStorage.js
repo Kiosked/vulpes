@@ -12,7 +12,17 @@ const Storage = require("./Storage.js");
 
 const JSON_PARSE_ARGS = ["*"];
 
+/**
+ * File storage adapter
+ * Stores and streams jobs in a local file (very inefficiently)
+ * @augments Storage
+ */
 class FileStorage extends Storage {
+    /**
+     * Constructor for a new FileStorage instance
+     * @param {String} filename The file to store/stream jobs to and from
+     * @memberof FileStorage
+     */
     constructor(filename) {
         super();
         this._filename = filename;
@@ -20,6 +30,13 @@ class FileStorage extends Storage {
         this._unlinkFile = pify(fs.unlink);
     }
 
+    /**
+     * Get an item by its ID
+     * @param {String} id The item ID
+     * @returns {Promise.<Object|null>} A promise that resolves with the item or
+     *  null if not found
+     * @memberof FileStorage
+     */
     async getItem(id) {
         const stream = await this.streamItems();
         return new Promise(resolve => {
@@ -39,10 +56,24 @@ class FileStorage extends Storage {
         });
     }
 
+    /**
+     * Remove an item by its ID
+     * @param {String} id The item ID
+     * @returns {Promise} A promise that resolves when the item's been removed
+     * @memberof FileStorage
+     */
     async removeItem(id) {
         await this.setItem(id, null);
     }
 
+    /**
+     * Set an item using its ID
+     * @param {String} id The item ID to set
+     * @param {Object|null} item The item to set (or null to remove)
+     * @returns {Promise} A promise that resolves when the operation has been
+     *  completed
+     * @memberof FileStorage
+     */
     async setItem(id, item) {
         await this._queue.channel("stream").enqueue(async () => {
             const { tmpPath, cleanup } = await new Promise((resolve, reject) =>
@@ -96,6 +127,11 @@ class FileStorage extends Storage {
         });
     }
 
+    /**
+     * Stream all items
+     * @returns {Promise.<ReadableStream>} A promise that resolves with a readable stream
+     * @memberof FileStorage
+     */
     async streamItems() {
         return await new Promise(async consumerResolve => {
             await this._queue.channel("stream").enqueue(
