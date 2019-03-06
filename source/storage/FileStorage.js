@@ -39,7 +39,7 @@ class FileStorage extends Storage {
      */
     async getItem(id) {
         const stream = await this.streamItems();
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
             let found = false;
             stream.on("data", item => {
                 if (item.id === id) {
@@ -48,7 +48,10 @@ class FileStorage extends Storage {
                     resolve(item);
                 }
             });
-            endOfStream(stream, () => {
+            endOfStream(stream, err => {
+                if (err) {
+                    return reject(err);
+                }
                 if (!found) {
                     resolve(null);
                 }
