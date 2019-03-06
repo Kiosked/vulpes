@@ -25,7 +25,7 @@ class Storage {
      * @memberof Storage
      */
     getKeyPrefix() {
-        return "";
+        return "job/";
     }
 
     /**

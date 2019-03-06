@@ -7,6 +7,10 @@ describe("Service", function() {
         return this.service.initialise();
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("addJob", function() {
         it("can add jobs", function() {
             return Promise.all([this.service.addJob(), this.service.addJob()])

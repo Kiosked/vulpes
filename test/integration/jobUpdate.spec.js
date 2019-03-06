@@ -12,6 +12,10 @@ describe("Service", function() {
             });
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("when updating jobs", function() {
         it("can update certain properties", function() {
             return this.service

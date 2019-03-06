@@ -21,6 +21,10 @@ describe("Service", function() {
             });
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("getJobChildren", function() {
         it("gets only the first set of children when fullProgeny not set", function() {
             return this.service.getJobChildren(this.jobIDs[3] /* job4 */).then(children => {

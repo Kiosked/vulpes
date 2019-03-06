@@ -185,7 +185,7 @@ class Service extends EventEmitter {
                 { timeLimit: this.timeLimit },
                 initProps
             );
-            await this.storage.setItem(`job/${job.id}`, job);
+            await this.storage.setItem(job.id, job);
             this.emit("jobAdded", { id: job.id });
             return job.id;
         });
@@ -209,10 +209,7 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return await this.storage
-            .getItem(`job/${jobID}`)
-            // Clone job
-            .then(job => (job ? merge(true, job) : null));
+        return await this.storage.getItem(jobID);
     }
 
     /**
@@ -423,7 +420,7 @@ class Service extends EventEmitter {
         if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
             job.result.type = JOB_RESULT_TYPE_FAILURE_SOFT;
         }
-        await this.storage.setItem(`job/${job.id}`, job);
+        await this.storage.setItem(job.id, job);
         this.emit("jobReset", { id: job.id });
     }
 
@@ -504,7 +501,7 @@ class Service extends EventEmitter {
                     job.times.firstStarted = job.times.started;
                 }
                 job.attempts += 1;
-                await this.storage.setItem(`job/${job.id}`, job);
+                await this.storage.setItem(job.id, job);
                 this.emit("jobStarted", { id: job.id });
                 if (!jobID) {
                     this.emit("jobRestarted", { id: job.id });
@@ -552,7 +549,7 @@ class Service extends EventEmitter {
                     if (resultType === JOB_RESULT_TYPE_SUCCESS) {
                         job.times.completed = job.times.stopped;
                     }
-                    return this.storage.setItem(`job/${job.id}`, job).then(() => {
+                    return this.storage.setItem(job.id, job).then(() => {
                         this.emit("jobStopped", { id: job.id });
                         if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
                             this.emit("jobTimeout", { id: job.id });
@@ -597,7 +594,7 @@ class Service extends EventEmitter {
                         ? filterJobInitObject(mergedProperties)
                         : mergedProperties;
                     const updatedJob = merge.recursive({}, job, updateProps);
-                    await this.storage.setItem(`job/${job.id}`, updatedJob);
+                    await this.storage.setItem(job.id, updatedJob);
                     this.emit("jobUpdated", {
                         id: job.id,
                         original: job,

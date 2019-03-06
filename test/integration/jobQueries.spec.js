@@ -20,6 +20,10 @@ describe("Service", function() {
             });
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("when querying jobs", function() {
         it("can query for jobs with data values", function() {
             return this.service.queryJobs({ "data.name": /^test\d+$/ }).then(jobs => {
