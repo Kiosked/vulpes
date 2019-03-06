@@ -10,9 +10,9 @@ describe("Service", function() {
     describe("addJob", function() {
         it("can add jobs", function() {
             return Promise.all([this.service.addJob(), this.service.addJob()])
-                .then(() => this.service.storage.getAllKeys())
-                .then(keys => {
-                    expect(keys).to.have.lengthOf(2);
+                .then(() => this.service.queryJobs({}))
+                .then(jobs => {
+                    expect(jobs).to.have.lengthOf(2);
                 });
         });
     });

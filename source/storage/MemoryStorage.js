@@ -1,4 +1,5 @@
-const pLimit = require("p-limit");
+const objectStream = require("object-stream");
+const filterStream = require("stream-filter");
 const Storage = require("./Storage.js");
 
 /**
@@ -11,39 +12,16 @@ class MemoryStorage extends Storage {
     constructor() {
         super();
         this._store = {};
-        this._limitAllItemsFetch = pLimit(20);
     }
 
     /**
      * The job store
      * @type {Object}
+     * @readonly
      * @memberof MemoryStorage
      */
     get store() {
         return this._store;
-    }
-
-    /**
-     * Get all items in the storage
-     * @returns {Promise.<Array.<*>>} A promise that resolves with all items
-     * @memberof MemoryStorage
-     * @deprecated Will be replaced with streams later
-     */
-    getAllItems() {
-        return this.getAllKeys().then(keys =>
-            Promise.all(keys.map(key => this._limitAllItemsFetch(() => this.getItem(key))))
-        );
-    }
-
-    /**
-     * Get all storage keys
-     * @returns {Promise.<Array.<String>>} A promise that resolves with an array of
-     *  all the keys in storage
-     * @memberof MemoryStorage
-     */
-    getAllKeys() {
-        const keyPrefixLen = this.getKeyPrefix().length;
-        return Promise.resolve(Object.keys(this.store).map(key => key.substr(keyPrefixLen)));
     }
 
     /**
@@ -84,6 +62,21 @@ class MemoryStorage extends Storage {
         const trueKey = `${this.getKeyPrefix()}${key}`;
         this.store[trueKey] = value;
         return Promise.resolve();
+    }
+
+    /**
+     * Stream all items
+     * @returns {Promise.<ReadableStream>} A promise that resolves with the readable stream
+     * @memberof MemoryStorage
+     */
+    streamItems() {
+        return new Promise(resolve => {
+            resolve(
+                objectStream
+                    .fromArray(Object.keys(this.store).map(key => this.store[key]))
+                    .pipe(filterStream.obj(item => !!item))
+            );
+        });
     }
 }
 

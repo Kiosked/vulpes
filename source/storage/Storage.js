@@ -1,3 +1,5 @@
+const objectStream = require("object-stream");
+
 /**
  * Storage base class
  * Provides a storage mechanism for the job handling framework,
@@ -5,27 +7,6 @@
  * interface and does not actually perform any operations.
  */
 class Storage {
-    /**
-     * Get all items in the storage
-     * EXPENSIVE: Returns all items in storage
-     * @returns {Promise.<Array.<*>>} A promise that resolves with all items
-     * @memberof Storage
-     * @deprecated Will be replaced with streams later
-     */
-    getAllItems() {
-        return Promise.resolve([]);
-    }
-
-    /**
-     * Get all keys in the storage
-     * @returns {Promise.<Array.<String>>} A promise that resolves with an array of
-     *  all the keys
-     * @memberof Storage
-     */
-    getAllKeys() {
-        return Promise.resolve([]);
-    }
-
     /**
      * Get an item by its key
      * @param {String} key The key to fetch
@@ -79,6 +60,24 @@ class Storage {
      */
     setItem(key, value) {
         return Promise.resolve();
+    }
+
+    /**
+     * Shutdown the storage instance
+     * @returns {Promise} A promise that resolves once the shutdown procedure is complete
+     * @memberof Storage
+     */
+    shutdown() {
+        return Promise.resolve();
+    }
+
+    /**
+     * Stream all items
+     * @returns {Promise.<ReadableStream>} A promise that resolves with the readable stream
+     * @memberof Storage
+     */
+    streamItems() {
+        return Promise.resolve(objectStream.fromArray([]));
     }
 }
 

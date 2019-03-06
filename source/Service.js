@@ -2,11 +2,12 @@ const EventEmitter = require("eventemitter3");
 const merge = require("merge");
 const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
+const endOfStream = require("end-of-stream");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
-const { selectJobs } = require("./jobQuery.js");
+const { jobMatches } = require("./jobQuery.js");
 const {
     addJobBatch,
     ensureParentsComplete,
@@ -351,29 +352,25 @@ class Service extends EventEmitter {
      *  an array of jobs
      * @memberof Service
      */
-    queryJobs(query, { limit = Infinity, sort = "created", order = "desc" } = {}) {
+    async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
         if (!this._initialised) {
-            return Promise.reject(newNotInitialisedError());
+            throw newNotInitialisedError();
         }
-        return (
-            this.storage
-                .getAllItems()
-                // Search
-                .then(items => selectJobs(items, query))
-                // Clone
-                .then(items => items.map(item => merge(true, item)))
-                // Sort
-                .then(items =>
-                    sortJobs(items, [
-                        {
-                            property: sort,
-                            direction: order
-                        }
-                    ])
-                )
-                // Limit
-                .then(items => (limit !== Infinity ? items.slice(0, limit) : items))
-        );
+        const jobStream = await this.storage.streamItems();
+        const results = [];
+        jobStream.on("data", job => {
+            if (jobMatches(job, query)) {
+                results.push(job);
+            }
+        });
+        await new Promise(resolve => endOfStream(jobStream, resolve));
+        const jobs = sortJobs(results, [
+            {
+                property: sort,
+                direction: order
+            }
+        ]);
+        return limit !== Infinity ? jobs.slice(0, limit) : jobs;
     }
 
     /**
