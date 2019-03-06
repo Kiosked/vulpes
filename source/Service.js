@@ -360,7 +360,14 @@ class Service extends EventEmitter {
                 results.push(job);
             }
         });
-        await new Promise(resolve => endOfStream(jobStream, resolve));
+        await new Promise((resolve, reject) =>
+            endOfStream(jobStream, err => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            })
+        );
         const jobs = sortJobs(results, [
             {
                 property: sort,
@@ -432,6 +439,7 @@ class Service extends EventEmitter {
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
+        this.storage.shutdown();
         this._helpers = [];
         this._shutdown = true;
         this._initialised = false;
