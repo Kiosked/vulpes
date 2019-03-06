@@ -2,112 +2,111 @@ const fs = require("fs");
 const debounce = require("debounce");
 const ChannelQueue = require("@buttercup/channel-queue");
 const pify = require("pify");
+const tmp = require("tmp");
+const endOfStream = require("end-of-stream");
+const pump = require("pump");
+const JSONStream = require("JSONStream");
 const fileExists = require("file-exists");
-const sleep = require("sleep-promise");
-const MemoryStorage = require("./MemoryStorage.js");
+const objectStream = require("object-stream");
+const Storage = require("./Storage.js");
 
-const FILE_WRITE_DELAY = 500;
+const JSON_PARSE_ARGS = ["*"];
 
-/**
- * File storage interface
- * Extends memory storage with persistent disk writes so that a
- * full copy of all jobs is kept on-disk.
- * @augments MemoryStorage
- */
-class FileStorage extends MemoryStorage {
-    /**
-     * Constructor for the FileStorage adapter
-     * @param {String} filename The filename to store the state in
-     * @memberof FileStorage
-     */
+class FileStorage extends Storage {
     constructor(filename) {
         super();
         this._filename = filename;
         this._queue = new ChannelQueue();
-
-        this._readFile = pify(fs.readFile);
-        this._writeFile = pify(fs.writeFile);
-
-        /**
-         * Debounced method for writing to the file
-         * @type {Function}
-         * @memberof FileStorage
-         * @see _writeStateToFile
-         */
-        this.writeStateToFile = debounce(
-            this._writeStateToFile.bind(this),
-            FILE_WRITE_DELAY,
-            /* immediate: */ false
-        );
+        this._unlinkFile = pify(fs.unlink);
     }
 
-    /**
-     * Initialise the file storage
-     * This method reads the contents of the file into memory
-     * @returns {Promise} A promise that resolves once the cached
-     *  file storage is loaded
-     * @memberof FileStorage
-     */
-    initialise() {
-        return super
-            .initialise()
-            .then(() => fileExists(this._filename))
-            .then(exists => {
-                if (!exists) {
+    async getItem(id) {
+        const stream = await this.streamItems();
+        return new Promise(resolve => {
+            let found = false;
+            stream.on("data", item => {
+                if (item.id === id) {
+                    found = true;
+                    stream.destroy();
+                    resolve(item);
+                }
+            });
+            endOfStream(stream, () => {
+                if (!found) {
+                    resolve(null);
+                }
+            });
+        });
+    }
+
+    async removeItem(id) {
+        await this.setItem(id, null);
+    }
+
+    async setItem(id, item) {
+        await this._queue.channel("stream").enqueue(async () => {
+            const { tmpPath, cleanup } = await new Promise((resolve, reject) =>
+                tmp.file((err, tmpPath, fd, cleanup) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve({ tmpPath, cleanup });
+                })
+            );
+            const rs = fs
+                .createReadStream(this._filename)
+                .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
+            const ws = JSONStream.stringifyObject();
+            const key = `${this.getKeyPrefix()}${id}`;
+            let itemExisted = false;
+            rs.on("data", currentItem => {
+                if (currentItem.id === id) {
+                    itemExisted = true;
+                    if (item === null) {
+                        return;
+                    }
+                    ws.write([key, item]);
                     return;
                 }
-                return this._readFile(this._filename, "utf8")
-                    .then(JSON.parse)
-                    .then(store => {
-                        this._store = store;
-                    });
+                ws.write([key, currentItem]);
             });
+            endOfStream(rs, () => {
+                if (!itemExisted && item !== null) {
+                    ws.write([key, item]);
+                }
+                ws.end();
+            });
+            await new Promise((resolve, reject) =>
+                pump(ws, fs.createWriteStream(tmpPath), err => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                })
+            );
+            await new Promise((resolve, reject) =>
+                pump(fs.createReadStream(tmpPath), fs.createWriteStream(this._filename), err => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                })
+            );
+            cleanup();
+        });
     }
 
-    /**
-     * Remove an item from storage
-     * @param {String} key The key to remove
-     * @returns {Promise} A promise that resolves once the item
-     *  has been removed
-     * @memberof FileStorage
-     */
-    removeItem(key) {
-        return super.removeItem(key).then(() => this.writeStateToFile());
-    }
-
-    /**
-     * Set an item in storage
-     * @param {String} key The key to set
-     * @param {*} value The value to store
-     * @returns {Promise} A promise that resolves once the
-     *  value has been stored
-     * @memberof FileStorage
-     */
-    setItem(key, value) {
-        return super.setItem(key, value).then(() => this.writeStateToFile());
-    }
-
-    /**
-     * Get the serialised state
-     * @returns {String} The state in serialised form
-     * @protected
-     * @memberof FileStorage
-     */
-    _getSerialisedState() {
-        return JSON.stringify(this.store);
-    }
-
-    /**
-     * Write the state to a file
-     * Enqueues write operations for storing the state in
-     * the specified file
-     * @protected
-     * @memberof FileStorage
-     */
-    _writeStateToFile() {
-        this._queue.channel("write").enqueue(() => {
-            return this._writeFile(this._filename, this._getSerialisedState()).then(() =>
-                sleep(100)
+    async streamItems() {
+        return await new Promise(async consumerResolve => {
+            await this._queue.channel("stream").enqueue(
+                () =>
+                    new Promise(channelResolve => {
+                        const stream = fs
+                            .createReadStream(this._filename)
+                            .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
+                        consumerResolve(stream);
+                        endOfStream(stream, () => channelResolve());
+                    })
             );
         });
     }
