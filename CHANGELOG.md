@@ -1,6 +1,13 @@
 # Vulpes Changelog
 
+## v0.16.3
+_2019-03-11_
+
+ * **Bugfix**:
+   * Sticky properties in job results would not be merged when job has no parents
+
 ## v0.16.2
+_2019-03-05_
 
  * **Bugfix**:
    * Jobs that hard-failed were not possible to restart
