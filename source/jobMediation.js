@@ -189,10 +189,11 @@ function pickOnlySticky(data) {
 
 function prepareJobForWorker(service, job) {
     const { id, type, data, result, parents, priority, status, timeLimit } = job;
+    // Create the job structure (data is added later)
     const workerJob = {
         id,
         type,
-        data,
+        data: {},
         priority,
         status,
         timeLimit
@@ -202,15 +203,21 @@ function prepareJobForWorker(service, job) {
             id: jobID => parents.indexOf(jobID) >= 0
         })
         .then(parentJobs => {
+            // Add data from parents first
             parentJobs.forEach(parentJob => {
-                workerJob.data = Object.assign(
-                    {},
+                Object.assign(
+                    workerJob.data,
                     normaliseJobData(parentJob.data),
-                    normaliseJobData(parentJob.result.data),
-                    normaliseJobData(workerJob.data),
-                    pickOnlySticky(normaliseJobData(result.data))
+                    normaliseJobData(parentJob.result.data)
                 );
             });
+            // Update data to merge actual job's data and its previous sticky
+            // results if it has been run earlier
+            Object.assign(
+                workerJob.data,
+                normaliseJobData(data),
+                pickOnlySticky(normaliseJobData(result.data))
+            );
             return workerJob;
         });
 }
