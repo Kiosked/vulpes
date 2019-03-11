@@ -109,6 +109,21 @@ describe("Service", function() {
                 });
         });
 
+        it("merges sticky results from previous job run", function() {
+            return this.service
+                .startJob(this.jobID1)
+                .then(() =>
+                    this.service.stopJob(this.jobID1, Service.JobResult.SoftFailure, {
+                        $stickyTest: 123
+                    })
+                )
+                .then(() => this.service.startJob(this.jobID1))
+                .then(workerJob => {
+                    const { data } = workerJob;
+                    expect(data).to.have.property("$stickyTest", 123);
+                });
+        });
+
         it("fails if the job ID doesn't exist", function() {
             const work = this.service.startJob("notreal");
             return expect(work).to.be.rejectedWith(/No job found for ID/i);
