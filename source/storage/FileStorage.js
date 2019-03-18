@@ -49,7 +49,7 @@ class FileStorage extends Storage {
                 }
             });
             endOfStream(stream, err => {
-                if (err) {
+                if (err && !found) {
                     return reject(err);
                 }
                 if (!found) {

@@ -41,20 +41,22 @@ describe("Service", function() {
         this.service.shutdown();
     });
 
-    it("reads jobs", function() {
-        return this.service.queryJobs().then(jobs => {
-            expect(jobs).to.have.lengthOf(6);
-        });
-    });
-
-    it("updates jobs", function() {
-        const [firstJobID] = this.jobIDs;
-        return this.service
-            .updateJob(firstJobID, { type: "job1-1", priority: JOB_PRIORITY_HIGH })
-            .then(() => this.service.getJob(firstJobID))
-            .then(job => {
-                expect(job.type).to.equal("job1-1");
-                expect(job.priority).to.equal(JOB_PRIORITY_HIGH);
+    describe("when using FileStorage", function() {
+        it("reads jobs", function() {
+            return this.service.queryJobs().then(jobs => {
+                expect(jobs).to.have.lengthOf(6);
             });
+        });
+
+        it("updates jobs", function() {
+            const [firstJobID] = this.jobIDs;
+            return this.service
+                .updateJob(firstJobID, { type: "job1-1", priority: JOB_PRIORITY_HIGH })
+                .then(() => this.service.getJob(firstJobID))
+                .then(job => {
+                    expect(job.type).to.equal("job1-1");
+                    expect(job.priority).to.equal(JOB_PRIORITY_HIGH);
+                });
+        });
     });
 });
