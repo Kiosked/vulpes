@@ -74,20 +74,28 @@ class RedisStorage extends Storage {
      * @memberof RedisStorage
      */
     async streamItems() {
+        // Create a readable stream for the consumer to read
+        // job items from
         const outStream = new Readable({ objectMode: true });
         outStream._read = NOOP;
+        // Create a stream for the reading from Redis
         const inStream = this.redis.scanStream({
             match: `${this.getKeyPrefix()}*`,
             count: STREAM_READ_COUNT
         });
         const usedKeys = [];
         inStream.on("data", keys =>
+            // We queue on portions of the stream to ensure that uniqueness
+            // is maintained while reading asynchronously
             this._queue.channel("streamOut").enqueue(async () => {
+                // Pause the redis stream so we can process
                 inStream.pause();
+                // Track unique keys already used
                 const uniqueKeys = keys.filter(key => !usedKeys.includes(key));
                 usedKeys.push(...uniqueKeys);
                 if (uniqueKeys.length > 0) {
                     await Promise.all(
+                        // Push all new unique items into the out stream
                         uniqueKeys.map(async itemKey => {
                             const json = await this.redis.get(itemKey);
                             if (json) {
@@ -98,11 +106,13 @@ class RedisStorage extends Storage {
                 } else {
                     await sleep(50);
                 }
+                // Continue processing
                 inStream.resume();
             })
         );
         endOfStream(inStream, () => {
             this._queue.channel("streamOut").enqueue(() => {
+                // Mark the stream as finished
                 outStream.push(null);
             });
         });

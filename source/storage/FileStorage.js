@@ -79,6 +79,7 @@ class FileStorage extends Storage {
      */
     async setItem(id, item) {
         await this._queue.channel("stream").enqueue(async () => {
+            // Prepare temp file
             const { tmpPath, cleanup } = await new Promise((resolve, reject) =>
                 tmp.file((err, tmpPath, fd, cleanup) => {
                     if (err) {
@@ -87,13 +88,18 @@ class FileStorage extends Storage {
                     resolve({ tmpPath, cleanup });
                 })
             );
+            // Create a read stream with JSON parsing
             const rs = fs
                 .createReadStream(this._filename)
                 .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
             const ws = JSONStream.stringifyObject();
             const key = `${this.getKeyPrefix()}${id}`;
+            // Track whether or not the item exists in the stream:
+            //  - If it doesn't, it should be added at the end of the stream
+            //  - If it does, it should be replaced mid-stream
             let itemExisted = false;
             rs.on("data", currentItem => {
+                // Item found, replace
                 if (currentItem.id === id) {
                     itemExisted = true;
                     if (item === null) {
@@ -102,14 +108,19 @@ class FileStorage extends Storage {
                     ws.write([key, item]);
                     return;
                 }
+                // Another item we're not looking for, write it immediately
                 ws.write([key, currentItem]);
             });
+            // Wait for the read stream to end
             endOfStream(rs, () => {
                 if (!itemExisted && item !== null) {
+                    // Item wasn't found, so add it
                     ws.write([key, item]);
                 }
                 ws.end();
             });
+            // Now pump the new write stream into the temp file (as we can't simply overwrite
+            //  the current live file)
             await new Promise((resolve, reject) =>
                 pump(ws, fs.createWriteStream(tmpPath), err => {
                     if (err) {
@@ -118,6 +129,7 @@ class FileStorage extends Storage {
                     resolve();
                 })
             );
+            // Pump the temp file back into the live file
             await new Promise((resolve, reject) =>
                 pump(fs.createReadStream(tmpPath), fs.createWriteStream(this._filename), err => {
                     if (err) {
@@ -126,6 +138,7 @@ class FileStorage extends Storage {
                     resolve();
                 })
             );
+            // Cleanup the temp file, without waiting
             cleanup();
         });
     }
@@ -136,6 +149,7 @@ class FileStorage extends Storage {
      * @memberof FileStorage
      */
     async streamItems() {
+        // Return a promise that resolves with the stream instance
         return await new Promise(async consumerResolve => {
             await this._queue.channel("stream").enqueue(
                 () =>
@@ -143,7 +157,11 @@ class FileStorage extends Storage {
                         const stream = fs
                             .createReadStream(this._filename)
                             .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
+                        // Resolve the consumer's promise with the stream instance, while
+                        // we wait for the stream to end next..
                         consumerResolve(stream);
+                        // We resolve the channel later as we need to wait for the stream
+                        // to close naturally
                         endOfStream(stream, () => channelResolve());
                     })
             );
