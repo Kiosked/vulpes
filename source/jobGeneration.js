@@ -1,5 +1,6 @@
 const uuid = require("uuid/v4");
 const ms = require("ms");
+const nested = require("nested-property");
 const { getTimestamp } = require("./time.js");
 const {
     ITEM_TYPE,
@@ -30,16 +31,20 @@ const CONFIGURABLE_JOB_KEYS = [
     "predicate",
     "data",
     "timeLimit",
-    "attemptsMax"
+    "attemptsMax",
+    "result.data",
+    "result.type"
 ];
 
 function filterJobInitObject(info) {
-    return Object.keys(info).reduce((output, nextKey) => {
-        if (CONFIGURABLE_JOB_KEYS.indexOf(nextKey) >= 0) {
-            output[nextKey] = info[nextKey];
+    const output = {};
+    CONFIGURABLE_JOB_KEYS.forEach(key => {
+        const value = nested.get(info, key);
+        if (typeof value !== "undefined") {
+            nested.set(output, key, value);
         }
-        return output;
-    }, {});
+    });
+    return output;
 }
 
 /**
