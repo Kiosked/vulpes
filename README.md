@@ -60,6 +60,20 @@ A job will not execute if its parents have not been completed. Providing the `pa
 
 More information is found in the [API documentation](API.md).
 
+### Job batches
+You can add batches of jobs by using the `Service#addJobs` method, which takes an array of new jobs.
+
+_You must specify an `id` property for each job used with this method - but it should be a number and not a UUID. Vulpes uses this number when calculating relationships in the added jobs._
+
+```javascript
+const jobs = await service.addJobs([
+    { id: 1, type: "parent" },
+    { id: 2, type: "child", parents: [1] }
+]);
+```
+
+This allows you to insert full job trees using one method.
+
 ### Job trees
 You can fetch jobs that are connected to a certain job using `getJobChildren`, `getJobParents` and `getJobTree`.
 
@@ -118,6 +132,20 @@ Special properties in job data can be used to change their behaviour. Special pr
 |-----------|---------------------------------------|---------------|
 | `$`       | Sticky property - will be sent to jobs even if in failed result set. | `$lastValue` |
 | `!`       | Reserved: For client implementation. This should not be sent to the server as future implementations may break. It is reserved for client-side implementation and should be stripped from results and data. | `!system_value` |
+
+### Scheduling jobs / Templates
+A common need of any task management system is scheduled/repeating jobs. Vulpes provides support for this via a `scheduler` helper attached to each `Service` instance. Scheduled jobs are simply timed executions of the `Service#addJobs` batch command.
+
+```javascript
+const taskID = await service.scheduler.addScheduledJobs({
+    title: "My batch",
+    schedule: "0 */2 * * *", // every 2 hours (CRON)
+    jobs: [
+        { id: 1, type: "parent" },
+        { id: 2, type: "child", parents: [1] }
+    ]
+});
+```
 
 ## Developing
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.

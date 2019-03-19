@@ -167,6 +167,14 @@ class Scheduler extends EventEmitter {
         await this._writeTask(task);
     }
 
+    /**
+     * Schedule a CRON execution
+     * @property {String} schedule - The minute-accurate CRON string
+     * @property {Function} cb - The callback to fire when the CRON timer matches current time
+     * @protected
+     * @returns {Object} The CRON task
+     * @memberof Scheduler
+     */
     _cronSchedule(schedule, cb) {
         return cron.schedule(schedule, cb);
     }
