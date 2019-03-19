@@ -118,6 +118,7 @@ Special properties in job data can be used to change their behaviour. Special pr
 |-----------|---------------------------------------|---------------|
 | `$`       | Sticky property - will be sent to jobs even if in failed result set. | `$lastValue` |
 | `!`       | Reserved: For client implementation. This should not be sent to the server as future implementations may break. It is reserved for client-side implementation and should be stripped from results and data. | `!system_value` |
+| `%`       | Hidden property - Properties prefixed by this symbol are hidden in the UI, but available everywhere else as a regular property. | `%imagedata` |
 
 ## Developing
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
