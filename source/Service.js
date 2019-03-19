@@ -3,6 +3,7 @@ const merge = require("merge");
 const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
 const endOfStream = require("end-of-stream");
+const Scheduler = require("./Scheduler.js");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
@@ -28,6 +29,8 @@ const {
     ERROR_CODE_NO_JOB_FOR_ID,
     ERROR_CODE_NOT_INIT,
     ERROR_CODE_PREDICATE_NOT_SATISFIED,
+    ITEM_TYPE,
+    ITEM_TYPE_JOB,
     JOB_PRIORITY_HIGH,
     JOB_PRIORITY_LOW,
     JOB_PRIORITY_NORMAL,
@@ -41,6 +44,8 @@ const {
     JOB_STATUS_STOPPED,
     JOB_TIMELIMIT_DEFAULT
 } = require("./symbols.js");
+
+const ITEM_JOB_PREFIX = /^job\//;
 
 /**
  * Job priorities
@@ -95,6 +100,7 @@ class Service extends EventEmitter {
         this._storage = storage;
         this._timeLimit = JOB_TIMELIMIT_DEFAULT;
         this._channelQueue = new ChannelQueue();
+        this._scheduler = new Scheduler(this);
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
@@ -138,6 +144,16 @@ class Service extends EventEmitter {
      */
     get jobQueue() {
         return this._channelQueue.channel("job");
+    }
+
+    /**
+     * The scheduler instance for scheduling tasks
+     * @type {Scheduler}
+     * @readonly
+     * @memberof Service
+     */
+    get scheduler() {
+        return this._scheduler;
     }
 
     /**
@@ -191,6 +207,12 @@ class Service extends EventEmitter {
         });
     }
 
+    /**
+     * Add an array of new jobs (a batch)
+     * @param {NewJob[]} jobs An array of new job objects
+     * @returns {Promise.<Job[]>} An array of newly created jobs
+     * @memberof Service
+     */
     async addJobs(jobs) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
@@ -356,7 +378,7 @@ class Service extends EventEmitter {
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {
-            if (jobMatches(job, query)) {
+            if (job[ITEM_TYPE] === ITEM_TYPE_JOB && jobMatches(job, query)) {
                 results.push(job);
             }
         });
@@ -393,8 +415,9 @@ class Service extends EventEmitter {
                 )
             );
         }
-        this._initialised = true;
         await this.storage.initialise();
+        await this.scheduler.initialise();
+        this._initialised = true;
     }
 
     /**
@@ -436,6 +459,7 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     shutdown() {
+        this.scheduler.shutdown();
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
