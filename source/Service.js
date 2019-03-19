@@ -2,11 +2,12 @@ const EventEmitter = require("eventemitter3");
 const merge = require("merge");
 const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
+const endOfStream = require("end-of-stream");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
-const { selectJobs } = require("./jobQuery.js");
+const { jobMatches } = require("./jobQuery.js");
 const {
     addJobBatch,
     ensureParentsComplete,
@@ -184,7 +185,7 @@ class Service extends EventEmitter {
                 { timeLimit: this.timeLimit },
                 initProps
             );
-            await this.storage.setItem(`job/${job.id}`, job);
+            await this.storage.setItem(job.id, job);
             this.emit("jobAdded", { id: job.id });
             return job.id;
         });
@@ -208,10 +209,7 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return await this.storage
-            .getItem(`job/${jobID}`)
-            // Clone job
-            .then(job => (job ? merge(true, job) : null));
+        return await this.storage.getItem(jobID);
     }
 
     /**
@@ -351,29 +349,32 @@ class Service extends EventEmitter {
      *  an array of jobs
      * @memberof Service
      */
-    queryJobs(query, { limit = Infinity, sort = "created", order = "desc" } = {}) {
+    async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
         if (!this._initialised) {
-            return Promise.reject(newNotInitialisedError());
+            throw newNotInitialisedError();
         }
-        return (
-            this.storage
-                .getAllItems()
-                // Search
-                .then(items => selectJobs(items, query))
-                // Clone
-                .then(items => items.map(item => merge(true, item)))
-                // Sort
-                .then(items =>
-                    sortJobs(items, [
-                        {
-                            property: sort,
-                            direction: order
-                        }
-                    ])
-                )
-                // Limit
-                .then(items => (limit !== Infinity ? items.slice(0, limit) : items))
+        const jobStream = await this.storage.streamItems();
+        const results = [];
+        jobStream.on("data", job => {
+            if (jobMatches(job, query)) {
+                results.push(job);
+            }
+        });
+        await new Promise((resolve, reject) =>
+            endOfStream(jobStream, err => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve();
+            })
         );
+        const jobs = sortJobs(results, [
+            {
+                property: sort,
+                direction: order
+            }
+        ]);
+        return limit !== Infinity ? jobs.slice(0, limit) : jobs;
     }
 
     /**
@@ -426,7 +427,7 @@ class Service extends EventEmitter {
         if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
             job.result.type = JOB_RESULT_TYPE_FAILURE_SOFT;
         }
-        await this.storage.setItem(`job/${job.id}`, job);
+        await this.storage.setItem(job.id, job);
         this.emit("jobReset", { id: job.id });
     }
 
@@ -438,6 +439,7 @@ class Service extends EventEmitter {
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
+        this.storage.shutdown();
         this._helpers = [];
         this._shutdown = true;
         this._initialised = false;
@@ -507,7 +509,7 @@ class Service extends EventEmitter {
                     job.times.firstStarted = job.times.started;
                 }
                 job.attempts += 1;
-                await this.storage.setItem(`job/${job.id}`, job);
+                await this.storage.setItem(job.id, job);
                 this.emit("jobStarted", { id: job.id });
                 if (!jobID) {
                     this.emit("jobRestarted", { id: job.id });
@@ -555,7 +557,7 @@ class Service extends EventEmitter {
                     if (resultType === JOB_RESULT_TYPE_SUCCESS) {
                         job.times.completed = job.times.stopped;
                     }
-                    return this.storage.setItem(`job/${job.id}`, job).then(() => {
+                    return this.storage.setItem(job.id, job).then(() => {
                         this.emit("jobStopped", { id: job.id });
                         if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
                             this.emit("jobTimeout", { id: job.id });
@@ -600,7 +602,7 @@ class Service extends EventEmitter {
                         ? filterJobInitObject(mergedProperties)
                         : mergedProperties;
                     const updatedJob = merge.recursive({}, job, updateProps);
-                    await this.storage.setItem(`job/${job.id}`, updatedJob);
+                    await this.storage.setItem(job.id, updatedJob);
                     this.emit("jobUpdated", {
                         id: job.id,
                         original: job,

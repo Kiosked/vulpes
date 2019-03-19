@@ -24,6 +24,10 @@ describe("Service", function() {
             );
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("getNextJob", function() {
         it("returns the correct next job", function() {
             return expect(this.service.getNextJob())

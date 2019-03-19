@@ -8,6 +8,7 @@ const TimeoutHelper = require("./helper/TimeoutHelper.js");
 const Storage = require("./storage/Storage.js");
 const FileStorage = require("./storage/FileStorage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
+const RedisStorage = require("./storage/RedisStorage.js");
 
 const Symbol = require("./symbols.js");
 
@@ -20,5 +21,6 @@ module.exports = {
 
     Storage,
     FileStorage,
-    MemoryStorage
+    MemoryStorage,
+    RedisStorage
 };

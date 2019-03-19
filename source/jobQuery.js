@@ -31,6 +31,7 @@ function selectJobs(jobs, query = {}) {
 }
 
 module.exports = {
+    jobMatches,
     selectJob,
     selectJobs
 };

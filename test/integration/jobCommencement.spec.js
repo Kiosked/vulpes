@@ -28,6 +28,10 @@ describe("Service", function() {
             });
     });
 
+    afterEach(function() {
+        this.service.shutdown();
+    });
+
     describe("when starting jobs", function() {
         it("starts jobs corrects", function() {
             return this.service
