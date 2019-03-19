@@ -51,5 +51,30 @@ describe("Service", function() {
                     expect(job.status).to.equal(JOB_STATUS_STOPPED);
                 });
         });
+
+        it("can overwrite previous results", function() {
+            return this.service
+                .updateJob(this.jobID, {
+                    result: {
+                        data: { test: true }
+                    }
+                })
+                .then(() =>
+                    this.service.updateJob(
+                        this.jobID,
+                        {
+                            result: {
+                                data: { test2: true }
+                            }
+                        },
+                        { stripResults: true }
+                    )
+                )
+                .then(() => this.service.getJob(this.jobID))
+                .then(job => {
+                    expect(job.result.data).to.not.have.property("test");
+                    expect(job.result.data).to.have.property("test2", true);
+                });
+        });
     });
 });
