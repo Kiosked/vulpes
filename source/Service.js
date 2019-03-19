@@ -606,6 +606,8 @@ class Service extends EventEmitter {
      *  NOT be overwritten. This is true by default. Using 'false' here may
      *  result in unpredictable and dangerous behaviour. Use at our own
      *  peril.
+     * @property {Boolean=} stripResults - Remove existing results before
+     *  updating the job data. Default is false.
      */
 
     /**
@@ -615,13 +617,16 @@ class Service extends EventEmitter {
      * @param {UpdateJobOptions=} options Update method options
      * @memberof Service
      */
-    updateJob(jobID, mergedProperties = {}, { filterProps = true } = {}) {
+    updateJob(jobID, mergedProperties = {}, { filterProps = true, stripResults = false } = {}) {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
         return this.jobQueue.enqueue(() =>
             this.getJob(jobID)
                 .then(async job => {
+                    if (stripResults) {
+                        job.result.data = {};
+                    }
                     const updateProps = filterProps
                         ? filterJobInitObject(mergedProperties)
                         : mergedProperties;
