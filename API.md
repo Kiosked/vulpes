@@ -6,18 +6,24 @@
 Helpers provide an easy interface with which to
 attach to services to perform ancillary tasks.</p>
 </dd>
+<dt><a href="#Scheduler">Scheduler</a> ⇐ <code>EventEmitter</code></dt>
+<dd><p>Scheduler for scheduled tasks</p>
+</dd>
 <dt><a href="#Service">Service</a> ⇐ <code>EventEmitter</code></dt>
 <dd><p>Service for managing jobs</p>
 </dd>
-<dt><a href="#FileStorage">FileStorage</a> ⇐ <code><a href="#MemoryStorage">MemoryStorage</a></code></dt>
-<dd><p>File storage interface
-Extends memory storage with persistent disk writes so that a
-full copy of all jobs is kept on-disk.</p>
+<dt><a href="#FileStorage">FileStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
+<dd><p>File storage adapter
+Stores and streams jobs in a local file (very inefficiently)</p>
 </dd>
 <dt><a href="#MemoryStorage">MemoryStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
 <dd><p>Memory storage adapter
 Stores jobs in memory. Once application is closed all jobs are
 purged - do not use this storage if you desire persistence.</p>
+</dd>
+<dt><a href="#RedisStorage">RedisStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
+<dd><p>Redis storage adapter
+Stores items in a Redis database</p>
 </dd>
 <dt><a href="#Storage">Storage</a></dt>
 <dd><p>Storage base class
@@ -58,6 +64,10 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#JobSortingStep">JobSortingStep</a> : <code>Object</code></dt>
 <dd><p>Job sorting step configuration</p>
 </dd>
+<dt><a href="#NewScheduledTask">NewScheduledTask</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#ScheduledTask">ScheduledTask</a> : <code><a href="#NewScheduledTask">NewScheduledTask</a></code></dt>
+<dd></dd>
 <dt><a href="#GetJobChildrenOptions">GetJobChildrenOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching job children</p>
 </dd>
@@ -130,6 +140,142 @@ Shutdown the helper
 This will be called by a Service instance
 
 **Kind**: instance method of [<code>Helper</code>](#Helper)  
+<a name="Scheduler"></a>
+
+## Scheduler ⇐ <code>EventEmitter</code>
+Scheduler for scheduled tasks
+
+**Kind**: global class  
+**Extends**: <code>EventEmitter</code>  
+
+* [Scheduler](#Scheduler) ⇐ <code>EventEmitter</code>
+    * [.service](#Scheduler+service) : [<code>Service</code>](#Service)
+    * [.taskQueue](#Scheduler+taskQueue) : <code>Channel</code>
+    * [.addScheduledJobs(options)](#Scheduler+addScheduledJobs) ⇒ <code>String</code>
+    * [.getScheduledTask(id)](#Scheduler+getScheduledTask) ⇒ [<code>Promise.&lt;ScheduledTask&gt;</code>](#ScheduledTask)
+    * [.getScheduledTasks()](#Scheduler+getScheduledTasks) ⇒ <code>Promise.&lt;Array.&lt;ScheduledTask&gt;&gt;</code>
+    * [.initialise()](#Scheduler+initialise) ⇒ <code>Promise</code>
+    * [.removeScheduledTask()](#Scheduler+removeScheduledTask) ⇒ <code>Promise</code>
+    * [.shutdown()](#Scheduler+shutdown)
+    * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask)
+    * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
+    * [._watchTask(task)](#Scheduler+_watchTask)
+    * [._writeTask(task)](#Scheduler+_writeTask) ⇒ <code>Promise</code>
+
+<a name="Scheduler+service"></a>
+
+### scheduler.service : [<code>Service</code>](#Service)
+Service reference
+
+**Kind**: instance property of [<code>Scheduler</code>](#Scheduler)  
+<a name="Scheduler+taskQueue"></a>
+
+### scheduler.taskQueue : <code>Channel</code>
+Task queue for job schedule checks
+
+**Kind**: instance property of [<code>Scheduler</code>](#Scheduler)  
+**Read only**: true  
+<a name="Scheduler+addScheduledJobs"></a>
+
+### scheduler.addScheduledJobs(options) ⇒ <code>String</code>
+Add scheduled jobs task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: <code>String</code> - The ID of the scheduled task  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | [<code>NewScheduledTask</code>](#NewScheduledTask) | Task structure for the newly scheduled job |
+
+<a name="Scheduler+getScheduledTask"></a>
+
+### scheduler.getScheduledTask(id) ⇒ [<code>Promise.&lt;ScheduledTask&gt;</code>](#ScheduledTask)
+Get a scheduled task by its ID
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: [<code>Promise.&lt;ScheduledTask&gt;</code>](#ScheduledTask) - A promise that resolves with the scheduled task  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+
+<a name="Scheduler+getScheduledTasks"></a>
+
+### scheduler.getScheduledTasks() ⇒ <code>Promise.&lt;Array.&lt;ScheduledTask&gt;&gt;</code>
+Get all scheduled tasks
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: <code>Promise.&lt;Array.&lt;ScheduledTask&gt;&gt;</code> - A promise that resolves with an array of all
+ scheduled tasks  
+<a name="Scheduler+initialise"></a>
+
+### scheduler.initialise() ⇒ <code>Promise</code>
+Initialise the scheduler
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+<a name="Scheduler+removeScheduledTask"></a>
+
+### scheduler.removeScheduledTask() ⇒ <code>Promise</code>
+Remove a scheduled task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+<a name="Scheduler+shutdown"></a>
+
+### scheduler.shutdown()
+Shutdown the scheduler
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+<a name="Scheduler+toggleTask"></a>
+
+### scheduler.toggleTask(taskID, [enabled])
+Enable/disable a task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| taskID | <code>String</code> | The ID of the task |
+| [enabled] | <code>Boolean</code> | Set the enabled status of the task to  true or false. If not specified, the status of the task will  be toggled. |
+
+<a name="Scheduler+_cronSchedule"></a>
+
+### scheduler._cronSchedule() ⇒ <code>Object</code>
+Schedule a CRON execution
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: <code>Object</code> - The CRON task  
+**Access**: protected  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| schedule | <code>String</code> | The minute-accurate CRON string |
+| cb | <code>function</code> | The callback to fire when the CRON timer matches current time |
+
+<a name="Scheduler+_watchTask"></a>
+
+### scheduler._watchTask(task)
+Watch a task (start timer for scheduling)
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| task | [<code>ScheduledTask</code>](#ScheduledTask) | The task to watch |
+
+<a name="Scheduler+_writeTask"></a>
+
+### scheduler._writeTask(task) ⇒ <code>Promise</code>
+Write a task to storage
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| task | [<code>ScheduledTask</code>](#ScheduledTask) | The task to write (will overwrite) |
+
 <a name="Service"></a>
 
 ## Service ⇐ <code>EventEmitter</code>
@@ -144,9 +290,11 @@ Service for managing jobs
         * [.helpers](#Service+helpers) : [<code>Array.&lt;Helper&gt;</code>](#Helper)
         * [.initialised](#Service+initialised) : <code>Boolean</code>
         * [.jobQueue](#Service+jobQueue) : <code>Channel</code>
+        * [.scheduler](#Service+scheduler) : [<code>Scheduler</code>](#Scheduler)
         * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
         * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
+        * [.addJobs(jobs)](#Service+addJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJob(jobID)](#Service+getJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
         * [.getJobChildren(jobID, [options])](#Service+getJobChildren) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
@@ -193,6 +341,13 @@ Execute queue for job manipulations
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
 **Read only**: true  
+<a name="Service+scheduler"></a>
+
+### service.scheduler : [<code>Scheduler</code>](#Scheduler)
+The scheduler instance for scheduling tasks
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
 <a name="Service+storage"></a>
 
 ### service.storage : [<code>Storage</code>](#Storage)
@@ -219,6 +374,18 @@ Add a new job
 | Param | Type | Description |
 | --- | --- | --- |
 | [properties] | [<code>NewJob</code>](#NewJob) | The new job's properties |
+
+<a name="Service+addJobs"></a>
+
+### service.addJobs(jobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+Add an array of new jobs (a batch)
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - An array of newly created jobs  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | An array of new job objects |
 
 <a name="Service+getJob"></a>
 
@@ -412,132 +579,83 @@ Job status
 **Kind**: static property of [<code>Service</code>](#Service)  
 <a name="FileStorage"></a>
 
-## FileStorage ⇐ [<code>MemoryStorage</code>](#MemoryStorage)
-File storage interface
-Extends memory storage with persistent disk writes so that a
-full copy of all jobs is kept on-disk.
+## FileStorage ⇐ [<code>Storage</code>](#Storage)
+File storage adapter
+Stores and streams jobs in a local file (very inefficiently)
 
 **Kind**: global class  
-**Extends**: [<code>MemoryStorage</code>](#MemoryStorage)  
+**Extends**: [<code>Storage</code>](#Storage)  
 
-* [FileStorage](#FileStorage) ⇐ [<code>MemoryStorage</code>](#MemoryStorage)
+* [FileStorage](#FileStorage) ⇐ [<code>Storage</code>](#Storage)
     * [new FileStorage(filename)](#new_FileStorage_new)
-    * _instance_
-        * [.store](#MemoryStorage+store) : <code>Object</code>
-        * [.initialise()](#FileStorage+initialise) ⇒ <code>Promise</code>
-        * [.removeItem(key)](#FileStorage+removeItem) ⇒ <code>Promise</code>
-        * [.setItem(key, value)](#FileStorage+setItem) ⇒ <code>Promise</code>
-        * [._getSerialisedState()](#FileStorage+_getSerialisedState) ⇒ <code>String</code>
-        * [._writeStateToFile()](#FileStorage+_writeStateToFile)
-        * ~~[.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-        * [.getAllKeys()](#MemoryStorage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
-        * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-        * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
-    * _static_
-        * [.this.writeStateToFile](#FileStorage.this.writeStateToFile) : <code>function</code>
+    * [.getItem(id)](#FileStorage+getItem) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
+    * [.removeItem(id)](#FileStorage+removeItem) ⇒ <code>Promise</code>
+    * [.setItem(id, item)](#FileStorage+setItem) ⇒ <code>Promise</code>
+    * [.streamItems()](#FileStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
+    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
 
 <a name="new_FileStorage_new"></a>
 
 ### new FileStorage(filename)
-Constructor for the FileStorage adapter
+Constructor for a new FileStorage instance
 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| filename | <code>String</code> | The filename to store the state in |
+| filename | <code>String</code> | The file to store/stream jobs to and from |
 
-<a name="MemoryStorage+store"></a>
+<a name="FileStorage+getItem"></a>
 
-### fileStorage.store : <code>Object</code>
-The job store
-
-**Kind**: instance property of [<code>FileStorage</code>](#FileStorage)  
-<a name="FileStorage+initialise"></a>
-
-### fileStorage.initialise() ⇒ <code>Promise</code>
-Initialise the file storage
-This method reads the contents of the file into memory
+### fileStorage.getItem(id) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
+Get an item by its ID
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>initialise</code>](#Storage+initialise)  
-**Returns**: <code>Promise</code> - A promise that resolves once the cached
- file storage is loaded  
+**Overrides**: [<code>getItem</code>](#Storage+getItem)  
+**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - A promise that resolves with the item or
+ null if not found  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The item ID |
+
 <a name="FileStorage+removeItem"></a>
 
-### fileStorage.removeItem(key) ⇒ <code>Promise</code>
-Remove an item from storage
+### fileStorage.removeItem(id) ⇒ <code>Promise</code>
+Remove an item by its ID
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>removeItem</code>](#MemoryStorage+removeItem)  
-**Returns**: <code>Promise</code> - A promise that resolves once the item
- has been removed  
+**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
+**Returns**: <code>Promise</code> - A promise that resolves when the item's been removed  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| key | <code>String</code> | The key to remove |
+| id | <code>String</code> | The item ID |
 
 <a name="FileStorage+setItem"></a>
 
-### fileStorage.setItem(key, value) ⇒ <code>Promise</code>
-Set an item in storage
+### fileStorage.setItem(id, item) ⇒ <code>Promise</code>
+Set an item using its ID
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>setItem</code>](#MemoryStorage+setItem)  
-**Returns**: <code>Promise</code> - A promise that resolves once the
- value has been stored  
+**Overrides**: [<code>setItem</code>](#Storage+setItem)  
+**Returns**: <code>Promise</code> - A promise that resolves when the operation has been
+ completed  
 
 | Param | Type | Description |
 | --- | --- | --- |
-| key | <code>String</code> | The key to set |
-| value | <code>\*</code> | The value to store |
+| id | <code>String</code> | The item ID to set |
+| item | <code>Object</code> \| <code>null</code> | The item to set (or null to remove) |
 
-<a name="FileStorage+_getSerialisedState"></a>
+<a name="FileStorage+streamItems"></a>
 
-### fileStorage._getSerialisedState() ⇒ <code>String</code>
-Get the serialised state
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>String</code> - The state in serialised form  
-**Access**: protected  
-<a name="FileStorage+_writeStateToFile"></a>
-
-### fileStorage._writeStateToFile()
-Write the state to a file
-Enqueues write operations for storing the state in
-the specified file
+### fileStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Access**: protected  
-<a name="MemoryStorage+getAllItems"></a>
-
-### ~~fileStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-***Deprecated***
-
-Get all items in the storage
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code> - A promise that resolves with all items  
-<a name="MemoryStorage+getAllKeys"></a>
-
-### fileStorage.getAllKeys() ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
-Get all storage keys
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>Promise.&lt;Array.&lt;String&gt;&gt;</code> - A promise that resolves with an array of
- all the keys in storage  
-<a name="MemoryStorage+getItem"></a>
-
-### fileStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-Get an item's value
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the value of
- the key or null if not found  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | Get the value of a key |
-
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with a readable stream  
 <a name="Storage+getKeyPrefix"></a>
 
 ### fileStorage.getKeyPrefix() ⇒ <code>String</code>
@@ -545,13 +663,23 @@ Get the base key prefix
 This prefix is prepended to all keys before writing to storage
 
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-<a name="FileStorage.this.writeStateToFile"></a>
+<a name="Storage+initialise"></a>
 
-### FileStorage.this.writeStateToFile : <code>function</code>
-Debounced method for writing to the file
+### fileStorage.initialise() ⇒ <code>Promise</code>
+Initialise the storage
+This usually entails reading the store from the storage so that it is
+immediately available
 
-**Kind**: static property of [<code>FileStorage</code>](#FileStorage)  
-**See**: _writeStateToFile  
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
+ completed  
+<a name="Storage+shutdown"></a>
+
+### fileStorage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
 <a name="MemoryStorage"></a>
 
 ## MemoryStorage ⇐ [<code>Storage</code>](#Storage)
@@ -564,13 +692,13 @@ purged - do not use this storage if you desire persistence.
 
 * [MemoryStorage](#MemoryStorage) ⇐ [<code>Storage</code>](#Storage)
     * [.store](#MemoryStorage+store) : <code>Object</code>
-    * ~~[.getAllItems()](#MemoryStorage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-    * [.getAllKeys()](#MemoryStorage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
     * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
     * [.removeItem(key)](#MemoryStorage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(key, value)](#MemoryStorage+setItem) ⇒ <code>Promise</code>
+    * [.streamItems()](#MemoryStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
     * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
 
 <a name="MemoryStorage+store"></a>
 
@@ -578,25 +706,7 @@ purged - do not use this storage if you desire persistence.
 The job store
 
 **Kind**: instance property of [<code>MemoryStorage</code>](#MemoryStorage)  
-<a name="MemoryStorage+getAllItems"></a>
-
-### ~~memoryStorage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-***Deprecated***
-
-Get all items in the storage
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>getAllItems</code>](#Storage+getAllItems)  
-**Returns**: <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code> - A promise that resolves with all items  
-<a name="MemoryStorage+getAllKeys"></a>
-
-### memoryStorage.getAllKeys() ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
-Get all storage keys
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>getAllKeys</code>](#Storage+getAllKeys)  
-**Returns**: <code>Promise.&lt;Array.&lt;String&gt;&gt;</code> - A promise that resolves with an array of
- all the keys in storage  
+**Read only**: true  
 <a name="MemoryStorage+getItem"></a>
 
 ### memoryStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
@@ -639,6 +749,14 @@ Set an item in the memory store
 | key | <code>String</code> | The key to store under |
 | value | <code>\*</code> | The value to store |
 
+<a name="MemoryStorage+streamItems"></a>
+
+### memoryStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
 <a name="Storage+getKeyPrefix"></a>
 
 ### memoryStorage.getKeyPrefix() ⇒ <code>String</code>
@@ -656,6 +774,102 @@ immediately available
 **Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
 **Returns**: <code>Promise</code> - A promise that resolves once initialisation has
  completed  
+<a name="Storage+shutdown"></a>
+
+### memoryStorage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
+<a name="RedisStorage"></a>
+
+## RedisStorage ⇐ [<code>Storage</code>](#Storage)
+Redis storage adapter
+Stores items in a Redis database
+
+**Kind**: global class  
+**Extends**: [<code>Storage</code>](#Storage)  
+
+* [RedisStorage](#RedisStorage) ⇐ [<code>Storage</code>](#Storage)
+    * [new RedisStorage([redisOptions])](#new_RedisStorage_new)
+    * [.getItem()](#RedisStorage+getItem) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
+    * [.removeItem()](#RedisStorage+removeItem) ⇒ <code>Promise</code>
+    * [.setItem(id, item)](#RedisStorage+setItem) ⇒ <code>Promise</code>
+    * [.shutdown()](#RedisStorage+shutdown)
+    * [.streamItems()](#RedisStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
+    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+
+<a name="new_RedisStorage_new"></a>
+
+### new RedisStorage([redisOptions])
+Create a new Redis storage instance
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [redisOptions] | <code>Object</code> | The options for ioredis |
+
+<a name="RedisStorage+getItem"></a>
+
+### redisStorage.getItem() ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
+Get an item by its ID
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Overrides**: [<code>getItem</code>](#Storage+getItem)  
+**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - The found item or null if not found  
+<a name="RedisStorage+removeItem"></a>
+
+### redisStorage.removeItem() ⇒ <code>Promise</code>
+Remove an item by its ID
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
+<a name="RedisStorage+setItem"></a>
+
+### redisStorage.setItem(id, item) ⇒ <code>Promise</code>
+Set an item for an ID
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Overrides**: [<code>setItem</code>](#Storage+setItem)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID to set |
+| item | <code>Object</code> | The item to set |
+
+<a name="RedisStorage+shutdown"></a>
+
+### redisStorage.shutdown()
+Shutdown the adapter (and disconnect Redis)
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
+<a name="RedisStorage+streamItems"></a>
+
+### redisStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A readable stream  
+<a name="Storage+getKeyPrefix"></a>
+
+### redisStorage.getKeyPrefix() ⇒ <code>String</code>
+Get the base key prefix
+This prefix is prepended to all keys before writing to storage
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+<a name="Storage+initialise"></a>
+
+### redisStorage.initialise() ⇒ <code>Promise</code>
+Initialise the storage
+This usually entails reading the store from the storage so that it is
+immediately available
+
+**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
+ completed  
 <a name="Storage"></a>
 
 ## Storage
@@ -667,32 +881,14 @@ interface and does not actually perform any operations.
 **Kind**: global class  
 
 * [Storage](#Storage)
-    * ~~[.getAllItems()](#Storage+getAllItems) ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-    * [.getAllKeys()](#Storage+getAllKeys) ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
     * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
     * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
     * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+    * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
 
-<a name="Storage+getAllItems"></a>
-
-### ~~storage.getAllItems() ⇒ <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code>~~
-***Deprecated***
-
-Get all items in the storage
-EXPENSIVE: Returns all items in storage
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise.&lt;Array.&lt;\*&gt;&gt;</code> - A promise that resolves with all items  
-<a name="Storage+getAllKeys"></a>
-
-### storage.getAllKeys() ⇒ <code>Promise.&lt;Array.&lt;String&gt;&gt;</code>
-Get all keys in the storage
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise.&lt;Array.&lt;String&gt;&gt;</code> - A promise that resolves with an array of
- all the keys  
 <a name="Storage+getItem"></a>
 
 ### storage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
@@ -749,6 +945,20 @@ Set an item
 | key | <code>String</code> | The key to set the value for |
 | value | <code>\*</code> | The value to set |
 
+<a name="Storage+shutdown"></a>
+
+### storage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>Storage</code>](#Storage)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
+<a name="Storage+streamItems"></a>
+
+### storage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>Storage</code>](#Storage)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
 <a name="JobPriorities"></a>
 
 ## JobPriorities : <code>enum</code>
@@ -865,7 +1075,6 @@ A job
 | parents | <code>Array.&lt;String&gt;</code> | An array of IDs of the job's parents |
 | predicate | <code>Object</code> | Predicate restraints for the job |
 | predicate.attemptsMax | <code>Number</code> | Maximum attempts that can be undertaken  on the job before it is failed |
-| predicate.runAt | <code>String</code> | CRON-based schedule by which the job can be  run |
 | predicate.timeBetweenRetries | <code>Number</code> | Milliseconds between retries  (minimum) |
 | data | <code>Object</code> | The data for the job (incoming) |
 | result | <code>Object</code> | Result information |
@@ -902,6 +1111,29 @@ Job sorting step configuration
 | --- | --- | --- |
 | property | <code>String</code> | The job property to sort by |
 | direction | <code>String</code> | The direction to sort in (desc/asc) |
+
+<a name="NewScheduledTask"></a>
+
+## NewScheduledTask : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| title | <code>String</code> | The scheduled job title |
+| schedule | <code>String</code> | The CRON formatted schedule for the job creation |
+| jobs | [<code>NewJob</code>](#NewJob) | An array of job templates |
+| enabled | <code>Boolean</code> | Whether the task is enabled or not |
+
+<a name="ScheduledTask"></a>
+
+## ScheduledTask : [<code>NewScheduledTask</code>](#NewScheduledTask)
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the scheduled job |
 
 <a name="GetJobChildrenOptions"></a>
 
@@ -974,6 +1206,7 @@ Update job options
 | Name | Type | Description |
 | --- | --- | --- |
 | [filterProps] | <code>Boolean</code> | Filter all properties that should  NOT be overwritten. This is true by default. Using 'false' here may  result in unpredictable and dangerous behaviour. Use at our own  peril. |
+| [stripResults] | <code>Boolean</code> | Remove existing results before  updating the job data. Default is false. |
 
 <a name="ResultType"></a>
 

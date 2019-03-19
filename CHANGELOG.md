@@ -1,5 +1,13 @@
 # Vulpes Changelog
 
+## v0.17.0
+_2019-03-19_
+
+ * *Redis* storage support via `RedisStorage` adapter
+ * Streaming jobs processing for improved performance on large job collections
+ * Scheduled tasks for repeating jobs using CRON timings
+ * Support for overwriting job results when using `Service#updateJob`
+
 ## v0.16.3
 _2019-03-11_
 
