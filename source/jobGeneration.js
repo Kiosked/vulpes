@@ -1,7 +1,12 @@
 const uuid = require("uuid/v4");
 const ms = require("ms");
 const { getTimestamp } = require("./time.js");
-const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
+const {
+    ITEM_TYPE,
+    ITEM_TYPE_JOB,
+    JOB_PRIORITY_NORMAL,
+    JOB_STATUS_PENDING
+} = require("./symbols.js");
 
 /**
  * New job data
@@ -18,7 +23,6 @@ const { JOB_PRIORITY_NORMAL, JOB_STATUS_PENDING } = require("./symbols.js");
  *  before this job
  */
 
-const CRON_ANY_TIME = "* * * * * *";
 const CONFIGURABLE_JOB_KEYS = [
     "type",
     "priority",
@@ -50,8 +54,6 @@ function filterJobInitObject(info) {
  * @property {Object} predicate - Predicate restraints for the job
  * @property {Number} predicate.attemptsMax - Maximum attempts that can be undertaken
  *  on the job before it is failed
- * @property {String} predicate.runAt - CRON-based schedule by which the job can be
- *  run
  * @property {Number} predicate.timeBetweenRetries - Milliseconds between retries
  *  (minimum)
  * @property {Object} data - The data for the job (incoming)
@@ -81,7 +83,7 @@ function filterJobInitObject(info) {
 function generateEmptyJob() {
     const id = uuid();
     return {
-        ["@@type"]: "vulpes/job",
+        [ITEM_TYPE]: ITEM_TYPE_JOB,
         id,
         type: "generic",
         status: JOB_STATUS_PENDING,
@@ -91,7 +93,6 @@ function generateEmptyJob() {
         predicate: {
             attemptsMax: null,
             locked: false,
-            runAt: CRON_ANY_TIME,
             timeBetweenRetries: ms("15m")
         },
         data: {},

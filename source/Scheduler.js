@@ -9,14 +9,15 @@ const { ITEM_TYPE, ITEM_TYPE_SCHEDULED_TASK } = require("./symbols.js");
 const ITEM_SCHEDULE_PREFIX = /^scheduled\//;
 
 /**
- * @typedef {Object} NewScheduledJob
+ * @typedef {Object} NewScheduledTask
  * @property {String} title - The scheduled job title
  * @property {String} schedule - The CRON formatted schedule for the job creation
- * @property {NewJob} job - The job structure to use to create job instances on schedule
+ * @property {NewJob} jobs - An array of job templates
+ * @property {Boolean} enabled - Whether the task is enabled or not
  */
 
 /**
- * @typedef {NewScheduledJob} ScheduledJob
+ * @typedef {NewScheduledTask} ScheduledTask
  * @property {String} id - The ID of the scheduled job
  */
 
@@ -32,6 +33,11 @@ class Scheduler extends EventEmitter {
         this._cronTasks = {};
     }
 
+    /**
+     * Service reference
+     * @type {Service}
+     * @memberof Scheduler
+     */
     get service() {
         return this._service;
     }
@@ -47,40 +53,56 @@ class Scheduler extends EventEmitter {
     }
 
     /**
-     * Add a scheduled job
-     * @param {NewScheduledJob} options Task structure for the newly scheduled job
+     * Add scheduled jobs task
+     * @param {NewScheduledTask} options Task structure for the newly scheduled job
      * @returns {String} The ID of the scheduled task
      */
-    async addScheduledJob({ title, schedule, job } = {}) {
+    async addScheduledJobs({ title, schedule, jobs, enabled = true } = {}) {
         const id = uuid();
         const task = {
             id,
             title,
             schedule,
-            job
+            enabled,
+            jobs
         };
-        await this.taskQueue.enqueue(async () => {
-            await this.storage.setItem(`scheduled/${id}`, task);
-            this._watchTask(task);
-        });
+        await this._writeTask(task);
+        this._watchTask(task);
         this.emit("taskAdded", {
             id,
             title,
-            schedule
+            schedule,
+            enabled
         });
         return id;
     }
 
-    async getScheduledJobs() {
-        const jobStream = await this.service.storage.streamItems();
+    /**
+     * Get a scheduled task by its ID
+     * @param {String} id The ID of the task
+     * @returns {Promise.<ScheduledTask>} A promise that resolves with the scheduled task
+     * @memberof Scheduler
+     */
+    async getScheduledTask(id) {
+        return await this.service.storage.getItem(`scheduled/${id}`);
+    }
+
+    /**
+     * Get all scheduled tasks
+     * @returns {Promise.<ScheduledTask[]>} A promise that resolves with an array of all
+     *  scheduled tasks
+     * @memberof Scheduler
+     */
+    async getScheduledTasks() {
+        const itemStream = await this.service.storage.streamItems();
         const results = [];
-        jobStream.on("data", job => {
-            if (job[ITEM_TYPE] === ITEM_TYPE_SCHEDULED_TASK) {
-                results.push(job);
+        itemStream.on("data", item => {
+            if (item[ITEM_TYPE] === ITEM_TYPE_SCHEDULED_TASK) {
+                results.push(item);
             }
         });
         await new Promise((resolve, reject) =>
-            endOfStream(jobStream, err => {
+            endOfStream(itemStream, err => {
                 if (err) {
                     return reject(err);
                 }
@@ -90,18 +112,27 @@ class Scheduler extends EventEmitter {
         return results;
     }
 
+    /**
+     * Initialise the scheduler
+     * @returns {Promise}
+     * @memberof Scheduler
+     */
     async initialise() {
         if (this.service.initialised) {
             throw new Error("Failed initialising Scheduler: Parent service already initialised");
         }
         await this.taskQueue.enqueue(async () => {
-            // const tasks = await this.service.storage.getAllItems(/^scheduled\//);
-            const tasks = await this.getScheduledJobs();
+            const tasks = await this.getScheduledTasks();
             tasks.forEach(task => this._watchTask(task));
         });
     }
 
-    async removeScheduledJob(id) {
+    /**
+     * Remove a scheduled task
+     * @returns {Promise}
+     * @memberof Scheduler
+     */
+    async removeScheduledTask(id) {
         await this.taskQueue.enqueue(async () => {
             await this.service.storage.removeItem(`scheduled/${id}`);
             const cronTask = this._cronTasks[id];
@@ -110,6 +141,10 @@ class Scheduler extends EventEmitter {
         });
     }
 
+    /**
+     * Shutdown the scheduler
+     * @memberof Scheduler
+     */
     shutdown() {
         Object.keys(this._cronTasks).forEach(key => {
             const cronTask = this._cronTasks[key];
@@ -118,11 +153,38 @@ class Scheduler extends EventEmitter {
         this._cronTasks = {};
     }
 
+    /**
+     * Enable/disable a task
+     * @param {String} taskID The ID of the task
+     * @param {Boolean=} enabled Set the enabled status of the task to
+     *  true or false. If not specified, the status of the task will
+     *  be toggled.
+     * @memberof Scheduler
+     */
+    async toggleTask(taskID, enabled) {
+        const task = await this.getScheduledTask(taskID);
+        task.enabled = typeof enabled === "boolean" ? enabled : !task.enabled;
+        await this._writeTask(task);
+    }
+
+    _cronSchedule(schedule, cb) {
+        return cron.schedule(schedule, cb);
+    }
+
+    /**
+     * Watch a task (start timer for scheduling)
+     * @param {ScheduledTask} task The task to watch
+     * @protected
+     * @memberof Scheduler
+     */
     _watchTask(task) {
-        const cronTask = cron.schedule(task.schedule, async () => {
-            const jobID = await this.service.addJob(task.job);
-            this.emit("createdJobFromTask", {
-                jobID,
+        const cronTask = this._cronSchedule(task.schedule, async () => {
+            if (task.enabled !== true) {
+                return;
+            }
+            const jobs = await this.service.addJobs(task.jobs);
+            this.emit("createdJobsFromTask", {
+                jobs,
                 id: task.id,
                 title: task.title,
                 schedule: task.schedule
@@ -131,9 +193,23 @@ class Scheduler extends EventEmitter {
         this.emit("taskScheduled", {
             id: task.id,
             title: task.title,
-            schedule: task.schedule
+            schedule: task.schedule,
+            enabled: task.enabled
         });
         this._cronTasks[task.id] = cronTask;
+    }
+
+    /**
+     * Write a task to storage
+     * @param {ScheduledTask} task The task to write (will overwrite)
+     * @returns {Promise}
+     * @memberof Scheduler
+     * @protected
+     */
+    async _writeTask(task) {
+        await this.taskQueue.enqueue(async () => {
+            await this.service.storage.setItem(`scheduled/${task.id}`, task);
+        });
     }
 }
 
