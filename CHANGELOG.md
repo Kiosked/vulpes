@@ -1,5 +1,12 @@
 # Vulpes Changelog
 
+## v0.18.0
+_2019-03-20_
+
+ * **Bugfix**:
+   * `FileStorage#streamItems` would throw if no file exists
+ * Add root `symbols.js` link for including only symbols
+
 ## v0.17.1
 _2019-03-20_
 
