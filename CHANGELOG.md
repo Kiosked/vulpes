@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.17.1
+_2019-03-20_
+
+ * **Bugfix**:
+   * `FileStorage` would throw if no file exists when writing from `setItem`
+
 ## v0.17.0
 _2019-03-19_
 
