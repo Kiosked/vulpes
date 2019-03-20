@@ -138,7 +138,7 @@ Special properties in job data can be used to change their behaviour. Special pr
 A common need of any task management system is scheduled/repeating jobs. Vulpes provides support for this via a `scheduler` helper attached to each `Service` instance. Scheduled jobs are simply timed executions of the `Service#addJobs` batch command.
 
 ```javascript
-const taskID = await service.scheduler.addScheduledJobs({
+const taskID = await service.scheduler.addScheduledTask({
     title: "My batch",
     schedule: "0 */2 * * *", // every 2 hours (CRON)
     jobs: [
