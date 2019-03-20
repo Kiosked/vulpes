@@ -28,6 +28,7 @@ class FileStorage extends Storage {
         this._filename = filename;
         this._queue = new ChannelQueue();
         this._unlinkFile = pify(fs.unlink);
+        this._writeFile = pify(fs.writeFile);
     }
 
     /**
@@ -79,6 +80,11 @@ class FileStorage extends Storage {
      */
     async setItem(id, item) {
         await this._queue.channel("stream").enqueue(async () => {
+            // Prepare jobs file
+            const originalExists = await fileExists(this._filename);
+            if (!originalExists) {
+                await this._writeFile(this._filename, "{}");
+            }
             // Prepare temp file
             const { tmpPath, cleanup } = await new Promise((resolve, reject) =>
                 tmp.file((err, tmpPath, fd, cleanup) => {
