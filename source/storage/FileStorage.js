@@ -155,6 +155,11 @@ class FileStorage extends Storage {
      * @memberof FileStorage
      */
     async streamItems() {
+        // Check if file exists
+        const originalExists = await fileExists(this._filename);
+        if (!originalExists) {
+            return super.streamItems();
+        }
         // Return a promise that resolves with the stream instance
         return await new Promise(async consumerResolve => {
             await this._queue.channel("stream").enqueue(
