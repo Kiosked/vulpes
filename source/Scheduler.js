@@ -53,9 +53,20 @@ class Scheduler extends EventEmitter {
     }
 
     /**
+     * Add scheduled jobs
+     * @deprecated Use `addScheduledTask` instead
+     * @see Scheduler#addScheduledTask
+     * @memberof Scheduler
+     */
+    addScheduledJobs(...args) {
+        return this.addScheduledTask(...args);
+    }
+
+    /**
      * Add scheduled jobs task
      * @param {NewScheduledTask} options Task structure for the newly scheduled job
      * @returns {String} The ID of the scheduled task
+     * @memberof Scheduler
      */
     async addScheduledTask({ title, schedule, jobs, enabled = true } = {}) {
         const id = uuid();
