@@ -18,6 +18,12 @@
     "test:unit": "npm run build && mocha -r test/index.js 'test/unit/**/*.spec.js'",
     "watch": "nodemon --exec 'npm run build' --watch source/"
   },
+  "files": [
+    "dist/**/*",
+    "symbols.js",
+    "API.md",
+    "vulpes-logo.jpg"
+  ],
   "lint-staged": {
     "{source,test}/**/*.js": [
       "prettier --write",
