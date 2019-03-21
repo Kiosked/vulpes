@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.19.0
+_2019-03-21_
+
+ * Support for updating scheduled tasks and their jobs
+
 ## v0.18.0
 _2019-03-20_
 
