@@ -12,7 +12,7 @@ const ITEM_SCHEDULE_PREFIX = /^scheduled\//;
  * @typedef {Object} NewScheduledTask
  * @property {String} title - The scheduled job title
  * @property {String} schedule - The CRON formatted schedule for the job creation
- * @property {NewJob} jobs - An array of job templates
+ * @property {NewJob[]} jobs - An array of job templates
  * @property {Boolean} enabled - Whether the task is enabled or not
  */
 
@@ -53,11 +53,22 @@ class Scheduler extends EventEmitter {
     }
 
     /**
+     * Add scheduled jobs
+     * @deprecated Use `addScheduledTask` instead
+     * @see Scheduler#addScheduledTask
+     * @memberof Scheduler
+     */
+    addScheduledJobs(...args) {
+        return this.addScheduledTask(...args);
+    }
+
+    /**
      * Add scheduled jobs task
      * @param {NewScheduledTask} options Task structure for the newly scheduled job
      * @returns {String} The ID of the scheduled task
+     * @memberof Scheduler
      */
-    async addScheduledJobs({ title, schedule, jobs, enabled = true } = {}) {
+    async addScheduledTask({ title, schedule, jobs, enabled = true } = {}) {
         const id = uuid();
         const task = {
             id,
@@ -138,6 +149,23 @@ class Scheduler extends EventEmitter {
             const cronTask = this._cronTasks[id];
             delete this._cronTasks[id];
             cronTask.destroy();
+        });
+    }
+
+    /**
+     * Set the jobs array for a task
+     * @param {String} taskID The ID of the task
+     * @param {NewJob[]} jobs An array of job templates
+     * @memberof Scheduler
+     * @returns {Promise}
+     */
+    async setJobsForScheduledTask(taskID, jobs) {
+        const task = await this.getScheduledTask(taskID);
+        task.jobs = jobs;
+        await this._writeTask(task);
+        this.emit("taskJobsUpdated", {
+            id: taskID,
+            jobs
         });
     }
 
