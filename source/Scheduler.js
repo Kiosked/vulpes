@@ -160,7 +160,7 @@ class Scheduler extends EventEmitter {
      * @returns {Promise}
      */
     async setJobsForScheduledTask(taskID, jobs) {
-        const task = await getScheduledTask(taskID);
+        const task = await this.getScheduledTask(taskID);
         task.jobs = jobs;
         await this._writeTask(task);
         this.emit("taskJobsUpdated", {

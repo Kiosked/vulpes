@@ -90,4 +90,39 @@ describe("Scheduler", function() {
                 expect(exeSpy.notCalled).to.be.true;
             });
     });
+
+    it("supports updating jobs within a task", function() {
+        let taskID;
+        return this.service.scheduler
+            .addScheduledJobs({
+                title: "Test",
+                schedule: CRON_WEEKLY,
+                jobs: [
+                    {
+                        id: 1,
+                        type: "test/job"
+                    },
+                    {
+                        id: 2,
+                        type: "test/job/2"
+                    }
+                ]
+            })
+            .then(id => {
+                taskID = id;
+            })
+            .then(() =>
+                this.service.scheduler.setJobsForScheduledTask(taskID, [
+                    {
+                        id: 1,
+                        type: "test/job/3"
+                    }
+                ])
+            )
+            .then(() => this.service.scheduler.getScheduledTask(taskID))
+            .then(task => {
+                expect(task.jobs).to.have.lengthOf(1);
+                expect(task.jobs[0]).to.have.property("type", "test/job/3");
+            });
+    });
 });
