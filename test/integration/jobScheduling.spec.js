@@ -138,4 +138,28 @@ describe("Scheduler", function() {
                 expect(task).to.have.property(ITEM_TYPE, ITEM_TYPE_SCHEDULED_TASK);
             });
     });
+
+    it("can return all scheduled tasks", function() {
+        return Promise.all([
+            this.service.scheduler.addScheduledJobs({
+                title: "test1",
+                schedule: CRON_WEEKLY,
+                jobs: []
+            }),
+            this.service.scheduler.addScheduledJobs({
+                title: "test2",
+                schedule: CRON_WEEKLY,
+                jobs: []
+            }),
+            this.service.scheduler.addScheduledJobs({
+                title: "test3",
+                schedule: CRON_WEEKLY,
+                jobs: []
+            })
+        ])
+            .then(() => this.service.scheduler.getScheduledTasks())
+            .then(tasks => {
+                expect(tasks).to.have.lengthOf(3);
+            });
+    });
 });
