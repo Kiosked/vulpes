@@ -27,7 +27,7 @@ describe("Scheduler", function() {
         this.service.scheduler.once("createdJobsFromTask", createdJobsSpy);
         this.service.scheduler.once("taskScheduled", taskScheduledSpy);
         return this.service.scheduler
-            .addScheduledJobs({
+            .addScheduledTask({
                 title: "Test",
                 schedule: CRON_WEEKLY,
                 jobs: [
@@ -71,7 +71,7 @@ describe("Scheduler", function() {
         const exeSpy = sinon.spy();
         this.service.scheduler.once("createdJobsFromTask", exeSpy);
         return this.service.scheduler
-            .addScheduledJobs({
+            .addScheduledTask({
                 title: "Test",
                 schedule: CRON_WEEKLY,
                 jobs: [
@@ -94,7 +94,7 @@ describe("Scheduler", function() {
     it("supports updating jobs within a task", function() {
         let taskID;
         return this.service.scheduler
-            .addScheduledJobs({
+            .addScheduledTask({
                 title: "Test",
                 schedule: CRON_WEEKLY,
                 jobs: [
@@ -128,7 +128,7 @@ describe("Scheduler", function() {
 
     it("sets the correct item type", function() {
         return this.service.scheduler
-            .addScheduledJobs({
+            .addScheduledTask({
                 title: "Test",
                 schedule: CRON_WEEKLY,
                 jobs: []
@@ -141,17 +141,17 @@ describe("Scheduler", function() {
 
     it("can return all scheduled tasks", function() {
         return Promise.all([
-            this.service.scheduler.addScheduledJobs({
+            this.service.scheduler.addScheduledTask({
                 title: "test1",
                 schedule: CRON_WEEKLY,
                 jobs: []
             }),
-            this.service.scheduler.addScheduledJobs({
+            this.service.scheduler.addScheduledTask({
                 title: "test2",
                 schedule: CRON_WEEKLY,
                 jobs: []
             }),
-            this.service.scheduler.addScheduledJobs({
+            this.service.scheduler.addScheduledTask({
                 title: "test3",
                 schedule: CRON_WEEKLY,
                 jobs: []
