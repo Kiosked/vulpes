@@ -1,6 +1,6 @@
 const sleep = require("sleep-promise");
 const Service = require("../../dist/Service.js");
-const { UUID_REXP } = require("../../dist/symbols.js");
+const { ITEM_TYPE, ITEM_TYPE_SCHEDULED_TASK, UUID_REXP } = require("../../dist/symbols.js");
 
 const CRON_WEEKLY = "0 0 * * 0"; // Sunday
 
@@ -123,6 +123,19 @@ describe("Scheduler", function() {
             .then(task => {
                 expect(task.jobs).to.have.lengthOf(1);
                 expect(task.jobs[0]).to.have.property("type", "test/job/3");
+            });
+    });
+
+    it("sets the correct item type", function() {
+        return this.service.scheduler
+            .addScheduledJobs({
+                title: "Test",
+                schedule: CRON_WEEKLY,
+                jobs: []
+            })
+            .then(id => this.service.scheduler.getScheduledTask(id))
+            .then(task => {
+                expect(task).to.have.property(ITEM_TYPE, ITEM_TYPE_SCHEDULED_TASK);
             });
     });
 });

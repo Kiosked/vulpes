@@ -71,6 +71,7 @@ class Scheduler extends EventEmitter {
     async addScheduledTask({ title, schedule, jobs, enabled = true } = {}) {
         const id = uuid();
         const task = {
+            [ITEM_TYPE]: ITEM_TYPE_SCHEDULED_TASK,
             id,
             title,
             schedule,
@@ -79,12 +80,7 @@ class Scheduler extends EventEmitter {
         };
         await this._writeTask(task);
         this._watchTask(task);
-        this.emit("taskAdded", {
-            id,
-            title,
-            schedule,
-            enabled
-        });
+        this.emit("taskAdded", task);
         return id;
     }
 
