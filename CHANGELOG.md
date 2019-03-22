@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.19.1
+_2019-03-22_
+
+ * **Bugfix**:
+   * `Scheduler#getScheduledTasks` method wouldn't return anything
+
 ## v0.19.0
 _2019-03-21_
 
