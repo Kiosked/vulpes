@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.19.2
+_2019-03-28_
+
+ * **Bugfix**:
+   * Empty object array streams would throw an exception
+
 ## v0.19.1
 _2019-03-22_
 
