@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.20.1
+_2019-03-28_
+
+ * Remove scheduled task ID prefixes
+
 ## v0.20.0
 _2019-03-28_
 
