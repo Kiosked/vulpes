@@ -32,8 +32,7 @@ class RedisStorage extends Storage {
      * @memberof RedisStorage
      */
     async getItem(id) {
-        const key = `${this.getKeyPrefix()}${id}`;
-        const json = await this.redis.get(key);
+        const json = await this.redis.get(id);
         return json ? JSON.parse(json) : null;
     }
 
@@ -43,8 +42,7 @@ class RedisStorage extends Storage {
      * @memberof RedisStorage
      */
     async removeItem(id) {
-        const key = `${this.getKeyPrefix()}${id}`;
-        await this.redis.del(key);
+        await this.redis.del(id);
     }
 
     /**
@@ -55,8 +53,7 @@ class RedisStorage extends Storage {
      * @memberof RedisStorage
      */
     async setItem(id, item) {
-        const key = `${this.getKeyPrefix()}${id}`;
-        await this.redis.set(key, JSON.stringify(item));
+        await this.redis.set(id, JSON.stringify(item));
     }
 
     /**
@@ -80,7 +77,7 @@ class RedisStorage extends Storage {
         outStream._read = NOOP;
         // Create a stream for the reading from Redis
         const inStream = this.redis.scanStream({
-            match: `${this.getKeyPrefix()}*`,
+            match: `*`,
             count: STREAM_READ_COUNT
         });
         const usedKeys = [];

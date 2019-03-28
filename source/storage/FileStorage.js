@@ -99,7 +99,7 @@ class FileStorage extends Storage {
                 .createReadStream(this._filename)
                 .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
             const ws = JSONStream.stringifyObject();
-            const key = `${this.getKeyPrefix()}${id}`;
+            const key = id;
             // Track whether or not the item exists in the stream:
             //  - If it doesn't, it should be added at the end of the stream
             //  - If it does, it should be replaced mid-stream

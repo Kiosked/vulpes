@@ -104,7 +104,6 @@ class Scheduler extends EventEmitter {
         const itemStream = await this.service.storage.streamItems();
         const results = [];
         itemStream.on("data", item => {
-            console.log("DATA", item);
             if (item[ITEM_TYPE] === ITEM_TYPE_SCHEDULED_TASK) {
                 results.push(item);
             }

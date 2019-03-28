@@ -32,8 +32,7 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     getItem(key) {
-        const trueKey = `${this.getKeyPrefix()}${key}`;
-        const value = this.store[trueKey] || null;
+        const value = this.store[key] || null;
         return Promise.resolve(value);
     }
 
@@ -44,9 +43,8 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     removeItem(key) {
-        const trueKey = `${this.getKeyPrefix()}${key}`;
-        this.store[trueKey] = null;
-        delete this.store[trueKey];
+        this.store[key] = null;
+        delete this.store[key];
         return Promise.resolve();
     }
 
@@ -59,8 +57,7 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     setItem(key, value) {
-        const trueKey = `${this.getKeyPrefix()}${key}`;
-        this.store[trueKey] = value;
+        this.store[key] = value;
         return Promise.resolve();
     }
 
