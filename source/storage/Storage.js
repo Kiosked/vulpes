@@ -19,16 +19,6 @@ class Storage {
     }
 
     /**
-     * Get the base key prefix
-     * This prefix is prepended to all keys before writing to storage
-     * @returns {String}
-     * @memberof Storage
-     */
-    getKeyPrefix() {
-        return "job/";
-    }
-
-    /**
      * Initialise the storage
      * This usually entails reading the store from the storage so that it is
      * immediately available
