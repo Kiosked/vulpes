@@ -43,7 +43,7 @@ class FileStorage extends Storage {
         return new Promise((resolve, reject) => {
             let found = false;
             stream.on("data", item => {
-                if (item.key === id) {
+                if (item.id === id) {
                     found = true;
                     stream.destroy();
                     resolve(item);

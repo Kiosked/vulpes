@@ -91,12 +91,6 @@ class Scheduler extends EventEmitter {
      * @memberof Scheduler
      */
     async getScheduledTask(id) {
-        console.log(
-            "DATA",
-            id,
-            await this.service.storage.getItem(`scheduled/${id}`),
-            await this.getScheduledTasks()
-        );
         return await this.service.storage.getItem(`scheduled/${id}`);
     }
 
