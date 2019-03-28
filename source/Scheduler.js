@@ -91,7 +91,7 @@ class Scheduler extends EventEmitter {
      * @memberof Scheduler
      */
     async getScheduledTask(id) {
-        return await this.service.storage.getItem(`scheduled/${id}`);
+        return await this.service.storage.getItem(id);
     }
 
     /**
@@ -141,7 +141,7 @@ class Scheduler extends EventEmitter {
      */
     async removeScheduledTask(id) {
         await this.taskQueue.enqueue(async () => {
-            await this.service.storage.removeItem(`scheduled/${id}`);
+            await this.service.storage.removeItem(id);
             const cronTask = this._cronTasks[id];
             delete this._cronTasks[id];
             cronTask.destroy();
@@ -240,7 +240,7 @@ class Scheduler extends EventEmitter {
      */
     async _writeTask(task) {
         await this.taskQueue.enqueue(async () => {
-            await this.service.storage.setItem(`scheduled/${task.id}`, task);
+            await this.service.storage.setItem(task.id, task);
         });
     }
 }
