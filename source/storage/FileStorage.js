@@ -7,7 +7,7 @@ const endOfStream = require("end-of-stream");
 const pump = require("pump");
 const JSONStream = require("JSONStream");
 const fileExists = require("file-exists");
-const objectStream = require("object-stream");
+const objectStream = require("@kiosked/object-stream");
 const Storage = require("./Storage.js");
 
 const JSON_PARSE_ARGS = ["*"];

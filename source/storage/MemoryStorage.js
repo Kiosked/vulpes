@@ -1,4 +1,4 @@
-const objectStream = require("object-stream");
+const objectStream = require("@kiosked/object-stream");
 const filterStream = require("stream-filter");
 const Storage = require("./Storage.js");
 
