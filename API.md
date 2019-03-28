@@ -151,11 +151,13 @@ Scheduler for scheduled tasks
 * [Scheduler](#Scheduler) ⇐ <code>EventEmitter</code>
     * [.service](#Scheduler+service) : [<code>Service</code>](#Service)
     * [.taskQueue](#Scheduler+taskQueue) : <code>Channel</code>
-    * [.addScheduledJobs(options)](#Scheduler+addScheduledJobs) ⇒ <code>String</code>
+    * ~~[.addScheduledJobs()](#Scheduler+addScheduledJobs)~~
+    * [.addScheduledTask(options)](#Scheduler+addScheduledTask) ⇒ <code>String</code>
     * [.getScheduledTask(id)](#Scheduler+getScheduledTask) ⇒ [<code>Promise.&lt;ScheduledTask&gt;</code>](#ScheduledTask)
     * [.getScheduledTasks()](#Scheduler+getScheduledTasks) ⇒ <code>Promise.&lt;Array.&lt;ScheduledTask&gt;&gt;</code>
     * [.initialise()](#Scheduler+initialise) ⇒ <code>Promise</code>
     * [.removeScheduledTask()](#Scheduler+removeScheduledTask) ⇒ <code>Promise</code>
+    * [.setJobsForScheduledTask(taskID, jobs)](#Scheduler+setJobsForScheduledTask) ⇒ <code>Promise</code>
     * [.shutdown()](#Scheduler+shutdown)
     * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask)
     * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
@@ -177,7 +179,16 @@ Task queue for job schedule checks
 **Read only**: true  
 <a name="Scheduler+addScheduledJobs"></a>
 
-### scheduler.addScheduledJobs(options) ⇒ <code>String</code>
+### ~~scheduler.addScheduledJobs()~~
+***Deprecated***
+
+Add scheduled jobs
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**See**: Scheduler#addScheduledTask  
+<a name="Scheduler+addScheduledTask"></a>
+
+### scheduler.addScheduledTask(options) ⇒ <code>String</code>
 Add scheduled jobs task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -219,6 +230,18 @@ Initialise the scheduler
 Remove a scheduled task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+<a name="Scheduler+setJobsForScheduledTask"></a>
+
+### scheduler.setJobsForScheduledTask(taskID, jobs) ⇒ <code>Promise</code>
+Set the jobs array for a task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| taskID | <code>String</code> | The ID of the task |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | An array of job templates |
+
 <a name="Scheduler+shutdown"></a>
 
 ### scheduler.shutdown()
@@ -592,7 +615,6 @@ Stores and streams jobs in a local file (very inefficiently)
     * [.removeItem(id)](#FileStorage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(id, item)](#FileStorage+setItem) ⇒ <code>Promise</code>
     * [.streamItems()](#FileStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
     * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
 
@@ -656,13 +678,6 @@ Stream all items
 **Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
 **Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
 **Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with a readable stream  
-<a name="Storage+getKeyPrefix"></a>
-
-### fileStorage.getKeyPrefix() ⇒ <code>String</code>
-Get the base key prefix
-This prefix is prepended to all keys before writing to storage
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
 <a name="Storage+initialise"></a>
 
 ### fileStorage.initialise() ⇒ <code>Promise</code>
@@ -696,7 +711,6 @@ purged - do not use this storage if you desire persistence.
     * [.removeItem(key)](#MemoryStorage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(key, value)](#MemoryStorage+setItem) ⇒ <code>Promise</code>
     * [.streamItems()](#MemoryStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
     * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
 
@@ -757,13 +771,6 @@ Stream all items
 **Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
 **Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
 **Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
-<a name="Storage+getKeyPrefix"></a>
-
-### memoryStorage.getKeyPrefix() ⇒ <code>String</code>
-Get the base key prefix
-This prefix is prepended to all keys before writing to storage
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
 <a name="Storage+initialise"></a>
 
 ### memoryStorage.initialise() ⇒ <code>Promise</code>
@@ -797,7 +804,6 @@ Stores items in a Redis database
     * [.setItem(id, item)](#RedisStorage+setItem) ⇒ <code>Promise</code>
     * [.shutdown()](#RedisStorage+shutdown)
     * [.streamItems()](#RedisStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
 
 <a name="new_RedisStorage_new"></a>
@@ -853,13 +859,6 @@ Stream all items
 **Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
 **Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
 **Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A readable stream  
-<a name="Storage+getKeyPrefix"></a>
-
-### redisStorage.getKeyPrefix() ⇒ <code>String</code>
-Get the base key prefix
-This prefix is prepended to all keys before writing to storage
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
 <a name="Storage+initialise"></a>
 
 ### redisStorage.initialise() ⇒ <code>Promise</code>
@@ -882,7 +881,6 @@ interface and does not actually perform any operations.
 
 * [Storage](#Storage)
     * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-    * [.getKeyPrefix()](#Storage+getKeyPrefix) ⇒ <code>String</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
     * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
@@ -902,13 +900,6 @@ Get an item by its key
 | --- | --- | --- |
 | key | <code>String</code> | The key to fetch |
 
-<a name="Storage+getKeyPrefix"></a>
-
-### storage.getKeyPrefix() ⇒ <code>String</code>
-Get the base key prefix
-This prefix is prepended to all keys before writing to storage
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
 <a name="Storage+initialise"></a>
 
 ### storage.initialise() ⇒ <code>Promise</code>
@@ -1122,7 +1113,7 @@ Job sorting step configuration
 | --- | --- | --- |
 | title | <code>String</code> | The scheduled job title |
 | schedule | <code>String</code> | The CRON formatted schedule for the job creation |
-| jobs | [<code>NewJob</code>](#NewJob) | An array of job templates |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | An array of job templates |
 | enabled | <code>Boolean</code> | Whether the task is enabled or not |
 
 <a name="ScheduledTask"></a>

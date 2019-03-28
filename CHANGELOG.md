@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.20.0
+_2019-03-28_
+
+ * **Breaking change**: Removed storage key prefixes
+
 ## v0.19.2
 _2019-03-28_
 
