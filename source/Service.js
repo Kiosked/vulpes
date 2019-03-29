@@ -443,8 +443,11 @@ class Service extends EventEmitter {
                 `Job already succeeded: ${job.id}`
             );
         }
-        if (job.attempts >= job.predicate.attemptsMax) {
-            job.predicate.attemptsMax += 1;
+        if (
+            typeof job.predicate.attemptsMax === "number" &&
+            job.attempts >= job.predicate.attemptsMax
+        ) {
+            job.predicate.attemptsMax = job.attempts + 1;
         }
         job.status = JOB_STATUS_PENDING;
         if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
