@@ -201,5 +201,43 @@ describe("Service", function() {
                     expect(job.result.type).to.equal(Service.JobResult.SoftFailure);
                 });
         });
+
+        it("does not increment attemptsMax if it is set to null", function() {
+            return this.service
+                .updateJob(
+                    this.jobID1,
+                    {
+                        attempts: 2,
+                        predicate: {
+                            attemptsMax: null
+                        }
+                    },
+                    { filterProps: false }
+                )
+                .then(() => this.service.resetJob(this.jobID1))
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.predicate.attemptsMax).to.be.null;
+                });
+        });
+
+        it("does increments attemptsMax to 1 more than the attempts count", function() {
+            return this.service
+                .updateJob(
+                    this.jobID1,
+                    {
+                        attempts: 5,
+                        predicate: {
+                            attemptsMax: 1
+                        }
+                    },
+                    { filterProps: false }
+                )
+                .then(() => this.service.resetJob(this.jobID1))
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.predicate.attemptsMax).to.equal(6);
+                });
+        });
     });
 });
