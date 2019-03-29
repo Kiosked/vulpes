@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.20.2
+_2019-03-29_
+
+ * **Bugfix**:
+   * ([#28](https://github.com/Kiosked/vulpes/issues/28)) `Service#resetJob` doesn't place job in state that can be retried (failed to adjust `attemptsMax` predicate)
+
 ## v0.20.1
 _2019-03-28_
 
