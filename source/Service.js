@@ -351,6 +351,27 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Initialise the Service instance
+     * Must be called before any other operation
+     * @returns {Promise} A promise that resolves once initialisation
+     *  has been completed
+     * @memberof Service
+     */
+    async initialise() {
+        if (this._initialised) {
+            return Promise.reject(
+                new VError(
+                    { info: { code: ERROR_CODE_ALREADY_INIT } },
+                    "Service already initialised"
+                )
+            );
+        }
+        await this.storage.initialise();
+        await this.scheduler.initialise();
+        this._initialised = true;
+    }
+
+    /**
      * @typedef {Object} QueryJobsOptions
      * @property {Number=} limit - Limit the number of jobs that are returned by the
      *  query. Defaults to Infinity.
@@ -397,27 +418,6 @@ class Service extends EventEmitter {
             }
         ]);
         return limit !== Infinity ? jobs.slice(0, limit) : jobs;
-    }
-
-    /**
-     * Initialise the Service instance
-     * Must be called before any other operation
-     * @returns {Promise} A promise that resolves once initialisation
-     *  has been completed
-     * @memberof Service
-     */
-    async initialise() {
-        if (this._initialised) {
-            return Promise.reject(
-                new VError(
-                    { info: { code: ERROR_CODE_ALREADY_INIT } },
-                    "Service already initialised"
-                )
-            );
-        }
-        await this.storage.initialise();
-        await this.scheduler.initialise();
-        this._initialised = true;
     }
 
     /**
