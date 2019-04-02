@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.21.0
+_2019-04-02_
+
+ * Scheduling support for updating task details
+ * Scheduled task returned from methods where it wasn't earlier
+
 ## v0.20.2
 _2019-03-29_
 
