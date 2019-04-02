@@ -68,6 +68,8 @@ interface and does not actually perform any operations.</p>
 <dd></dd>
 <dt><a href="#ScheduledTask">ScheduledTask</a> : <code><a href="#NewScheduledTask">NewScheduledTask</a></code></dt>
 <dd></dd>
+<dt><a href="#UpdateTaskPropertiesOptions">UpdateTaskPropertiesOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#GetJobChildrenOptions">GetJobChildrenOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching job children</p>
 </dd>
@@ -159,10 +161,17 @@ Scheduler for scheduled tasks
     * [.removeScheduledTask()](#Scheduler+removeScheduledTask) ⇒ <code>Promise</code>
     * [.setJobsForScheduledTask(taskID, jobs)](#Scheduler+setJobsForScheduledTask) ⇒ <code>Promise</code>
     * [.shutdown()](#Scheduler+shutdown)
-    * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask)
+    * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
+    * [.updateTaskProperties(taskID, ops)](#Scheduler+updateTaskProperties) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
     * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
     * [._watchTask(task)](#Scheduler+_watchTask)
     * [._writeTask(task)](#Scheduler+_writeTask) ⇒ <code>Promise</code>
+    * ["taskAdded"](#Scheduler+event_taskAdded)
+    * ["taskJobsUpdated"](#Scheduler+event_taskJobsUpdated)
+    * ["taskStatusToggled"](#Scheduler+event_taskStatusToggled)
+    * ["taskPropertiesUpdated"](#Scheduler+event_taskPropertiesUpdated)
+    * ["createdJobsFromTask"](#Scheduler+event_createdJobsFromTask)
+    * ["taskScheduled"](#Scheduler+event_taskScheduled)
 
 <a name="Scheduler+service"></a>
 
@@ -193,6 +202,11 @@ Add scheduled jobs task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
 **Returns**: <code>String</code> - The ID of the scheduled task  
+**Throws**:
+
+- <code>Error</code> Throws if the schedule is not a valid CRON format
+
+**Emits**: [<code>taskAdded</code>](#Scheduler+event_taskAdded)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -236,6 +250,7 @@ Remove a scheduled task
 Set the jobs array for a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Emits**: [<code>taskJobsUpdated</code>](#Scheduler+event_taskJobsUpdated)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -250,15 +265,31 @@ Shutdown the scheduler
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
 <a name="Scheduler+toggleTask"></a>
 
-### scheduler.toggleTask(taskID, [enabled])
+### scheduler.toggleTask(taskID, [enabled]) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
 Enable/disable a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: [<code>ScheduledTask</code>](#ScheduledTask) - Returns the toggled task  
+**Emits**: [<code>taskStatusToggled</code>](#Scheduler+event_taskStatusToggled)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | taskID | <code>String</code> | The ID of the task |
 | [enabled] | <code>Boolean</code> | Set the enabled status of the task to  true or false. If not specified, the status of the task will  be toggled. |
+
+<a name="Scheduler+updateTaskProperties"></a>
+
+### scheduler.updateTaskProperties(taskID, ops) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
+Update properties of a task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: [<code>ScheduledTask</code>](#ScheduledTask) - Returns the toggled task  
+**Emits**: [<code>taskPropertiesUpdated</code>](#Scheduler+event_taskPropertiesUpdated)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| taskID | <code>String</code> | The ID of the task to update |
+| ops | [<code>UpdateTaskPropertiesOptions</code>](#UpdateTaskPropertiesOptions) | Properties to update on the task |
 
 <a name="Scheduler+_cronSchedule"></a>
 
@@ -281,6 +312,7 @@ Schedule a CRON execution
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Emits**: [<code>createdJobsFromTask</code>](#Scheduler+event_createdJobsFromTask), [<code>taskScheduled</code>](#Scheduler+event_taskScheduled)  
 **Access**: protected  
 
 | Param | Type | Description |
@@ -298,6 +330,94 @@ Write a task to storage
 | Param | Type | Description |
 | --- | --- | --- |
 | task | [<code>ScheduledTask</code>](#ScheduledTask) | The task to write (will overwrite) |
+
+<a name="Scheduler+event_taskAdded"></a>
+
+### "taskAdded"
+Event for when a new task is added
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| title | <code>String</code> | The title of the task |
+| schedule | <code>String</code> | The CRON schedule for the task |
+| enabled | <code>Boolean</code> | Whether the task is enabled or not |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | Array of job templates for scheduled creation |
+
+<a name="Scheduler+event_taskJobsUpdated"></a>
+
+### "taskJobsUpdated"
+Event for when a task's jobs are updated
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | Array of job templates for scheduled creation |
+
+<a name="Scheduler+event_taskStatusToggled"></a>
+
+### "taskStatusToggled"
+Event for when a task has its status toggled (enabled/disabled)
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| enabled | <code>Boolean</code> | Whether the task is enabled or disabled |
+
+<a name="Scheduler+event_taskPropertiesUpdated"></a>
+
+### "taskPropertiesUpdated"
+Event for when a task's properties (title/schedule) are updated
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| title | <code>String</code> | The title of the task |
+| schedule | <code>String</code> | The CRON schedule for the task |
+
+<a name="Scheduler+event_createdJobsFromTask"></a>
+
+### "createdJobsFromTask"
+Event for when jobs are created as a result of a scheduled task
+having been fired using its CRON schedule
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| title | <code>String</code> | The title of the task |
+| schedule | <code>String</code> | The CRON schedule for the task |
+| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | Array of job templates for scheduled creation |
+
+<a name="Scheduler+event_taskScheduled"></a>
+
+### "taskScheduled"
+Event for when a task has been scheduled (fired both when created and
+ when being read from storage upon a fresh start-up)
+
+**Kind**: event emitted by [<code>Scheduler</code>](#Scheduler)  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The ID of the task |
+| title | <code>String</code> | The title of the task |
+| schedule | <code>String</code> | The CRON schedule for the task |
+| enabled | <code>Boolean</code> | Whether the task is enabled or not |
 
 <a name="Service"></a>
 
@@ -323,8 +443,8 @@ Service for managing jobs
         * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJobTree(jobID, [options])](#Service+getJobTree) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-        * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
+        * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
         * [.shutdown()](#Service+shutdown)
         * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
@@ -478,6 +598,15 @@ before returning the very next job that should be started.
 **Kind**: instance method of [<code>Service</code>](#Service)  
 **Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - A promise that resolves with the job
  or null if none available  
+<a name="Service+initialise"></a>
+
+### service.initialise() ⇒ <code>Promise</code>
+Initialise the Service instance
+Must be called before any other operation
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation
+ has been completed  
 <a name="Service+queryJobs"></a>
 
 ### service.queryJobs([query], [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
@@ -496,15 +625,6 @@ library's `find` method.
 | [query] | <code>Object</code> | The object query to perform |
 | [options] | [<code>QueryJobsOptions</code>](#QueryJobsOptions) | Options for querying jobs, like sorting |
 
-<a name="Service+initialise"></a>
-
-### service.initialise() ⇒ <code>Promise</code>
-Initialise the Service instance
-Must be called before any other operation
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation
- has been completed  
 <a name="Service+resetJob"></a>
 
 ### service.resetJob(jobID) ⇒ <code>Promise</code>
@@ -1125,6 +1245,17 @@ Job sorting step configuration
 | Name | Type | Description |
 | --- | --- | --- |
 | id | <code>String</code> | The ID of the scheduled job |
+
+<a name="UpdateTaskPropertiesOptions"></a>
+
+## UpdateTaskPropertiesOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [title] | <code>String</code> | The title of the task |
+| [schedule] | <code>String</code> | The schedule of the task (CRON) |
 
 <a name="GetJobChildrenOptions"></a>
 
