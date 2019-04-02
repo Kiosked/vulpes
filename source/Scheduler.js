@@ -67,8 +67,13 @@ class Scheduler extends EventEmitter {
      * @param {NewScheduledTask} options Task structure for the newly scheduled job
      * @returns {String} The ID of the scheduled task
      * @memberof Scheduler
+     * @throws {Error} Throws if the schedule is not a valid CRON format
+     * @fires Scheduler#taskAdded
      */
     async addScheduledTask({ title, schedule, jobs, enabled = true } = {}) {
+        if (!cron.validate(schedule)) {
+            throw new Error(`Invalid CRON schedule: ${schedule}`);
+        }
         const id = uuid();
         const task = {
             [ITEM_TYPE]: ITEM_TYPE_SCHEDULED_TASK,
@@ -80,6 +85,16 @@ class Scheduler extends EventEmitter {
         };
         await this._writeTask(task);
         this._watchTask(task);
+        /**
+         * Event for when a new task is added
+         * @event Scheduler#taskAdded
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {String} title - The title of the task
+         * @property {String} schedule - The CRON schedule for the task
+         * @property {Boolean} enabled - Whether the task is enabled or not
+         * @property {NewJob[]} jobs - Array of job templates for scheduled creation
+         */
         this.emit("taskAdded", task);
         return id;
     }
@@ -154,15 +169,24 @@ class Scheduler extends EventEmitter {
      * @param {NewJob[]} jobs An array of job templates
      * @memberof Scheduler
      * @returns {Promise}
+     * @fires Scheduler#taskJobsUpdated
      */
     async setJobsForScheduledTask(taskID, jobs) {
         const task = await this.getScheduledTask(taskID);
         task.jobs = jobs;
         await this._writeTask(task);
+        /**
+         * Event for when a task's jobs are updated
+         * @event Scheduler#taskJobsUpdated
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {NewJob[]} jobs - Array of job templates for scheduled creation
+         */
         this.emit("taskJobsUpdated", {
             id: taskID,
             jobs
         });
+        return task;
     }
 
     /**
@@ -184,11 +208,67 @@ class Scheduler extends EventEmitter {
      *  true or false. If not specified, the status of the task will
      *  be toggled.
      * @memberof Scheduler
+     * @returns {ScheduledTask} Returns the toggled task
+     * @fires Scheduler#taskStatusToggled
      */
     async toggleTask(taskID, enabled) {
         const task = await this.getScheduledTask(taskID);
         task.enabled = typeof enabled === "boolean" ? enabled : !task.enabled;
         await this._writeTask(task);
+        /**
+         * Event for when a task has its status toggled (enabled/disabled)
+         * @event Scheduler#taskStatusToggled
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {Boolean} enabled - Whether the task is enabled or disabled
+         */
+        this.emit("taskStatusToggled", {
+            id: taskID,
+            enabled: task.enabled
+        });
+        return task;
+    }
+
+    /**
+     * @typedef {Object} UpdateTaskPropertiesOptions
+     * @property {String=} title - The title of the task
+     * @property {String=} schedule - The schedule of the task (CRON)
+     */
+
+    /**
+     * Update properties of a task
+     * @param {String} taskID The ID of the task to update
+     * @param {UpdateTaskPropertiesOptions} ops Properties to update on the task
+     * @returns {ScheduledTask} Returns the toggled task
+     * @memberof Scheduler
+     * @fires Scheduler#taskPropertiesUpdated
+     */
+    async updateTaskProperties(taskID, { title, schedule } = {}) {
+        const task = await this.getScheduledTask(taskID);
+        if (title) {
+            task.title = title;
+        }
+        if (schedule) {
+            if (!cron.validate(schedule)) {
+                throw new Error(`Invalid CRON schedule: ${schedule}`);
+            }
+            task.schedule = schedule;
+        }
+        await this._writeTask(task);
+        /**
+         * Event for when a task's properties (title/schedule) are updated
+         * @event Scheduler#taskPropertiesUpdated
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {String} title - The title of the task
+         * @property {String} schedule - The CRON schedule for the task
+         */
+        this.emit("taskPropertiesUpdated", {
+            id: taskID,
+            title: task.title,
+            schedule: task.schedule
+        });
+        return task;
     }
 
     /**
@@ -208,6 +288,8 @@ class Scheduler extends EventEmitter {
      * @param {ScheduledTask} task The task to watch
      * @protected
      * @memberof Scheduler
+     * @fires Scheduler#createdJobsFromTask
+     * @fires Scheduler#taskScheduled
      */
     _watchTask(task) {
         const cronTask = this._cronSchedule(task.schedule, async () => {
@@ -215,6 +297,16 @@ class Scheduler extends EventEmitter {
                 return;
             }
             const jobs = await this.service.addJobs(task.jobs);
+            /**
+             * Event for when jobs are created as a result of a scheduled task
+             * having been fired using its CRON schedule
+             * @event Scheduler#createdJobsFromTask
+             * @type {Object}
+             * @property {String} id - The ID of the task
+             * @property {String} title - The title of the task
+             * @property {String} schedule - The CRON schedule for the task
+             * @property {NewJob[]} jobs - Array of job templates for scheduled creation
+             */
             this.emit("createdJobsFromTask", {
                 jobs,
                 id: task.id,
@@ -222,6 +314,16 @@ class Scheduler extends EventEmitter {
                 schedule: task.schedule
             });
         });
+        /**
+         * Event for when a task has been scheduled (fired both when created and
+         *  when being read from storage upon a fresh start-up)
+         * @event Scheduler#taskScheduled
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {String} title - The title of the task
+         * @property {String} schedule - The CRON schedule for the task
+         * @property {Boolean} enabled - Whether the task is enabled or not
+         */
         this.emit("taskScheduled", {
             id: task.id,
             title: task.title,
