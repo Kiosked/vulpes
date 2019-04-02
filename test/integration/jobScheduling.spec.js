@@ -187,4 +187,38 @@ describe("Scheduler", function() {
                 expect(job).to.have.property("type", "test-job");
             });
     });
+
+    it("executes tasks using CRON when initially disabled", function() {
+        let taskID;
+        const fn = sinon.spy();
+        this.service.scheduler.on("createdJobsFromTask", fn);
+        return this.service.scheduler
+            .addScheduledTask({
+                title: "Test",
+                schedule: CRON_SECONDS,
+                jobs: [
+                    {
+                        id: 1,
+                        type: "test-job"
+                    }
+                ],
+                enabled: false
+            })
+            .then(id => {
+                taskID = id;
+            })
+            .then(() => sleep(2250))
+            .then(() => {
+                expect(fn.notCalled).to.be.true;
+                return this.service.scheduler.toggleTask(taskID, true);
+            })
+            .then(() => sleep(2250))
+            .then(() => {
+                expect(fn.callCount).to.be.above(0);
+                expect(fn.callCount).to.be.below(3);
+                const task = fn.firstCall.args[0];
+                const [job] = task.jobs;
+                expect(job).to.have.property("type", "test-job");
+            });
+    });
 });
