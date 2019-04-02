@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.21.1
+_2019-04-02_
+
+ * **Bugfix**:
+   * Schedule tasks would not read their `enabled` status if changed while `Service` and `Scheduler` are still running
+
 ## v0.21.0
 _2019-04-02_
 
