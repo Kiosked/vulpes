@@ -164,6 +164,26 @@ describe("Scheduler", function() {
             });
     });
 
+    it("can update task properties", function() {
+        return this.service.scheduler
+            .addScheduledTask({
+                title: "test1",
+                schedule: CRON_WEEKLY,
+                jobs: []
+            })
+            .then(id =>
+                this.service.scheduler.updateTaskProperties(id, {
+                    title: "test2",
+                    schedule: CRON_SECONDS
+                })
+            )
+            .then(task => this.service.scheduler.getScheduledTask(task.id))
+            .then(task => {
+                expect(task).to.have.property("title", "test2");
+                expect(task).to.have.property("schedule", CRON_SECONDS);
+            });
+    });
+
     it("executes tasks using CRON", function() {
         const fn = sinon.spy();
         this.service.scheduler.on("createdJobsFromTask", fn);
