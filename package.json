@@ -11,10 +11,10 @@
     "precommit": "lint-staged",
     "prepare": "run-s build",
     "test": "run-s build test:all test:coverage test:format",
-    "test:all": "nyc mocha -r test/index.js 'test/**/*.spec.js'",
+    "test:all": "nyc mocha --timeout 10000 -r test/index.js 'test/**/*.spec.js'",
     "test:coverage": "nyc check-coverage --lines 50 --functions 50 --branches 50 --statements 50",
     "test:format": "prettier-check '{source,test}/**/*.js'",
-    "test:integration": "npm run build && mocha -r test/index.js 'test/integration/**/*.spec.js'",
+    "test:integration": "npm run build && mocha --timeout 10000 -r test/index.js 'test/integration/**/*.spec.js'",
     "test:unit": "npm run build && mocha -r test/index.js 'test/unit/**/*.spec.js'",
     "watch": "nodemon --exec 'npm run build' --watch source/"
   },

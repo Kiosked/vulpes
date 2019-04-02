@@ -2,6 +2,7 @@ const sleep = require("sleep-promise");
 const Service = require("../../dist/Service.js");
 const { ITEM_TYPE, ITEM_TYPE_SCHEDULED_TASK, UUID_REXP } = require("../../dist/symbols.js");
 
+const CRON_SECONDS = "*/2 * * * * *"; // Every 2 seconds
 const CRON_WEEKLY = "0 0 * * 0"; // Sunday
 
 function createFakeCronTask() {
@@ -160,6 +161,30 @@ describe("Scheduler", function() {
             .then(() => this.service.scheduler.getScheduledTasks())
             .then(tasks => {
                 expect(tasks).to.have.lengthOf(3);
+            });
+    });
+
+    it("executes tasks using CRON", function() {
+        const fn = sinon.spy();
+        this.service.scheduler.on("createdJobsFromTask", fn);
+        return this.service.scheduler
+            .addScheduledTask({
+                title: "Test",
+                schedule: CRON_SECONDS,
+                jobs: [
+                    {
+                        id: 1,
+                        type: "test-job"
+                    }
+                ]
+            })
+            .then(() => sleep(2250))
+            .then(() => {
+                expect(fn.callCount).to.be.above(0);
+                expect(fn.callCount).to.be.below(3);
+                const task = fn.firstCall.args[0];
+                const [job] = task.jobs;
+                expect(job).to.have.property("type", "test-job");
             });
     });
 });
