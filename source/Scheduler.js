@@ -293,10 +293,11 @@ class Scheduler extends EventEmitter {
      */
     _watchTask(task) {
         const cronTask = this._cronSchedule(task.schedule, async () => {
-            if (task.enabled !== true) {
+            const activatedTask = await this.getScheduledTask(task.id);
+            if (!activatedTask || activatedTask.enabled !== true) {
                 return;
             }
-            const jobs = await this.service.addJobs(task.jobs);
+            const jobs = await this.service.addJobs(activatedTask.jobs);
             /**
              * Event for when jobs are created as a result of a scheduled task
              * having been fired using its CRON schedule
@@ -309,9 +310,9 @@ class Scheduler extends EventEmitter {
              */
             this.emit("createdJobsFromTask", {
                 jobs,
-                id: task.id,
-                title: task.title,
-                schedule: task.schedule
+                id: activatedTask.id,
+                title: activatedTask.title,
+                schedule: activatedTask.schedule
             });
         });
         /**
