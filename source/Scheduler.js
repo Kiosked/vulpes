@@ -31,6 +31,7 @@ class Scheduler extends EventEmitter {
         this._service = service;
         this._channelQueue = new ChannelQueue();
         this._cronTasks = {};
+        this.enabled = true;
     }
 
     /**
@@ -315,7 +316,7 @@ class Scheduler extends EventEmitter {
     _watchTask(task) {
         const cronTask = this._cronSchedule(task.schedule, async () => {
             const activatedTask = await this.getScheduledTask(task.id);
-            if (!activatedTask || activatedTask.enabled !== true) {
+            if (!activatedTask || activatedTask.enabled !== true || !this.enabled) {
                 return;
             }
             const jobs = await this.service.addJobs(activatedTask.jobs);

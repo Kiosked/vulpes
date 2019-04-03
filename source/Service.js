@@ -96,7 +96,18 @@ const newNotInitialisedError = () =>
  * @augments EventEmitter
  */
 class Service extends EventEmitter {
-    constructor(storage = new MemoryStorage()) {
+    /**
+     * @typedef {Object} ServiceOptions
+     * @property {Boolean=} enableScheduling - Control whether or not the scheduling piece of the Service
+     *  is enabled or not. Default is true.
+     */
+
+    /**
+     * Contrsuctor for the Service class
+     * @param {Storage=} storage The storage instance
+     * @param {ServiceOptions=} ops Options for the service instance
+     */
+    constructor(storage = new MemoryStorage(), { enableScheduling = true } = {}) {
         super();
         if (storage instanceof Storage !== true) {
             throw new Error("Failed instantiating Service: Provided storage is of invalid type");
@@ -105,6 +116,9 @@ class Service extends EventEmitter {
         this._timeLimit = JOB_TIMELIMIT_DEFAULT;
         this._channelQueue = new ChannelQueue();
         this._scheduler = new Scheduler(this);
+        if (!enableScheduling) {
+            this._scheduler.enabled = false;
+        }
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;

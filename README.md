@@ -5,6 +5,7 @@
 [![Build Status](https://travis-ci.org/Kiosked/vulpes.svg?branch=master)](https://travis-ci.org/Kiosked/vulpes) [![npm version](https://badge.fury.io/js/vulpes.svg)](https://www.npmjs.com/package/vulpes)
 
 ## About
+
 Vulpes (_/ˈwul.peːs/_) is a job management framework, designed at making job management and processing easy. Jobs are simply blobs of JSON data that are tracked by a globally unique ID (UUID), which retain status and result information. They can be linked to other jobs and processed in a tree-like manner.
 
 Vulpes does not do any job processing itself - it is merely a _service_ designed to outsource the processing elsewhere. A Vulpes Service tracks jobs, their dependencies and their parents.
@@ -16,6 +17,7 @@ Vulpes has helper libraries to assist you in building complete job management sy
  * [Vulpes-API](https://github.com/Kiosked/vulpes-api) - A drop-in API generator for Express.
 
 ## Installation
+
 Install Vulpes as a dependency by running the following:
 
 ```shell
@@ -25,6 +27,7 @@ npm install vulpes --save
 Vulpes is compatible with NodeJS version 6 and newer.
 
 ## Usage
+
 The main concept behind Vulpes is the `Service` class, which controls a collection of jobs:
 
 ```javascript
@@ -61,6 +64,7 @@ A job will not execute if its parents have not been completed. Providing the `pa
 More information is found in the [API documentation](API.md).
 
 ### Job batches
+
 You can add batches of jobs by using the `Service#addJobs` method, which takes an array of new jobs.
 
 _You must specify an `id` property for each job used with this method - but it should be a number and not a UUID. Vulpes uses this number when calculating relationships in the added jobs._
@@ -75,6 +79,7 @@ const jobs = await service.addJobs([
 This allows you to insert full job trees using one method.
 
 ### Job trees
+
 You can fetch jobs that are connected to a certain job using `getJobChildren`, `getJobParents` and `getJobTree`.
 
 ```javascript
@@ -112,6 +117,7 @@ A    B
 Taking the tree of B will result in [B, C] and will not include A. Taking the tree of C would result in [C, A, B].
 
 ### Job data
+
 Job data is stored as a JSON object. Returning properties from job results is a great way to share information between jobs. Keys can be made up of any combination of characters and values should be of type `Number`/`String`/`Boolean`/`null` or basically anything serialisable.
 
 When a job starts, it merges data payloads to form the provided data for the starting job. It merges data and results from parent jobs as well. It merges in the following precedence, from first to last (last overwriting first):
@@ -135,6 +141,7 @@ Special properties in job data can be used to change their behaviour. Special pr
 | `%`       | Hidden property - Properties prefixed by this symbol are hidden in the UI, but available everywhere else as a regular property. | `%imagedata` |
 
 ### Scheduling jobs / Templates
+
 A common need of any task management system is scheduled/repeating jobs. Vulpes provides support for this via a `scheduler` helper attached to each `Service` instance. Scheduled jobs are simply timed executions of the `Service#addJobs` batch command.
 
 ```javascript
@@ -148,12 +155,30 @@ const taskID = await service.scheduler.addScheduledTask({
 });
 ```
 
+#### Disabling Scheduling
+
+Scheduling can be completely disabled in the case where it would be undesirable to schedule any tasks. If, for some reason, 2 services were started and pointed to the same data source, scheduling should be turned off on one of them to ensure duplicate tasks are not created (though multiple services is not recommended nor supported). You can disable scheduling by either specifying an argument at creation time of the service (preferred):
+
+```javascript
+const service = new Service(storage, { enableScheduling: false });
+```
+
+Or by simply disabling it on the scheduler:
+
+```javascript
+service.scheduler.enabled = false;
+```
+
+The latter option is not recommended as the scheduler would still have a minutue amount of time, if the service is initialised, to create tasks.
+
 ## Developing
+
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
 
 To run the tests, execute `npm t` - this executes all tests and coverage checks. To run just unit tests or just integration tests, run `npm run test:unit` or `npm run test:integration` respectively.
 
 ### Contributing
+
 We welcome contributions! Please make sure you've run `npm install` so the `precommit` hook(s) can run - we perform code formatting before commits are finalised. Keep with the code style and make sure to submit with Linux-style line endings (weird formatting changes etc. will not be accepted).
 
 Be friendly and unassuming - the feature you want _may_ not necessarily align with our goals for the project. Always open an issue first so we can discuss your proposal. We're more than happy to receive feedback and constructive criticism.
