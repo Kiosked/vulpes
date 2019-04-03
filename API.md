@@ -70,6 +70,8 @@ interface and does not actually perform any operations.</p>
 <dd></dd>
 <dt><a href="#UpdateTaskPropertiesOptions">UpdateTaskPropertiesOptions</a> : <code>Object</code></dt>
 <dd></dd>
+<dt><a href="#ServiceOptions">ServiceOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#GetJobChildrenOptions">GetJobChildrenOptions</a> : <code>Object</code></dt>
 <dd><p>Options for fetching job children</p>
 </dd>
@@ -164,6 +166,7 @@ Scheduler for scheduled tasks
     * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
     * [.updateTaskProperties(taskID, ops)](#Scheduler+updateTaskProperties) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
     * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
+    * [._unwatchTask(task)](#Scheduler+_unwatchTask) ⇒ <code>Boolean</code>
     * [._watchTask(task)](#Scheduler+_watchTask)
     * [._writeTask(task)](#Scheduler+_writeTask) ⇒ <code>Promise</code>
     * ["taskAdded"](#Scheduler+event_taskAdded)
@@ -293,7 +296,7 @@ Update properties of a task
 
 <a name="Scheduler+_cronSchedule"></a>
 
-### scheduler._cronSchedule() ⇒ <code>Object</code>
+### scheduler.\_cronSchedule() ⇒ <code>Object</code>
 Schedule a CRON execution
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -306,9 +309,22 @@ Schedule a CRON execution
 | schedule | <code>String</code> | The minute-accurate CRON string |
 | cb | <code>function</code> | The callback to fire when the CRON timer matches current time |
 
+<a name="Scheduler+_unwatchTask"></a>
+
+### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
+Unwatch a CRON task (deschedule it)
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Returns**: <code>Boolean</code> - True if a task was found, false otherwise  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| task | [<code>ScheduledTask</code>](#ScheduledTask) | The task to deschedule |
+
 <a name="Scheduler+_watchTask"></a>
 
-### scheduler._watchTask(task)
+### scheduler.\_watchTask(task)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -321,7 +337,7 @@ Watch a task (start timer for scheduling)
 
 <a name="Scheduler+_writeTask"></a>
 
-### scheduler._writeTask(task) ⇒ <code>Promise</code>
+### scheduler.\_writeTask(task) ⇒ <code>Promise</code>
 Write a task to storage
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -428,6 +444,7 @@ Service for managing jobs
 **Extends**: <code>EventEmitter</code>  
 
 * [Service](#Service) ⇐ <code>EventEmitter</code>
+    * [new Service([storage], [ops])](#new_Service_new)
     * _instance_
         * [.alive](#Service+alive) : <code>Boolean</code>
         * [.helpers](#Service+helpers) : [<code>Array.&lt;Helper&gt;</code>](#Helper)
@@ -455,6 +472,17 @@ Service for managing jobs
         * [.JobPriority](#Service.JobPriority) : [<code>JobPriorities</code>](#JobPriorities)
         * [.JobResult](#Service.JobResult) : [<code>JobResultTypes</code>](#JobResultTypes)
         * [.JobStatus](#Service.JobStatus) : <code>JobStatus</code>
+
+<a name="new_Service_new"></a>
+
+### new Service([storage], [ops])
+Contrsuctor for the Service class
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [storage] | [<code>Storage</code>](#Storage) | The storage instance |
+| [ops] | [<code>ServiceOptions</code>](#ServiceOptions) | Options for the service instance |
 
 <a name="Service+alive"></a>
 
@@ -1256,6 +1284,16 @@ Job sorting step configuration
 | --- | --- | --- |
 | [title] | <code>String</code> | The title of the task |
 | [schedule] | <code>String</code> | The schedule of the task (CRON) |
+
+<a name="ServiceOptions"></a>
+
+## ServiceOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [enableScheduling] | <code>Boolean</code> | Control whether or not the scheduling piece of the Service  is enabled or not. Default is true. |
 
 <a name="GetJobChildrenOptions"></a>
 
