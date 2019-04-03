@@ -2,11 +2,14 @@ const uuid = require("uuid/v4");
 const ms = require("ms");
 const nested = require("nested-property");
 const { getTimestamp } = require("./time.js");
+const { clone } = require("./objects.js");
 const {
     ITEM_TYPE,
     ITEM_TYPE_JOB,
     JOB_PRIORITY_NORMAL,
-    JOB_STATUS_PENDING
+    JOB_RESULT_TYPES_REXP,
+    JOB_STATUS_PENDING,
+    JOB_STATUS_REXP
 } = require("./symbols.js");
 
 /**
@@ -25,16 +28,34 @@ const {
  */
 
 const CONFIGURABLE_JOB_KEYS = [
-    "type",
-    "priority",
+    "data",
     "parents",
     "predicate",
-    "data",
-    "timeLimit",
-    "attemptsMax",
+    "priority",
     "result.data",
-    "result.type"
+    "result.type",
+    "timeLimit",
+    "type"
 ];
+const DEFAULT_JOB_TYPE = "generic";
+const JOB_VALIDATION = {
+    data: [d => typeof d === "object" && d !== null, () => ({})],
+    created: [c => c > 0, () => Date.now()],
+    parents: [p => Array.isArray(p), () => []],
+    predicate: [p => typeof p === "object" && p !== null, () => generateEmptyJob().predicate],
+    "predicate.attemptsMax": [a => a === null || a > 0, null],
+    "predicate.locked": [l => typeof l === "boolean", false],
+    "predicate.timeBetweenRetries": [
+        t => t === null || t >= 0,
+        () => generateEmptyJob().predicate.timeBetweenRetries
+    ],
+    priority: [p => typeof p === "number" && !isNaN(p), JOB_PRIORITY_NORMAL],
+    "result.data": [d => typeof d === "object" && d !== null, () => ({})],
+    "result.type": [t => t === null || JOB_RESULT_TYPES_REXP.test(t), null],
+    timeLimit: [t => t === null || t > 0, null],
+    type: [t => typeof t === "string", DEFAULT_JOB_TYPE],
+    status: [s => JOB_STATUS_REXP.test(s), JOB_STATUS_PENDING]
+};
 
 function filterJobInitObject(info) {
     const output = {};
@@ -90,7 +111,7 @@ function generateEmptyJob() {
     return {
         [ITEM_TYPE]: ITEM_TYPE_JOB,
         id,
-        type: "generic",
+        type: DEFAULT_JOB_TYPE,
         status: JOB_STATUS_PENDING,
         priority: JOB_PRIORITY_NORMAL,
         created: getTimestamp(),
@@ -116,7 +137,21 @@ function generateEmptyJob() {
     };
 }
 
+function validateJobProperties(job) {
+    const output = clone(job);
+    Object.keys(JOB_VALIDATION).forEach(key => {
+        const [test, defaultValue] = JOB_VALIDATION[key];
+        const value = nested.get(output, key);
+        if (!test(value)) {
+            const newValue = typeof defaultValue === "function" ? defaultValue() : defaultValue;
+            nested.set(output, key, newValue);
+        }
+    });
+    return output;
+}
+
 module.exports = {
     filterJobInitObject,
-    generateEmptyJob
+    generateEmptyJob,
+    validateJobProperties
 };

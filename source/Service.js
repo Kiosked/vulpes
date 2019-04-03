@@ -7,7 +7,11 @@ const Scheduler = require("./Scheduler.js");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
-const { filterJobInitObject, generateEmptyJob } = require("./jobGeneration.js");
+const {
+    filterJobInitObject,
+    generateEmptyJob,
+    validateJobProperties
+} = require("./jobGeneration.js");
 const { jobMatches } = require("./jobQuery.js");
 const {
     addJobBatch,
@@ -196,10 +200,8 @@ class Service extends EventEmitter {
         }
         return this.jobQueue.enqueue(async () => {
             const initProps = filterJobInitObject(properties);
-            const job = merge.recursive(
-                generateEmptyJob(),
-                { timeLimit: this.timeLimit },
-                initProps
+            const job = validateJobProperties(
+                merge.recursive(generateEmptyJob(), { timeLimit: this.timeLimit }, initProps)
             );
             await this.storage.setItem(job.id, job);
             this.emit("jobAdded", { id: job.id });

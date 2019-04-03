@@ -46,6 +46,7 @@ const JOB_RESULT_TYPES_RESTARTABLE_REXP = /^job\/result\/(success|fail\/soft)$/;
 const JOB_RESULT_TYPES_REXP = /^job\/result\/.+$/;
 
 const JOB_STATUS_PENDING = "job/status/pending";
+const JOB_STATUS_REXP = /^job\/status\/(pending|running|stopped)$/;
 const JOB_STATUS_RUNNING = "job/status/running";
 const JOB_STATUS_STOPPED = "job/status/stopped";
 
@@ -81,6 +82,7 @@ module.exports = {
     JOB_RESULT_TYPES_RESTARTABLE_REXP,
     JOB_RESULT_TYPES_REXP,
     JOB_STATUS_PENDING,
+    JOB_STATUS_REXP,
     JOB_STATUS_RUNNING,
     JOB_STATUS_STOPPED,
     JOB_TIMELIMIT_DEFAULT,
