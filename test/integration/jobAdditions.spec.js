@@ -19,6 +19,23 @@ describe("Service", function() {
                     expect(jobs).to.have.lengthOf(2);
                 });
         });
+
+        it("validates certain properties upon addition", function() {
+            return this.service
+                .addJob({
+                    priority: null,
+                    status: false
+                })
+                .then(id => this.service.getJob(id))
+                .then(job => {
+                    expect(job)
+                        .to.have.property("priority")
+                        .that.is.a("number");
+                    expect(job)
+                        .to.have.property("status")
+                        .that.is.a("string");
+                });
+        });
     });
 
     describe("addJobs", function() {
