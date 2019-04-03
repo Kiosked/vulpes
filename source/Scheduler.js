@@ -255,6 +255,10 @@ class Scheduler extends EventEmitter {
             task.schedule = schedule;
         }
         await this._writeTask(task);
+        // Remove CRON watcher
+        this._unwatchTask(task);
+        // Set new CRON watcher (schedule changed)
+        this._watchTask(task);
         /**
          * Event for when a task's properties (title/schedule) are updated
          * @event Scheduler#taskPropertiesUpdated
@@ -281,6 +285,23 @@ class Scheduler extends EventEmitter {
      */
     _cronSchedule(schedule, cb) {
         return cron.schedule(schedule, cb);
+    }
+
+    /**
+     * Unwatch a CRON task (deschedule it)
+     * @param {ScheduledTask} task The task to deschedule
+     * @returns {Boolean} True if a task was found, false otherwise
+     * @protected
+     * @memberof Scheduler
+     */
+    _unwatchTask(task) {
+        const cronTask = this._cronTasks[task.id];
+        if (!cronTask) {
+            return false;
+        }
+        cronTask.destroy();
+        delete this._cronTasks[task.id];
+        return true;
     }
 
     /**
