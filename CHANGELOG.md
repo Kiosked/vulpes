@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.22.0
+_2019-04-03_
+
+ * Property validation and resetting for new jobs
+
 ## v0.21.1
 _2019-04-02_
 
