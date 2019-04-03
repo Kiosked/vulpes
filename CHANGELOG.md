@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.22.1
+_2019-04-03_
+
+ * Resetting of CRON schedules when calling `Scheduler#updateTaskProperties`
+
 ## v0.22.0
 _2019-04-03_
 
