@@ -241,4 +241,28 @@ describe("Scheduler", function() {
                 expect(job).to.have.property("type", "test-job");
             });
     });
+
+    it("can trigger tasks immediately", function() {
+        const fn = sinon.spy();
+        this.service.scheduler.on("createdJobsFromTask", fn);
+        return this.service.scheduler
+            .addScheduledTask({
+                title: "Test",
+                schedule: CRON_WEEKLY,
+                jobs: [
+                    {
+                        id: 1,
+                        type: "test-job"
+                    }
+                ]
+            })
+            .then(id => this.service.scheduler.triggerTask(id))
+            .then(() => sleep(2250))
+            .then(() => {
+                expect(fn.calledOnce).to.be.true;
+                const task = fn.firstCall.args[0];
+                const [job] = task.jobs;
+                expect(job).to.have.property("type", "test-job");
+            });
+    });
 });

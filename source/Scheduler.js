@@ -231,6 +231,16 @@ class Scheduler extends EventEmitter {
     }
 
     /**
+     * Trigger a task (skip schedule)
+     * @param {String} taskID The scheduled task's ID
+     * @returns {Promise}
+     * @memberof Scheduler
+     */
+    async triggerTask(taskID) {
+        await this._executeTask(taskID);
+    }
+
+    /**
      * @typedef {Object} UpdateTaskPropertiesOptions
      * @property {String=} title - The title of the task
      * @property {String=} schedule - The schedule of the task (CRON)
@@ -289,6 +299,39 @@ class Scheduler extends EventEmitter {
     }
 
     /**
+     * Execute a task
+     * @param {ScheduledTask|String} taskOrTaskID The scheduled task or an ID of a task
+     * @protected
+     * @fires Scheduler#createdJobsFromTask
+     * @memberof Scheduler
+     */
+    async _executeTask(taskOrTaskID) {
+        const activatedTask = await this.getScheduledTask(
+            typeof taskOrTaskID === "string" ? taskOrTaskID : taskOrTaskID.id
+        );
+        if (!activatedTask || activatedTask.enabled !== true || !this.enabled) {
+            return;
+        }
+        const jobs = await this.service.addJobs(activatedTask.jobs);
+        /**
+         * Event for when jobs are created as a result of a scheduled task
+         * having been fired using its CRON schedule
+         * @event Scheduler#createdJobsFromTask
+         * @type {Object}
+         * @property {String} id - The ID of the task
+         * @property {String} title - The title of the task
+         * @property {String} schedule - The CRON schedule for the task
+         * @property {NewJob[]} jobs - Array of job templates for scheduled creation
+         */
+        this.emit("createdJobsFromTask", {
+            jobs,
+            id: activatedTask.id,
+            title: activatedTask.title,
+            schedule: activatedTask.schedule
+        });
+    }
+
+    /**
      * Unwatch a CRON task (deschedule it)
      * @param {ScheduledTask} task The task to deschedule
      * @returns {Boolean} True if a task was found, false otherwise
@@ -310,33 +353,10 @@ class Scheduler extends EventEmitter {
      * @param {ScheduledTask} task The task to watch
      * @protected
      * @memberof Scheduler
-     * @fires Scheduler#createdJobsFromTask
      * @fires Scheduler#taskScheduled
      */
     _watchTask(task) {
-        const cronTask = this._cronSchedule(task.schedule, async () => {
-            const activatedTask = await this.getScheduledTask(task.id);
-            if (!activatedTask || activatedTask.enabled !== true || !this.enabled) {
-                return;
-            }
-            const jobs = await this.service.addJobs(activatedTask.jobs);
-            /**
-             * Event for when jobs are created as a result of a scheduled task
-             * having been fired using its CRON schedule
-             * @event Scheduler#createdJobsFromTask
-             * @type {Object}
-             * @property {String} id - The ID of the task
-             * @property {String} title - The title of the task
-             * @property {String} schedule - The CRON schedule for the task
-             * @property {NewJob[]} jobs - Array of job templates for scheduled creation
-             */
-            this.emit("createdJobsFromTask", {
-                jobs,
-                id: activatedTask.id,
-                title: activatedTask.title,
-                schedule: activatedTask.schedule
-            });
-        });
+        const cronTask = this._cronSchedule(task.schedule, () => this._executeTask(task));
         /**
          * Event for when a task has been scheduled (fired both when created and
          *  when being read from storage upon a fresh start-up)
