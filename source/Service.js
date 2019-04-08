@@ -4,6 +4,7 @@ const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
 const endOfStream = require("end-of-stream");
 const Scheduler = require("./Scheduler.js");
+const Tracker = require("./Tracker.js");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
@@ -119,6 +120,7 @@ class Service extends EventEmitter {
         if (!enableScheduling) {
             this._scheduler.enabled = false;
         }
+        this._tracker = new Tracker();
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
@@ -193,6 +195,16 @@ class Service extends EventEmitter {
      */
     get timeLimit() {
         return this._timeLimit;
+    }
+
+    /**
+     * Analytics tracking instance
+     * @type {Tracker}
+     * @readonly
+     * @memberof Service
+     */
+    get tracker() {
+        return this._tracker;
     }
 
     set timeLimit(tl) {
