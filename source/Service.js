@@ -437,6 +437,17 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Completely delete a job
+     * @param {String} jobID The ID of the job to reset
+     * @returns {Promise} A promise that resolves once the job has
+     *  been removed
+     * @memberof Service
+     */
+    async removeJob(jobID) {
+        await this.storage.removeItem(jobID);
+    }
+
+    /**
      * Reset a failed job
      * @param {String} jobID The ID of the job to reset
      * @returns {Promise} A promise that resolves once the job has
