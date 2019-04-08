@@ -98,6 +98,8 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Priority">Priority</a> : <code>String</code></dt>
 <dd><p>Job priority</p>
 </dd>
+<dt><a href="#RegisteredWorker">RegisteredWorker</a> : <code>Object</code></dt>
+<dd></dd>
 </dl>
 
 <a name="Helper"></a>
@@ -164,8 +166,10 @@ Scheduler for scheduled tasks
     * [.setJobsForScheduledTask(taskID, jobs)](#Scheduler+setJobsForScheduledTask) ⇒ <code>Promise</code>
     * [.shutdown()](#Scheduler+shutdown)
     * [.toggleTask(taskID, [enabled])](#Scheduler+toggleTask) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
+    * [.triggerTask(taskID)](#Scheduler+triggerTask) ⇒ <code>Promise</code>
     * [.updateTaskProperties(taskID, ops)](#Scheduler+updateTaskProperties) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
     * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
+    * [._executeTask(taskOrTaskID)](#Scheduler+_executeTask)
     * [._unwatchTask(task)](#Scheduler+_unwatchTask) ⇒ <code>Boolean</code>
     * [._watchTask(task)](#Scheduler+_watchTask)
     * [._writeTask(task)](#Scheduler+_writeTask) ⇒ <code>Promise</code>
@@ -280,6 +284,17 @@ Enable/disable a task
 | taskID | <code>String</code> | The ID of the task |
 | [enabled] | <code>Boolean</code> | Set the enabled status of the task to  true or false. If not specified, the status of the task will  be toggled. |
 
+<a name="Scheduler+triggerTask"></a>
+
+### scheduler.triggerTask(taskID) ⇒ <code>Promise</code>
+Trigger a task (skip schedule)
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| taskID | <code>String</code> | The scheduled task's ID |
+
 <a name="Scheduler+updateTaskProperties"></a>
 
 ### scheduler.updateTaskProperties(taskID, ops) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
@@ -309,6 +324,19 @@ Schedule a CRON execution
 | schedule | <code>String</code> | The minute-accurate CRON string |
 | cb | <code>function</code> | The callback to fire when the CRON timer matches current time |
 
+<a name="Scheduler+_executeTask"></a>
+
+### scheduler.\_executeTask(taskOrTaskID)
+Execute a task
+
+**Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
+**Emits**: [<code>createdJobsFromTask</code>](#Scheduler+event_createdJobsFromTask)  
+**Access**: protected  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| taskOrTaskID | [<code>ScheduledTask</code>](#ScheduledTask) \| <code>String</code> | The scheduled task or an ID of a task |
+
 <a name="Scheduler+_unwatchTask"></a>
 
 ### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
@@ -328,7 +356,7 @@ Unwatch a CRON task (deschedule it)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
-**Emits**: [<code>createdJobsFromTask</code>](#Scheduler+event_createdJobsFromTask), [<code>taskScheduled</code>](#Scheduler+event_taskScheduled)  
+**Emits**: [<code>taskScheduled</code>](#Scheduler+event_taskScheduled)  
 **Access**: protected  
 
 | Param | Type | Description |
@@ -453,6 +481,7 @@ Service for managing jobs
         * [.scheduler](#Service+scheduler) : [<code>Scheduler</code>](#Scheduler)
         * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
+        * [.tracker](#Service+tracker) : <code>Tracker</code>
         * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
         * [.addJobs(jobs)](#Service+addJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJob(jobID)](#Service+getJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
@@ -462,6 +491,7 @@ Service for managing jobs
         * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
         * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
         * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.removeJob(jobID)](#Service+removeJob) ⇒ <code>Promise</code>
         * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
         * [.shutdown()](#Service+shutdown)
         * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
@@ -534,6 +564,13 @@ The timelimit is applied to *new* jobs as they're added, and
 changes to this value do not affect existing jobs.
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
+<a name="Service+tracker"></a>
+
+### service.tracker : <code>Tracker</code>
+Analytics tracking instance
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
 <a name="Service+addJob"></a>
 
 ### service.addJob([properties]) ⇒ <code>Promise.&lt;String&gt;</code>
@@ -652,6 +689,19 @@ library's `find` method.
 | --- | --- | --- |
 | [query] | <code>Object</code> | The object query to perform |
 | [options] | [<code>QueryJobsOptions</code>](#QueryJobsOptions) | Options for querying jobs, like sorting |
+
+<a name="Service+removeJob"></a>
+
+### service.removeJob(jobID) ⇒ <code>Promise</code>
+Completely delete a job
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+**Returns**: <code>Promise</code> - A promise that resolves once the job has
+ been removed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job to reset |
 
 <a name="Service+resetJob"></a>
 
@@ -1386,3 +1436,15 @@ Job status
 Job priority
 
 **Kind**: global typedef  
+<a name="RegisteredWorker"></a>
+
+## RegisteredWorker : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The worker ID |
+| updated | <code>Number</code> | The last updated timestamp |
+| count | <code>Number</code> | The number of times the worker has updated |
+

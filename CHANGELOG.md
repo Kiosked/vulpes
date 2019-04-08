@@ -1,5 +1,12 @@
 # Vulpes Changelog
 
+## v0.24.0
+_2019-04-08_
+
+ * Analytics `Tracker` (@ `Service.tracker`) for tracking workers
+ * `Scheduler#triggerTask` for triggering scheduled tasks (skip schedule)
+ * `Service#removeJob`
+
 ## v0.23.0
 _2019-04-03_
 
