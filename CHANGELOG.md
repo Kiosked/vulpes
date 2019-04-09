@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.24.1
+_2019-04-09_
+
+ * **Bugfix**:
+   * `Scheduler#triggerTask` would not trigger disabled tasks
+
 ## v0.24.0
 _2019-04-08_
 

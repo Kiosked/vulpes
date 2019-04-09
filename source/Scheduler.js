@@ -301,6 +301,8 @@ class Scheduler extends EventEmitter {
     /**
      * Execute a task
      * @param {ScheduledTask|String} taskOrTaskID The scheduled task or an ID of a task
+     * @param {Boolean=} force Optionally force the execution (bypass disabled statuses).
+     *  Default is false.
      * @protected
      * @fires Scheduler#createdJobsFromTask
      * @memberof Scheduler

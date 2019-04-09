@@ -169,7 +169,7 @@ Scheduler for scheduled tasks
     * [.triggerTask(taskID)](#Scheduler+triggerTask) ⇒ <code>Promise</code>
     * [.updateTaskProperties(taskID, ops)](#Scheduler+updateTaskProperties) ⇒ [<code>ScheduledTask</code>](#ScheduledTask)
     * [._cronSchedule()](#Scheduler+_cronSchedule) ⇒ <code>Object</code>
-    * [._executeTask(taskOrTaskID)](#Scheduler+_executeTask)
+    * [._executeTask(taskOrTaskID, [force])](#Scheduler+_executeTask)
     * [._unwatchTask(task)](#Scheduler+_unwatchTask) ⇒ <code>Boolean</code>
     * [._watchTask(task)](#Scheduler+_watchTask)
     * [._writeTask(task)](#Scheduler+_writeTask) ⇒ <code>Promise</code>
@@ -311,7 +311,7 @@ Update properties of a task
 
 <a name="Scheduler+_cronSchedule"></a>
 
-### scheduler.\_cronSchedule() ⇒ <code>Object</code>
+### scheduler._cronSchedule() ⇒ <code>Object</code>
 Schedule a CRON execution
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -326,20 +326,21 @@ Schedule a CRON execution
 
 <a name="Scheduler+_executeTask"></a>
 
-### scheduler.\_executeTask(taskOrTaskID)
+### scheduler._executeTask(taskOrTaskID, [force])
 Execute a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
 **Emits**: [<code>createdJobsFromTask</code>](#Scheduler+event_createdJobsFromTask)  
 **Access**: protected  
 
-| Param | Type | Description |
-| --- | --- | --- |
-| taskOrTaskID | [<code>ScheduledTask</code>](#ScheduledTask) \| <code>String</code> | The scheduled task or an ID of a task |
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| taskOrTaskID | [<code>ScheduledTask</code>](#ScheduledTask) \| <code>String</code> |  | The scheduled task or an ID of a task |
+| [force] | <code>Boolean</code> | <code>false</code> | Optionally force the execution (bypass disabled statuses).  Default is false. |
 
 <a name="Scheduler+_unwatchTask"></a>
 
-### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
+### scheduler._unwatchTask(task) ⇒ <code>Boolean</code>
 Unwatch a CRON task (deschedule it)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -352,7 +353,7 @@ Unwatch a CRON task (deschedule it)
 
 <a name="Scheduler+_watchTask"></a>
 
-### scheduler.\_watchTask(task)
+### scheduler._watchTask(task)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -365,7 +366,7 @@ Watch a task (start timer for scheduling)
 
 <a name="Scheduler+_writeTask"></a>
 
-### scheduler.\_writeTask(task) ⇒ <code>Promise</code>
+### scheduler._writeTask(task) ⇒ <code>Promise</code>
 Write a task to storage
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
