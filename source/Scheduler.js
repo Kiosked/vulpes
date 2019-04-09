@@ -237,7 +237,7 @@ class Scheduler extends EventEmitter {
      * @memberof Scheduler
      */
     async triggerTask(taskID) {
-        await this._executeTask(taskID);
+        await this._executeTask(taskID, /* force: */ true);
     }
 
     /**
@@ -305,11 +305,11 @@ class Scheduler extends EventEmitter {
      * @fires Scheduler#createdJobsFromTask
      * @memberof Scheduler
      */
-    async _executeTask(taskOrTaskID) {
+    async _executeTask(taskOrTaskID, force = false) {
         const activatedTask = await this.getScheduledTask(
             typeof taskOrTaskID === "string" ? taskOrTaskID : taskOrTaskID.id
         );
-        if (!activatedTask || activatedTask.enabled !== true || !this.enabled) {
+        if (!force && (!activatedTask || activatedTask.enabled !== true || !this.enabled)) {
             return;
         }
         const jobs = await this.service.addJobs(activatedTask.jobs);
