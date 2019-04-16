@@ -430,7 +430,7 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
-        query.archived = false;
+        query.archived = archived => archived === false || archived === undefined;
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
