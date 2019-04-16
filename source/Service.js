@@ -249,6 +249,15 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Archive a job so it will be removed from queries
+     * @param {String} jobID The job ID
+     * @memberof Service
+     */
+    async archiveJob(jobID) {
+        return this.updateJob(jobID, { archived: true });
+    }
+
+    /**
      * Get a job by its ID
      * @param {String} jobID The job ID
      * @returns {Promise.<Object|null>} A promise that resolves with the job
@@ -421,6 +430,7 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
+        query.archived = false;
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
