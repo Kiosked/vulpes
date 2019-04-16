@@ -499,9 +499,7 @@ class Service extends EventEmitter {
             job.predicate.attemptsMax = job.attempts + 1;
         }
         job.status = JOB_STATUS_PENDING;
-        if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
-            job.result.type = JOB_RESULT_TYPE_FAILURE_SOFT;
-        }
+        job.result.type = null;
         await this.storage.setItem(job.id, job);
         this.emit("jobReset", { id: job.id });
     }
