@@ -435,7 +435,7 @@ class Service extends EventEmitter {
         }
         query.archived = query.archived
             ? query.archived
-            : archived === false || archived === undefined;
+            : archived => archived === false || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {
