@@ -25,9 +25,11 @@ const {
  *  timelimit on the Service instance). Set to null to disable timeouts.
  * @property {Number=} attemptsMax - The maximum number of soft failures that can occur
  *  before this job
+ * @property {Boolean=} archived - Determining if job will be excluded from queries or not
  */
 
 const CONFIGURABLE_JOB_KEYS = [
+    "archived",
     "data",
     "parents",
     "predicate",
@@ -39,6 +41,7 @@ const CONFIGURABLE_JOB_KEYS = [
 ];
 const DEFAULT_JOB_TYPE = "generic";
 const JOB_VALIDATION = {
+    archived: [a => typeof a === "boolean"],
     data: [d => typeof d === "object" && d !== null, () => ({})],
     created: [c => c > 0, () => Date.now()],
     parents: [p => Array.isArray(p), () => []],
@@ -100,6 +103,7 @@ function filterJobInitObject(info) {
  * @property {Number|null} timeLimit - Time limitation for the job's
  *  execution. null means no limit.
  * @property {Number} attempts - Number of attempts the job has had
+ * @property {Boolean} archived - True means the job will be archived and excluded from queries
  */
 
 /**
@@ -133,7 +137,8 @@ function generateEmptyJob() {
             completed: null
         },
         timeLimit: null,
-        attempts: 0
+        attempts: 0,
+        archived: false
     };
 }
 
