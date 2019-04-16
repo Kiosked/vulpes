@@ -253,7 +253,7 @@ class Service extends EventEmitter {
      * @param {String} jobID The job ID
      * @memberof Service
      */
-    async archiveJob(jobID) {
+    archiveJob(jobID) {
         return this.updateJob(jobID, { archived: true });
     }
 
@@ -430,10 +430,10 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
-        query.archived = archived => archived === false || archived === undefined;
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
+        query.archived = query.archived || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {
