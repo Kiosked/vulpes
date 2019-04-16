@@ -433,7 +433,9 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
-        query.archived = query.archived || archived === undefined;
+        query.archived = query.archived
+            ? query.archived
+            : archived === false || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {
