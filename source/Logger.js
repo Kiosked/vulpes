@@ -1,7 +1,9 @@
-const fs = require("fs");
+const endOfStream = require("end-of-stream");
+const uuid = require("uuid/v4");
+const { ITEM_TYPE, ITEM_TYPE_LOG_ENTRY } = require("./symbols.js");
 
 class Logger {
-    constructor() {
+    constructor(storage) {
         this._fileName = "taillog.json";
         this.levels = {
             LOGGER_ALERT: "alert",
@@ -11,54 +13,38 @@ class Logger {
             LOGGER_DEBUG: "debug"
         };
         this.entriesMax = 200;
-        this.init();
+        this.storage = storage;
     }
 
-    init() {
-        const obj = {
-            entries: []
-        };
-        obj.entries.push({
-            level: this.levels.LOGGER_INFO,
-            msg: "Start of logfile",
+    async addEntry(level, msg) {
+        const entry = {
+            [ITEM_TYPE]: ITEM_TYPE_LOG_ENTRY,
+            id: uuid(),
+            level: level,
+            msg: msg,
             timestamp: Date.now()
-        });
-        const json = JSON.stringify(obj);
-        fs.writeFile(this._fileName, json, function(err) {
-            if (err) throw err;
-        });
+        };
+        await this.storage.setItem(entry.id, entry);
     }
 
-    addEntry(level, msg) {
-        const self = this;
-        new Promise(resolve => {
-            fs.readFile(this._fileName, "utf8", function(err, data) {
-                if (err) {
-                    console.log(err);
-                }
-                const log = JSON.parse(data);
-                if (log.entries && log.entries.length >= self.entriesMax) {
-                    log.entries.shift();
-                }
-                log.entries.push({ level: level, msg: msg, timestamp: Date.now() });
-                const json = JSON.stringify(log);
-                fs.writeFile(self._fileName, json, function(err) {
-                    if (err) throw err;
-                    resolve();
-                });
-            });
+    async readLogEntries() {
+        const logStream = await this.storage.streamItems();
+        const results = [];
+        logStream.on("data", entry => {
+            if (entry[ITEM_TYPE] === ITEM_TYPE_LOG_ENTRY) {
+                results.push(entry);
+            }
         });
-    }
-
-    readLog() {
-        return new Promise((resolve, reject) => {
-            fs.readFile(this._fileName, "utf8", function(err, data) {
+        await new Promise((resolve, reject) =>
+            endOfStream(logStream, err => {
                 if (err) {
-                    reject(err);
+                    return reject(err);
                 }
-                resolve(data);
-            });
-        });
+                resolve();
+            })
+        );
+        const logEntries = results.sort((a, b) => a.timestamp - b.timestamp);
+        return logEntries;
     }
 }
 
