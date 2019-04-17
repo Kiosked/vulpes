@@ -4,11 +4,11 @@ class Logger {
     constructor() {
         this._fileName = "taillog.json";
         this.levels = {
-            LOGGER_ALERT: 0,
-            LOGGER_ERROR: 1,
-            LOGGER_WARNING: 2,
-            LOGGER_INFO: 3,
-            LOGGER_DEBUG: 4
+            LOGGER_ALERT: "alert",
+            LOGGER_ERROR: "error",
+            LOGGER_WARNING: "warning",
+            LOGGER_INFO: "info",
+            LOGGER_DEBUG: "debug"
         };
         this.entriesMax = 200;
         this.init();
@@ -18,7 +18,11 @@ class Logger {
         const obj = {
             entries: []
         };
-        obj.entries.push({ level: 3, msg: "Start of logfile", timestamp: Date.now() });
+        obj.entries.push({
+            level: this.levels.LOGGER_INFO,
+            msg: "Start of logfile",
+            timestamp: Date.now()
+        });
         const json = JSON.stringify(obj);
         fs.writeFile(this._fileName, json, function(err) {
             if (err) throw err;
