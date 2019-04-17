@@ -8,6 +8,7 @@ const Tracker = require("./Tracker.js");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
+const Logger = require("./Logger.js");
 const {
     filterJobInitObject,
     generateEmptyJob,
@@ -124,6 +125,7 @@ class Service extends EventEmitter {
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
+        this._logger = new Logger();
     }
 
     /**
@@ -205,6 +207,16 @@ class Service extends EventEmitter {
      */
     get tracker() {
         return this._tracker;
+    }
+
+    /**
+     * Logger instance
+     * @type {Logger}
+     * @readonly
+     * @memberof Service
+     */
+    get logger() {
+        return this._logger;
     }
 
     set timeLimit(tl) {
@@ -457,7 +469,12 @@ class Service extends EventEmitter {
                 direction: order
             }
         ]);
+        await this.logger.addEntry(this.logger.levels.LOGGER_DEBUG, "Testing the logger");
         return limit !== Infinity ? jobs.slice(0, limit) : jobs;
+    }
+
+    readLog() {
+        return this.logger.readLog();
     }
 
     /**
