@@ -12,11 +12,15 @@ class Logger {
             LOGGER_INFO: "info",
             LOGGER_DEBUG: "debug"
         };
-        this.entriesMax = 200;
+        this.entriesMax = 100;
         this.storage = storage;
     }
 
     async addEntry(level, msg) {
+        const entries = await this.readLogEntries();
+        if (entries.length >= this.entriesMax) {
+            await this.removeEntry(entries[0]);
+        }
         const entry = {
             [ITEM_TYPE]: ITEM_TYPE_LOG_ENTRY,
             id: uuid(),
@@ -45,6 +49,10 @@ class Logger {
         );
         const logEntries = results.sort((a, b) => a.timestamp - b.timestamp);
         return logEntries;
+    }
+
+    async removeEntry(entry) {
+        await this.storage.removeItem(entry.id);
     }
 }
 
