@@ -4,7 +4,6 @@ const { ITEM_TYPE, ITEM_TYPE_LOG_ENTRY } = require("./symbols.js");
 
 class Logger {
     constructor(storage) {
-        this._fileName = "taillog.json";
         this.levels = {
             LOGGER_ALERT: "alert",
             LOGGER_ERROR: "error",
