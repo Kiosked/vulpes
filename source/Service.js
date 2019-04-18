@@ -125,7 +125,7 @@ class Service extends EventEmitter {
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
-        this._logger = new Logger(storage);
+        this._logger = new Logger(this);
     }
 
     /**
@@ -242,10 +242,6 @@ class Service extends EventEmitter {
                 merge.recursive(generateEmptyJob(), { timeLimit: this.timeLimit }, initProps)
             );
             await this.storage.setItem(job.id, job);
-            await this.logger.addEntry(
-                this.logger.levels.LOGGER_INFO,
-                `Created job with id: ${job.id}`
-            );
             this.emit("jobAdded", { id: job.id });
             return job.id;
         });
@@ -473,12 +469,7 @@ class Service extends EventEmitter {
                 direction: order
             }
         ]);
-        //await this.logger.addEntry(this.logger.levels.LOGGER_DEBUG, "Testing the logger");
         return limit !== Infinity ? jobs.slice(0, limit) : jobs;
-    }
-
-    readLog() {
-        return this.logger.readLogEntries();
     }
 
     /**
@@ -525,7 +516,6 @@ class Service extends EventEmitter {
         job.result.type = null;
         await this.storage.setItem(job.id, job);
         this.emit("jobReset", { id: job.id });
-        await this.logger.addEntry(this.logger.levels.LOGGER_INFO, `Reset job ${job.id}`);
     }
 
     /**
