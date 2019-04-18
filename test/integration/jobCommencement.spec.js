@@ -193,12 +193,12 @@ describe("Service", function() {
                 .then(() => this.service.stopJob(this.jobID1, Service.JobResult.Timeout));
         });
 
-        it("changes timeout result types to soft fails", function() {
+        it("expects type to be null after reset", function() {
             return this.service
                 .resetJob(this.jobID1)
                 .then(() => this.service.getJob(this.jobID1))
                 .then(job => {
-                    expect(job.result.type).to.equal(Service.JobResult.SoftFailure);
+                    expect(job.result.type).to.equal(null);
                 });
         });
 

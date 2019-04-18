@@ -249,6 +249,15 @@ class Service extends EventEmitter {
     }
 
     /**
+     * Archive a job so it will be removed from queries
+     * @param {String} jobID The job ID
+     * @memberof Service
+     */
+    archiveJob(jobID) {
+        return this.updateJob(jobID, { archived: true });
+    }
+
+    /**
      * Get a job by its ID
      * @param {String} jobID The job ID
      * @returns {Promise.<Object|null>} A promise that resolves with the job
@@ -424,6 +433,9 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
+        query.archived = query.archived
+            ? query.archived
+            : archived => archived === false || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {
@@ -489,9 +501,7 @@ class Service extends EventEmitter {
             job.predicate.attemptsMax = job.attempts + 1;
         }
         job.status = JOB_STATUS_PENDING;
-        if (job.result.type !== JOB_RESULT_TYPE_FAILURE_SOFT) {
-            job.result.type = JOB_RESULT_TYPE_FAILURE_SOFT;
-        }
+        job.result.type = null;
         await this.storage.setItem(job.id, job);
         this.emit("jobReset", { id: job.id });
     }
