@@ -1,8 +1,9 @@
+const ms = require("ms");
 const Helper = require("./Helper.js");
 const {
     JOB_RESULT_TYPE_FAILURE,
     JOB_RESULT_TYPE_SUCCESS,
-    JOB_STATUS_RUNNING
+    JOB_STATUS_STOPPED
 } = require("../symbols.js");
 
 class AutoArchiveHelper extends Helper {
@@ -11,22 +12,33 @@ class AutoArchiveHelper extends Helper {
     }
 
     archiveCompletedJobs() {
-        this.service
+        const self = this;
+        self.service
             .queryJobs({
                 archived: archived => archived === false || archived === undefined,
-                status: JOB_STATUS_RUNNING
+                status: JOB_STATUS_STOPPED
             })
             .then(completedJobs => {
-                completedJobs.forEach(job => {});
+                completedJobs.forEach(job => {
+                    if (job.result.type === JOB_RESULT_TYPE_SUCCESS) {
+                        if (
+                            job.times &&
+                            job.times.completed !== null &&
+                            Date.now() - job.times.completed >= ms("30d")
+                        ) {
+                            self.service.archiveJob(job.id);
+                        }
+                    } else if (job.result.type === JOB_RESULT_TYPE_FAILURE) {
+                        if (
+                            job.times &&
+                            job.times.completed !== null &&
+                            Date.now() - job.times.completed >= ms("90d")
+                        ) {
+                            self.service.archiveJob(job.id);
+                        }
+                    }
+                });
             });
-    }
-
-    getTimeLimit(months = 1) {
-        const time = new Date();
-        time.setMonth(time.getMonth() - months);
-        time.setHours(0, 0, 0);
-        time.setMilliseconds(0);
-        return time;
     }
 }
 
