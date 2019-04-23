@@ -26,7 +26,7 @@ class AutoArchiveHelper extends Helper {
                             job.times.completed !== null &&
                             Date.now() - job.times.completed >= ms("30d")
                         ) {
-                            self.service.archiveJob(job.id);
+                            self.archiveJobTree(job.id);
                         }
                     } else if (job.result.type === JOB_RESULT_TYPE_FAILURE) {
                         if (
@@ -34,11 +34,20 @@ class AutoArchiveHelper extends Helper {
                             job.times.completed !== null &&
                             Date.now() - job.times.completed >= ms("90d")
                         ) {
-                            self.service.archiveJob(job.id);
+                            self.archiveJobTree(job.id);
                         }
                     }
                 });
             });
+    }
+
+    archiveJobTree(jobId) {
+        const self = this;
+        self.service.getJobTree(jobId, { resolveParents: true }).then(tree => {
+            tree.forEach(job => {
+                self.service.archiveJob(job.id);
+            });
+        });
     }
 }
 
