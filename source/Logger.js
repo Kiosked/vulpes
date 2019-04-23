@@ -13,10 +13,12 @@ class Logger {
         };
         this.entriesMax = 100;
         this.service = service;
-        this.init();
     }
 
-    init() {
+    initialise() {
+        if (this.service.initialised) {
+            throw new Error("Failed initialising Scheduler: Parent service already initialised");
+        }
         const logger = this;
         logger.service.on("jobAdded", job => {
             logger.addEntry(logger.levels.LOGGER_INFO, `Added job with id ${job.id}`);

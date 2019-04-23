@@ -417,6 +417,7 @@ class Service extends EventEmitter {
         }
         await this.storage.initialise();
         await this.scheduler.initialise();
+        await this.logger.initialise();
         this._initialised = true;
     }
 
