@@ -7,8 +7,15 @@ const {
 } = require("../symbols.js");
 
 class AutoArchiveHelper extends Helper {
-    constructor() {
+    constructor(interval = ms("1d")) {
         super();
+        this._interval = interval;
+    }
+
+    attach(service) {
+        super.attach(service);
+        this._timer = setInterval(this.archiveCompletedJobs.bind(this), this._interval);
+        setTimeout(() => this.archiveCompletedJobs(), 0);
     }
 
     archiveCompletedJobs() {
@@ -48,6 +55,11 @@ class AutoArchiveHelper extends Helper {
                 self.service.archiveJob(job.id);
             });
         });
+    }
+
+    shutdown() {
+        clearInterval(this._timer);
+        super.shutdown();
     }
 }
 
