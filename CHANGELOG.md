@@ -1,5 +1,15 @@
 # Vulpes Changelog
 
+## v0.25.1
+_2019-04-29_
+
+ * Add job/task id to logging data
+
+## v0.25.0
+_2019-04-23_
+
+ * Logging
+
 ## v0.24.1
 _2019-04-09_
 
