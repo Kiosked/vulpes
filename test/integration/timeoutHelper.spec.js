@@ -9,7 +9,7 @@ describe("TimeoutHelper", function() {
     });
 
     afterEach(function() {
-        this.service.shutdown();
+        return this.service.shutdown();
     });
 
     it("times-out running jobs", function() {

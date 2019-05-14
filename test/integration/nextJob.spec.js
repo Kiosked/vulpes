@@ -25,7 +25,7 @@ describe("Service", function() {
     });
 
     afterEach(function() {
-        this.service.shutdown();
+        return this.service.shutdown();
     });
 
     describe("getNextJob", function() {

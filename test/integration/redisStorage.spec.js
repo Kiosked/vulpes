@@ -30,7 +30,7 @@ describe("Service", function() {
     });
 
     afterEach(function() {
-        this.service.shutdown();
+        return this.service.shutdown();
     });
 
     describe("when using RedisStorage", function() {

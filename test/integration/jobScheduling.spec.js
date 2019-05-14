@@ -18,7 +18,7 @@ describe("Scheduler", function() {
     });
 
     afterEach(function() {
-        this.service.shutdown();
+        return this.service.shutdown();
     });
 
     it("fires events for newly scheduled tasks", function() {
