@@ -266,7 +266,11 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     archiveJob(jobID) {
-        return this.updateJob(jobID, { archived: true }, { filterProps: false });
+        return this.updateJob(
+            jobID,
+            { archived: true, times: { archived: getTimestamp() } },
+            { filterProps: false }
+        );
     }
 
     /**
@@ -446,9 +450,10 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
-        query.archived = query.archived
-            ? query.archived
-            : archived => archived === false || archived === undefined;
+        query.archived =
+            typeof query.archived === "boolean"
+                ? query.archived
+                : archived => archived === false || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
         jobStream.on("data", job => {

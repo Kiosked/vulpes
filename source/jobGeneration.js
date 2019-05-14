@@ -130,6 +130,7 @@ function generateEmptyJob() {
             type: null
         },
         times: {
+            archived: null,
             firstStarted: null,
             started: null,
             stopped: null,
