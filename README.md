@@ -171,6 +171,18 @@ service.scheduler.enabled = false;
 
 The latter option is not recommended as the scheduler would still have a minutue amount of time, if the service is initialised, to create tasks.
 
+### Shutdown
+
+Shutting down a Vulpes service is accomplished by running `service.shutdown()`, which returns a `Promise`:
+
+```javascript
+async () => {
+    await service.shutdown();
+};
+```
+
+It is important to wait for the Promise to resolve, as some items need time to close connections. Redis storages need time to close their connections before a shutdown can be completed.
+
 ## Developing
 
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.
