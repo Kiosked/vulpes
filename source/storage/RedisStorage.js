@@ -6,6 +6,8 @@ const ChannelQueue = require("@buttercup/channel-queue");
 const Storage = require("./Storage.js");
 
 const NOOP = () => {};
+const SHUTDOWN_GRACE_PRE = 100;
+const SHUTDOWN_GRACE_POST = 150;
 const STREAM_READ_COUNT = 2;
 
 /**
@@ -63,7 +65,11 @@ class RedisStorage extends Storage {
      */
     async shutdown() {
         await super.shutdown();
-        await this.redis.quit();
+        await sleep(SHUTDOWN_GRACE_PRE);
+        await this._queue.channel("streamOut").enqueue(async () => {
+            await sleep(SHUTDOWN_GRACE_POST);
+            await this.redis.quit();
+        });
     }
 
     /**
