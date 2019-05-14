@@ -3,6 +3,7 @@ require("./polyfill.js");
 const Service = require("./Service.js");
 
 const Helper = require("./helper/Helper.js");
+const AutoArchiveHelper = require("./helper/AutoArchiveHelper.js");
 const TimeoutHelper = require("./helper/TimeoutHelper.js");
 
 const Storage = require("./storage/Storage.js");
@@ -17,6 +18,7 @@ module.exports = {
     Symbol,
 
     Helper,
+    AutoArchiveHelper,
     TimeoutHelper,
 
     Storage,
