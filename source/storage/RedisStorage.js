@@ -59,10 +59,11 @@ class RedisStorage extends Storage {
     /**
      * Shutdown the adapter (and disconnect Redis)
      * @memberof RedisStorage
+     * @returns {Promise} A promise that resolves when shutdown has completed
      */
-    shutdown() {
-        super.shutdown();
-        this.redis.quit();
+    async shutdown() {
+        await super.shutdown();
+        await this.redis.quit();
     }
 
     /**

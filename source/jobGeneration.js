@@ -29,7 +29,6 @@ const {
  */
 
 const CONFIGURABLE_JOB_KEYS = [
-    "archived",
     "data",
     "parents",
     "predicate",

@@ -266,7 +266,7 @@ class Service extends EventEmitter {
      * @memberof Service
      */
     archiveJob(jobID) {
-        return this.updateJob(jobID, { archived: true });
+        return this.updateJob(jobID, { archived: true }, { filterProps: false });
     }
 
     /**
@@ -521,14 +521,15 @@ class Service extends EventEmitter {
 
     /**
      * Shutdown the instance
+     * @returns {Promise}
      * @memberof Service
      */
-    shutdown() {
+    async shutdown() {
         this.scheduler.shutdown();
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
-        this.storage.shutdown();
+        await this.storage.shutdown();
         this._helpers = [];
         this._shutdown = true;
         this._initialised = false;
@@ -695,7 +696,7 @@ class Service extends EventEmitter {
                     const updateProps = filterProps
                         ? filterJobInitObject(mergedProperties)
                         : mergedProperties;
-                    const updatedJob = merge.recursive({}, job, updateProps);
+                    const updatedJob = validateJobProperties(merge.recursive({}, job, updateProps));
                     await this.storage.setItem(job.id, updatedJob);
                     this.emit("jobUpdated", {
                         id: job.id,
