@@ -171,6 +171,31 @@ service.scheduler.enabled = false;
 
 The latter option is not recommended as the scheduler would still have a minutue amount of time, if the service is initialised, to create tasks.
 
+### Archiving jobs
+
+After a while jobs should be archived so that they don't clog the system. You can archive individual jobs by running the `Service#archiveJob()` method:
+
+```javascript
+await service.archiveJob(jobID);
+```
+
+You should of course archive the entire job tree when doing this. Archiving a job prevents the job from showing in `Service#queryJobs()` results. Archived jobs will not be started by a worker nor will appear in the UI.
+
+A helper named `AutoArchiveHelper` is also available for use in automatically archiving old jobs that have stopped and have either succeeded or failed (failure, timeout or success). Usage is very simple:
+
+```javascript
+const ms = require("ms");
+const { AutoArchiveHelper, Service } = require("vulpes");
+
+const service = new Service();
+const autoArchiveHelper = new AutoArchiveHelper({
+    checkInterval: ms("15m"), // default: 10 minutes
+    archivePeriod: ms("1m"), // default: 2 weeks
+    queryLimit: 100 // default: 50 (max jobs per query to check for archiving)
+});
+service.use(autoArchiveHelper);
+```
+
 ### Shutdown
 
 Shutting down a Vulpes service is accomplished by running `service.shutdown()`, which returns a `Promise`:

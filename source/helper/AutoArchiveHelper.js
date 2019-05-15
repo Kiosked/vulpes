@@ -4,6 +4,7 @@ const { clearDelayedInterval, setDelayedInterval } = require("delayable-setinter
 const {
     JOB_RESULT_TYPE_FAILURE,
     JOB_RESULT_TYPE_SUCCESS,
+    JOB_RESULT_TYPE_TIMEOUT,
     JOB_STATUS_STOPPED
 } = require("../symbols.js");
 const { getTimestamp } = require("../time.js");
@@ -21,7 +22,9 @@ class AutoArchiveHelper extends Helper {
         const oldJobs = await this.service.queryJobs(
             {
                 "result.type": type =>
-                    type === JOB_RESULT_TYPE_FAILURE || type === JOB_RESULT_TYPE_SUCCESS,
+                    type === JOB_RESULT_TYPE_FAILURE ||
+                    type === JOB_RESULT_TYPE_TIMEOUT ||
+                    type === JOB_RESULT_TYPE_SUCCESS,
                 status: JOB_STATUS_STOPPED,
                 "times.stopped": stopped => stopped && now - stopped >= this._archivePeriod
             },
@@ -36,9 +39,10 @@ class AutoArchiveHelper extends Helper {
             processedIDs.push(...jobTree.map(job => job.id));
             const readyToArchive = jobTree.every(
                 job =>
-                    (job.status === JOB_STATUS_STOPPED &&
-                        job.result.type === JOB_RESULT_TYPE_FAILURE) ||
-                    JOB_RESULT_TYPE_SUCCESS
+                    job.status === JOB_STATUS_STOPPED &&
+                    (job.result.type === JOB_RESULT_TYPE_FAILURE ||
+                        job.result.type === JOB_RESULT_TYPE_SUCCESS ||
+                        job.result.type === JOB_RESULT_TYPE_TIMEOUT)
             );
             if (readyToArchive) {
                 for (let j = 0; j < jobTree.length; j += 1) {
