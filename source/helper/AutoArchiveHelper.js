@@ -9,7 +9,24 @@ const {
 } = require("../symbols.js");
 const { getTimestamp } = require("../time.js");
 
+/**
+ * Auto archive helper
+ * @augments Helper
+ */
 class AutoArchiveHelper extends Helper {
+    /**
+     * @typedef {Object} AutoArchiveHelperOptions
+     * @property {Number=} checkInterval - Milliseconds between archive checks
+     * @property {Number=} archivePeriod - Milliseconds that a job has been stopped before
+     *  it can be archived
+     * @property {Number=} queryLimit - Max job results from queries for archving
+     */
+
+    /**
+     * Constructor for the auto archive helper
+     * @param {AutoArchiveHelperOptions=} options Config options
+     * @memberof AutoArchiveHelper
+     */
     constructor({ checkInterval = ms("10m"), archivePeriod = ms("2w"), queryLimit = 50 } = {}) {
         super();
         this._checkInterval = checkInterval;
@@ -17,6 +34,11 @@ class AutoArchiveHelper extends Helper {
         this._queryLimit = queryLimit;
     }
 
+    /**
+     * Run the archival process
+     * @returns {Promise}
+     * @memberof AutoArchiveHelper
+     */
     async archiveJobs() {
         const now = getTimestamp();
         const oldJobs = await this.service.queryJobs(
@@ -52,11 +74,20 @@ class AutoArchiveHelper extends Helper {
         }
     }
 
+    /**
+     * Attach to a service instance
+     * @param {Service} service The service to attach to
+     * @memberof AutoArchiveHelper
+     */
     attach(service) {
         super.attach(service);
         this._timer = setDelayedInterval(() => this.archiveJobs(), this._checkInterval);
     }
 
+    /**
+     * Shutdown the helper
+     * @memberof AutoArchiveHelper
+     */
     shutdown() {
         clearDelayedInterval(this._timer);
         super.shutdown();

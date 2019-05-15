@@ -1,6 +1,9 @@
 ## Classes
 
 <dl>
+<dt><a href="#AutoArchiveHelper">AutoArchiveHelper</a> ⇐ <code><a href="#Helper">Helper</a></code></dt>
+<dd><p>Auto archive helper</p>
+</dd>
 <dt><a href="#Helper">Helper</a></dt>
 <dd><p>Helper base class
 Helpers provide an easy interface with which to
@@ -53,6 +56,8 @@ interface and does not actually perform any operations.</p>
 ## Typedefs
 
 <dl>
+<dt><a href="#AutoArchiveHelperOptions">AutoArchiveHelperOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#NewJob">NewJob</a> : <code>Object</code></dt>
 <dd><p>New job data</p>
 </dd>
@@ -102,6 +107,63 @@ interface and does not actually perform any operations.</p>
 <dd></dd>
 </dl>
 
+<a name="AutoArchiveHelper"></a>
+
+## AutoArchiveHelper ⇐ [<code>Helper</code>](#Helper)
+Auto archive helper
+
+**Kind**: global class  
+**Extends**: [<code>Helper</code>](#Helper)  
+
+* [AutoArchiveHelper](#AutoArchiveHelper) ⇐ [<code>Helper</code>](#Helper)
+    * [new AutoArchiveHelper([options])](#new_AutoArchiveHelper_new)
+    * [.service](#Helper+service) : [<code>Service</code>](#Service)
+    * [.archiveJobs()](#AutoArchiveHelper+archiveJobs) ⇒ <code>Promise</code>
+    * [.attach(service)](#AutoArchiveHelper+attach)
+    * [.shutdown()](#AutoArchiveHelper+shutdown)
+
+<a name="new_AutoArchiveHelper_new"></a>
+
+### new AutoArchiveHelper([options])
+Constructor for the auto archive helper
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [options] | [<code>AutoArchiveHelperOptions</code>](#AutoArchiveHelperOptions) | Config options |
+
+<a name="Helper+service"></a>
+
+### autoArchiveHelper.service : [<code>Service</code>](#Service)
+The attached service
+
+**Kind**: instance property of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+**Read only**: true  
+<a name="AutoArchiveHelper+archiveJobs"></a>
+
+### autoArchiveHelper.archiveJobs() ⇒ <code>Promise</code>
+Run the archival process
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+<a name="AutoArchiveHelper+attach"></a>
+
+### autoArchiveHelper.attach(service)
+Attach to a service instance
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+**Overrides**: [<code>attach</code>](#Helper+attach)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| service | [<code>Service</code>](#Service) | The service to attach to |
+
+<a name="AutoArchiveHelper+shutdown"></a>
+
+### autoArchiveHelper.shutdown()
+Shutdown the helper
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+**Overrides**: [<code>shutdown</code>](#Helper+shutdown)  
 <a name="Helper"></a>
 
 ## Helper
@@ -483,8 +545,10 @@ Service for managing jobs
         * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
         * [.tracker](#Service+tracker) : <code>Tracker</code>
+        * [.logger](#Service+logger) : <code>Logger</code>
         * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
         * [.addJobs(jobs)](#Service+addJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
+        * [.archiveJob(jobID)](#Service+archiveJob) ⇒ <code>Promise</code>
         * [.getJob(jobID)](#Service+getJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
         * [.getJobChildren(jobID, [options])](#Service+getJobChildren) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
@@ -494,7 +558,7 @@ Service for managing jobs
         * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.removeJob(jobID)](#Service+removeJob) ⇒ <code>Promise</code>
         * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
-        * [.shutdown()](#Service+shutdown)
+        * [.shutdown()](#Service+shutdown) ⇒ <code>Promise</code>
         * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
         * [.stopJob(jobID, resultType, [resultData])](#Service+stopJob) ⇒ <code>Promise</code>
         * [.updateJob(jobID, mergedProperties, [options])](#Service+updateJob)
@@ -572,6 +636,13 @@ Analytics tracking instance
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
 **Read only**: true  
+<a name="Service+logger"></a>
+
+### service.logger : <code>Logger</code>
+Logger instance
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
 <a name="Service+addJob"></a>
 
 ### service.addJob([properties]) ⇒ <code>Promise.&lt;String&gt;</code>
@@ -595,6 +666,17 @@ Add an array of new jobs (a batch)
 | Param | Type | Description |
 | --- | --- | --- |
 | jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | An array of new job objects |
+
+<a name="Service+archiveJob"></a>
+
+### service.archiveJob(jobID) ⇒ <code>Promise</code>
+Archive a job so it will be removed from queries
+
+**Kind**: instance method of [<code>Service</code>](#Service)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID |
 
 <a name="Service+getJob"></a>
 
@@ -719,7 +801,7 @@ Reset a failed job
 
 <a name="Service+shutdown"></a>
 
-### service.shutdown()
+### service.shutdown() ⇒ <code>Promise</code>
 Shutdown the instance
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
@@ -1001,7 +1083,7 @@ Stores items in a Redis database
     * [.getItem()](#RedisStorage+getItem) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
     * [.removeItem()](#RedisStorage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(id, item)](#RedisStorage+setItem) ⇒ <code>Promise</code>
-    * [.shutdown()](#RedisStorage+shutdown)
+    * [.shutdown()](#RedisStorage+shutdown) ⇒ <code>Promise</code>
     * [.streamItems()](#RedisStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
 
@@ -1045,11 +1127,12 @@ Set an item for an ID
 
 <a name="RedisStorage+shutdown"></a>
 
-### redisStorage.shutdown()
+### redisStorage.shutdown() ⇒ <code>Promise</code>
 Shutdown the adapter (and disconnect Redis)
 
 **Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
 **Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
+**Returns**: <code>Promise</code> - A promise that resolves when shutdown has completed  
 <a name="RedisStorage+streamItems"></a>
 
 ### redisStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
@@ -1229,6 +1312,18 @@ Sort jobs by priority
 | --- | --- | --- |
 | jobs | [<code>Array.&lt;Job&gt;</code>](#Job) | An array of jobs |
 
+<a name="AutoArchiveHelperOptions"></a>
+
+## AutoArchiveHelperOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [checkInterval] | <code>Number</code> | Milliseconds between archive checks |
+| [archivePeriod] | <code>Number</code> | Milliseconds that a job has been stopped before  it can be archived |
+| [queryLimit] | <code>Number</code> | Max job results from queries for archving |
+
 <a name="NewJob"></a>
 
 ## NewJob : <code>Object</code>
@@ -1246,6 +1341,7 @@ New job data
 | [data] | <code>Object</code> | Data for this job |
 | [timeLimit] | <code>Number</code> | Time limit in milliseconds (defaults to the default  timelimit on the Service instance). Set to null to disable timeouts. |
 | [attemptsMax] | <code>Number</code> | The maximum number of soft failures that can occur  before this job |
+| [archived] | <code>Boolean</code> | Determining if job will be excluded from queries or not |
 
 <a name="Job"></a>
 
@@ -1277,6 +1373,7 @@ A job
 | times.completed | <code>Number</code> \| <code>null</code> | Timestamp for when the job was  completed successfully |
 | timeLimit | <code>Number</code> \| <code>null</code> | Time limitation for the job's  execution. null means no limit. |
 | attempts | <code>Number</code> | Number of attempts the job has had |
+| archived | <code>Boolean</code> | True means the job will be archived and excluded from queries |
 
 <a name="PredicatesTestResult"></a>
 
