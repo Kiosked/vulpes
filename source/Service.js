@@ -434,6 +434,9 @@ class Service extends EventEmitter {
      * @property {String=} sort - Property to sort by. Defaults to "created". Can be
      *  set to created/status/priority/type.
      * @property {String=} order - Sorting order: asc/desc (default "desc")
+     * @property {Number=} start - The starting offset (index) for when to start
+     *  collecting search results. Should be used together with `limit` to perform
+     *  pagination. Defaults to 0.
      */
 
     /**
@@ -448,7 +451,10 @@ class Service extends EventEmitter {
      *  an array of jobs
      * @memberof Service
      */
-    async queryJobs(query = {}, { limit = Infinity, sort = "created", order = "desc" } = {}) {
+    async queryJobs(
+        query = {},
+        { start = 0, limit = Infinity, sort = "created", order = "desc" } = {}
+    ) {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
@@ -458,9 +464,13 @@ class Service extends EventEmitter {
                 : archived => archived === false || archived === undefined;
         const jobStream = await this.storage.streamItems();
         const results = [];
+        let offsetLeft = start;
         jobStream.on("data", job => {
             if (job[ITEM_TYPE] === ITEM_TYPE_JOB && jobMatches(job, query)) {
-                results.push(job);
+                if (offsetLeft <= 0) {
+                    results.push(job);
+                }
+                offsetLeft = Math.max(offsetLeft - 1, 0);
             }
         });
         await new Promise((resolve, reject) =>

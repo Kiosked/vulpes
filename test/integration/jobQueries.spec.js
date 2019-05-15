@@ -44,6 +44,12 @@ describe("Service", function() {
             });
         });
 
+        it("can offset the start index of jobs", function() {
+            return this.service.queryJobs({}, { start: 1 }).then(jobs => {
+                expect(jobs).to.have.lengthOf(1);
+            });
+        });
+
         it("can sort jobs", function() {
             return this.service.queryJobs({}, { sort: "type", order: "desc" }).then(jobs => {
                 expect(jobs).to.have.lengthOf(2);
