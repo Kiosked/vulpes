@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.27.0
+_2019-05-15_
+
+ * `start` index for `Service#queryJobs` to support pagination
+
 ## v0.26.0
 _2019-05-15_
 
