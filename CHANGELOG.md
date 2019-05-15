@@ -1,5 +1,13 @@
 # Vulpes Changelog
 
+## v0.26.0
+_2019-05-15_
+
+ * Job archiving
+ * `AutoArchiveHelper` for archving jobs automatically
+ * Redis storage shutdown grace period
+ * `Service#shutdown` is now async
+
 ## v0.25.1
 _2019-04-29_
 
