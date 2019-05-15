@@ -1,64 +1,60 @@
 const ms = require("ms");
 const Helper = require("./Helper.js");
+const { clearDelayedInterval, setDelayedInterval } = require("delayable-setinterval");
 const {
     JOB_RESULT_TYPE_FAILURE,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_STATUS_STOPPED
 } = require("../symbols.js");
+const { getTimestamp } = require("../time.js");
 
 class AutoArchiveHelper extends Helper {
-    constructor(interval = ms("1d")) {
+    constructor({ checkInterval = ms("10m"), archivePeriod = ms("2w"), queryLimit = 50 } = {}) {
         super();
-        this._interval = interval;
+        this._checkInterval = checkInterval;
+        this._archivePeriod = archivePeriod;
+        this._queryLimit = queryLimit;
+    }
+
+    async archiveJobs() {
+        const now = getTimestamp();
+        const oldJobs = await this.service.queryJobs(
+            {
+                "result.type": type =>
+                    type === JOB_RESULT_TYPE_FAILURE || type === JOB_RESULT_TYPE_SUCCESS,
+                status: JOB_STATUS_STOPPED,
+                "times.stopped": stopped => stopped && now - stopped >= this._archivePeriod
+            },
+            { limit: this._queryLimit }
+        );
+        const processedIDs = [];
+        for (let i = 0; i < oldJobs.length; i += 1) {
+            if (processedIDs.includes(oldJobs[i].id)) {
+                continue;
+            }
+            const jobTree = await this.service.getJobTree(oldJobs[i].id);
+            processedIDs.push(...jobTree.map(job => job.id));
+            const readyToArchive = jobTree.every(
+                job =>
+                    (job.status === JOB_STATUS_STOPPED &&
+                        job.result.type === JOB_RESULT_TYPE_FAILURE) ||
+                    JOB_RESULT_TYPE_SUCCESS
+            );
+            if (readyToArchive) {
+                for (let j = 0; j < jobTree.length; j += 1) {
+                    await this.service.archiveJob(jobTree[j].id);
+                }
+            }
+        }
     }
 
     attach(service) {
         super.attach(service);
-        this._timer = setInterval(this.archiveCompletedJobs.bind(this), this._interval);
-        setTimeout(() => this.archiveCompletedJobs(), 0);
-    }
-
-    archiveCompletedJobs() {
-        const self = this;
-        self.service
-            .queryJobs({
-                archived: archived => archived === false || archived === undefined,
-                status: JOB_STATUS_STOPPED
-            })
-            .then(completedJobs => {
-                completedJobs.forEach(job => {
-                    if (job.result.type === JOB_RESULT_TYPE_SUCCESS) {
-                        if (
-                            job.times &&
-                            job.times.completed !== null &&
-                            Date.now() - job.times.completed >= ms("30d")
-                        ) {
-                            self.archiveJobTree(job.id);
-                        }
-                    } else if (job.result.type === JOB_RESULT_TYPE_FAILURE) {
-                        if (
-                            job.times &&
-                            job.times.completed !== null &&
-                            Date.now() - job.times.completed >= ms("90d")
-                        ) {
-                            self.archiveJobTree(job.id);
-                        }
-                    }
-                });
-            });
-    }
-
-    archiveJobTree(jobId) {
-        const self = this;
-        self.service.getJobTree(jobId, { resolveParents: true }).then(tree => {
-            tree.forEach(job => {
-                self.service.archiveJob(job.id);
-            });
-        });
+        this._timer = setDelayedInterval(() => this.archiveJobs(), this._checkInterval);
     }
 
     shutdown() {
-        clearInterval(this._timer);
+        clearDelayedInterval(this._timer);
         super.shutdown();
     }
 }

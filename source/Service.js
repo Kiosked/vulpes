@@ -263,14 +263,16 @@ class Service extends EventEmitter {
     /**
      * Archive a job so it will be removed from queries
      * @param {String} jobID The job ID
+     * @returns {Promise}
      * @memberof Service
      */
-    archiveJob(jobID) {
-        return this.updateJob(
+    async archiveJob(jobID) {
+        await this.updateJob(
             jobID,
             { archived: true, times: { archived: getTimestamp() } },
             { filterProps: false }
         );
+        this.emit("jobArchived", { id: jobID });
     }
 
     /**
