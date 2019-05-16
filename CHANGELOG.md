@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.28.1
+_2019-05-16_
+
+ * `total` property on query results for total jobs found
+
 ## v0.28.0
 _2019-05-16_
 
