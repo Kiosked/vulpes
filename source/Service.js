@@ -506,12 +506,14 @@ class Service extends EventEmitter {
         });
         await waitForStream(jobStreamFinal);
         // Final sort
-        return sortJobs(jobs, [
+        const output = sortJobs(jobs, [
             {
                 property: sort,
                 direction: order
             }
         ]);
+        output.total = allJobsSorted.length;
+        return output;
     }
 
     /**

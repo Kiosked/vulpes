@@ -50,6 +50,25 @@ describe("Service", function() {
             });
         });
 
+        it("can sort, order and limit while processing the total jobs", function() {
+            return this.service
+                .addJobs([
+                    { id: 1, type: "test3" },
+                    { id: 2, type: "test4" },
+                    { id: 3, type: "test5" },
+                    { id: 4, type: "test6" },
+                    { id: 5, type: "test7" }
+                ])
+                .then(() =>
+                    this.service.queryJobs({}, { start: 2, limit: 3, sort: "type", order: "desc" })
+                )
+                .then(jobs => {
+                    const mapped = jobs.map(job => job.type);
+                    expect(mapped).to.deep.equal(["test5", "test4", "test3"]);
+                    expect(jobs).to.have.property("total", 7);
+                });
+        });
+
         it("can sort jobs", function() {
             return this.service.queryJobs({}, { sort: "type", order: "desc" }).then(jobs => {
                 expect(jobs).to.have.lengthOf(2);

@@ -140,6 +140,21 @@ Special properties in job data can be used to change their behaviour. Special pr
 | `!`       | Reserved: For client implementation. This should not be sent to the server as future implementations may break. It is reserved for client-side implementation and should be stripped from results and data. | `!system_value` |
 | `%`       | Hidden property - Properties prefixed by this symbol are hidden in the UI, but available everywhere else as a regular property. | `%imagedata` |
 
+### Querying jobs
+
+Use the `Service#queryJobs` method to query for jobs:
+
+```javascript
+const jobs = await service.queryJobs(
+    { type: /^custom/ },
+    { start: 0, limit: 25, sort: "type", order: "desc" }
+);
+```
+
+The second options parameter is optional, and by default the function will sort by **created** and will limit results to `Infinity`.
+
+`start` and `limit` can be used to configure pagination. The resulting `jobs` variable specified above will contain property called `total` which holds the total count of found jobs, after the query but before the slicing using `start` and `limit`.
+
 ### Scheduling jobs / Templates
 
 A common need of any task management system is scheduled/repeating jobs. Vulpes provides support for this via a `scheduler` helper attached to each `Service` instance. Scheduled jobs are simply timed executions of the `Service#addJobs` batch command.
