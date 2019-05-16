@@ -373,7 +373,7 @@ Update properties of a task
 
 <a name="Scheduler+_cronSchedule"></a>
 
-### scheduler._cronSchedule() ⇒ <code>Object</code>
+### scheduler.\_cronSchedule() ⇒ <code>Object</code>
 Schedule a CRON execution
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -388,7 +388,7 @@ Schedule a CRON execution
 
 <a name="Scheduler+_executeTask"></a>
 
-### scheduler._executeTask(taskOrTaskID, [force])
+### scheduler.\_executeTask(taskOrTaskID, [force])
 Execute a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -402,7 +402,7 @@ Execute a task
 
 <a name="Scheduler+_unwatchTask"></a>
 
-### scheduler._unwatchTask(task) ⇒ <code>Boolean</code>
+### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
 Unwatch a CRON task (deschedule it)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -415,7 +415,7 @@ Unwatch a CRON task (deschedule it)
 
 <a name="Scheduler+_watchTask"></a>
 
-### scheduler._watchTask(task)
+### scheduler.\_watchTask(task)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -428,7 +428,7 @@ Watch a task (start timer for scheduling)
 
 <a name="Scheduler+_writeTask"></a>
 
-### scheduler._writeTask(task) ⇒ <code>Promise</code>
+### scheduler.\_writeTask(task) ⇒ <code>Promise</code>
 Write a task to storage
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -759,14 +759,14 @@ Must be called before any other operation
 
 ### service.queryJobs([query], [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
 Perform a jobs query
-Query for an array of jobs by the job's properties. This uses a library
-called simple-object-query to query each job. This method uses the
-library's `find` method.
+Query for an array of jobs by the job's properties. This method streams all
+jobs from storage, testing each individually against the query. Once a group
+of jobs is collected, further sorting and limiting are applied before once
+again streaming the jobs to find the full matches to return.
 
 **Kind**: instance method of [<code>Service</code>](#Service)  
 **Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - Returns a promise that resolves with
  an array of jobs  
-**See**: https://www.npmjs.com/package/simple-object-query  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -1490,6 +1490,7 @@ Options for fetching a job tree
 | [limit] | <code>Number</code> | Limit the number of jobs that are returned by the  query. Defaults to Infinity. |
 | [sort] | <code>String</code> | Property to sort by. Defaults to "created". Can be  set to created/status/priority/type. |
 | [order] | <code>String</code> | Sorting order: asc/desc (default "desc") |
+| [start] | <code>Number</code> | The starting offset (index) for when to start  collecting search results. Should be used together with `limit` to perform  pagination. Defaults to 0. |
 
 <a name="StartJobOptions"></a>
 

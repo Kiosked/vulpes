@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.28.0
+_2019-05-16_
+
+ * Update `Service#queryJobs` to support correct sorting and limiting
+
 ## v0.27.0
 _2019-05-15_
 
