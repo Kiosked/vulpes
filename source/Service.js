@@ -441,10 +441,10 @@ class Service extends EventEmitter {
 
     /**
      * Perform a jobs query
-     * Query for an array of jobs by the job's properties. This uses a library
-     * called simple-object-query to query each job. This method uses the
-     * library's `find` method.
-     * @see https://www.npmjs.com/package/simple-object-query
+     * Query for an array of jobs by the job's properties. This method streams all
+     * jobs from storage, testing each individually against the query. Once a group
+     * of jobs is collected, further sorting and limiting are applied before once
+     * again streaming the jobs to find the full matches to return.
      * @param {Object=} query The object query to perform
      * @param {QueryJobsOptions=} options Options for querying jobs, like sorting
      * @returns {Promise.<Array.<Job>>} Returns a promise that resolves with
@@ -458,36 +458,60 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
+        const waitForStream = stream =>
+            new Promise((resolve, reject) =>
+                endOfStream(stream, err => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve();
+                })
+            );
         query.archived =
             typeof query.archived === "boolean"
                 ? query.archived
                 : archived => archived === false || archived === undefined;
-        const jobStream = await this.storage.streamItems();
-        const results = [];
-        let offsetLeft = start;
-        jobStream.on("data", job => {
+        const jobStreamInitial = await this.storage.streamItems();
+        // First build an index of all job results
+        const jobsIndex = [];
+        jobStreamInitial.on("data", job => {
             if (job[ITEM_TYPE] === ITEM_TYPE_JOB && jobMatches(job, query)) {
-                if (offsetLeft <= 0) {
-                    results.push(job);
-                }
-                offsetLeft = Math.max(offsetLeft - 1, 0);
+                jobsIndex.push({
+                    id: job.id,
+                    type: job.type,
+                    status: job.status,
+                    priority: job.priority,
+                    created: job.created
+                });
             }
         });
-        await new Promise((resolve, reject) =>
-            endOfStream(jobStream, err => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve();
-            })
-        );
-        const jobs = sortJobs(results, [
+        await waitForStream(jobStreamInitial);
+        // Sort initial list
+        const allJobsSorted = sortJobs(jobsIndex, [
             {
                 property: sort,
                 direction: order
             }
         ]);
-        return limit !== Infinity ? jobs.slice(0, limit) : jobs;
+        // Select range
+        const finalRange = allJobsSorted.slice(start, limit === Infinity ? limit : start + limit);
+        // Final selection
+        const jobs = [];
+        const jobStreamFinal = await this.storage.streamItems();
+        jobStreamFinal.on("data", job => {
+            if (finalRange.find(stub => stub.id === job.id)) {
+                // Job is in the set
+                jobs.push(job);
+            }
+        });
+        await waitForStream(jobStreamFinal);
+        // Final sort
+        return sortJobs(jobs, [
+            {
+                property: sort,
+                direction: order
+            }
+        ]);
     }
 
     /**
