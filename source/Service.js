@@ -25,6 +25,7 @@ const {
 } = require("./jobMediation.js");
 const { getTimestamp } = require("./time.js");
 const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
+const { updateStatsForJob } = require("./jobStats.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -121,7 +122,7 @@ class Service extends EventEmitter {
         if (!enableScheduling) {
             this._scheduler.enabled = false;
         }
-        this._tracker = new Tracker();
+        this._tracker = new Tracker(this);
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
@@ -472,20 +473,28 @@ class Service extends EventEmitter {
                 ? query.archived
                 : archived => archived === false || archived === undefined;
         const jobStreamInitial = await this.storage.streamItems();
+        const stats = this.tracker.statsTemplate;
         // First build an index of all job results
         const jobsIndex = [];
         jobStreamInitial.on("data", job => {
-            if (job[ITEM_TYPE] === ITEM_TYPE_JOB && jobMatches(job, query)) {
-                jobsIndex.push({
-                    id: job.id,
-                    type: job.type,
-                    status: job.status,
-                    priority: job.priority,
-                    created: job.created
-                });
+            if (job[ITEM_TYPE] === ITEM_TYPE_JOB) {
+                // Handle query check first
+                if (jobMatches(job, query)) {
+                    jobsIndex.push({
+                        id: job.id,
+                        type: job.type,
+                        status: job.status,
+                        priority: job.priority,
+                        created: job.created
+                    });
+                }
+                // Process jobs for stats updates
+                updateStatsForJob(stats, job);
             }
         });
         await waitForStream(jobStreamInitial);
+        // Update stats
+        this.tracker.updateStats(stats);
         // Sort initial list
         const allJobsSorted = sortJobs(jobsIndex, [
             {

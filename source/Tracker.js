@@ -1,6 +1,27 @@
 const ms = require("ms");
 
 /**
+ * @typedef {Object} TrackerJobStats
+ * @property {Number} totalJobs - Total number of jobs
+ * @property {Number} stoppedJobs - Total number of currently stopped jobs
+ * @property {Number} runningJobs - Total number of currently running jobs
+ * @property {Number} pendingJobs - Total number of currently pending jobs
+ * @property {Number} succeededJobs - Total succeeded jobs
+ * @property {Number} failedJobs - Total failed jobs
+ * @property {Number} jobsInLastHour - Total number of jobs completed successfully in the last hour
+ */
+
+const STATS = {
+    totalJobs: 0,
+    stoppedJobs: 0,
+    runningJobs: 0,
+    pendingJobs: 0,
+    succeededJobs: 0,
+    failedJobs: 0,
+    jobsInLastHour: 0
+};
+
+/**
  * @typedef {Object} RegisteredWorker
  * @property {String} id The worker ID
  * @property {Number} updated The last updated timestamp
@@ -8,8 +29,10 @@ const ms = require("ms");
  */
 
 class Tracker {
-    constructor() {
+    constructor(service) {
+        this._service = service;
         this._workers = [];
+        this._stats = this.statsTemplate;
         this.liveWorkerTolerance = ms("60s");
     }
 
@@ -22,6 +45,26 @@ class Tracker {
     get liveWorkers() {
         const validUpdatedTime = Date.now() - this.liveWorkerTolerance;
         return this._workers.filter(worker => worker.updated >= validUpdatedTime);
+    }
+
+    /**
+     * Get a new stats template (zeroed)
+     * @returns {TrackerJobStats}
+     * @memberof Tracker
+     */
+    get statsTemplate() {
+        return Object.assign({}, STATS);
+    }
+
+    /**
+     * Fetch job stats
+     * @returns {Promise.<TrackerJobStats>}
+     * @memberof Tracker
+     */
+    async fetchStats() {
+        // Run a query to process all jobs
+        await this._service.queryJobs({});
+        return Object.assign(this.statsTemplate, this._stats);
     }
 
     /**
@@ -41,6 +84,15 @@ class Tracker {
             updated: Date.now(),
             count: 1
         });
+    }
+
+    /**
+     * Update job stats
+     * @param {TrackerJobStats} newStats
+     * @memberof Tracker
+     */
+    updateStats(newStats) {
+        this._stats = Object.assign(this.statsTemplate, newStats);
     }
 }
 
