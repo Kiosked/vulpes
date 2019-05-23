@@ -51,6 +51,10 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#sortJobsByPriority">sortJobsByPriority(jobs)</a> ⇒ <code><a href="#Job">Array.&lt;Job&gt;</a></code></dt>
 <dd><p>Sort jobs by priority</p>
 </dd>
+<dt><a href="#updateStatsForJob">updateStatsForJob(jobStats, job)</a></dt>
+<dd><p>Updates the properties in <code>jobStats</code> according to the state
+of the <code>job</code></p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -103,6 +107,8 @@ interface and does not actually perform any operations.</p>
 <dt><a href="#Priority">Priority</a> : <code>String</code></dt>
 <dd><p>Job priority</p>
 </dd>
+<dt><a href="#TrackerJobStats">TrackerJobStats</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#RegisteredWorker">RegisteredWorker</a> : <code>Object</code></dt>
 <dd></dd>
 </dl>
@@ -1312,6 +1318,19 @@ Sort jobs by priority
 | --- | --- | --- |
 | jobs | [<code>Array.&lt;Job&gt;</code>](#Job) | An array of jobs |
 
+<a name="updateStatsForJob"></a>
+
+## updateStatsForJob(jobStats, job)
+Updates the properties in `jobStats` according to the state
+of the `job`
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobStats | <code>Object</code> | Job stats - mutated during execution (not pure) |
+| job | [<code>Job</code>](#Job) | A raw job |
+
 <a name="AutoArchiveHelperOptions"></a>
 
 ## AutoArchiveHelperOptions : <code>Object</code>
@@ -1535,6 +1554,22 @@ Job status
 Job priority
 
 **Kind**: global typedef  
+<a name="TrackerJobStats"></a>
+
+## TrackerJobStats : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| totalJobs | <code>Number</code> | Total number of jobs |
+| stoppedJobs | <code>Number</code> | Total number of currently stopped jobs |
+| runningJobs | <code>Number</code> | Total number of currently running jobs |
+| pendingJobs | <code>Number</code> | Total number of currently pending jobs |
+| succeededJobs | <code>Number</code> | Total succeeded jobs |
+| failedJobs | <code>Number</code> | Total failed jobs |
+| jobsInLastHour | <code>Number</code> | Total number of jobs completed successfully in the last hour |
+
 <a name="RegisteredWorker"></a>
 
 ## RegisteredWorker : <code>Object</code>
