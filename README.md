@@ -223,6 +223,18 @@ async () => {
 
 It is important to wait for the Promise to resolve, as some items need time to close connections. Redis storages need time to close their connections before a shutdown can be completed.
 
+### Stats
+
+Stats are recorded using the built-in `Tracker` instance, attached to each `Service` upon instantiation. It records things like current live workers and job stats.
+
+To get job stats from the tracker:
+
+```javascript
+const stats = await service.tracker.fetchStats();
+```
+
+`stats` will resemble the [`TrackerJobStats`](API.md#TrackerJobStats) object. You can also get the current live worker count by getting the property `service.tracker.liveWorkers`, which resembles [`RegisteredWorker`](API.md#registeredworker--object).
+
 ## Developing
 
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.

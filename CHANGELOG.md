@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.29.0
+_2019-05-23_
+
+ * `Tracker` job stats
+
 ## v0.28.1
 _2019-05-16_
 
