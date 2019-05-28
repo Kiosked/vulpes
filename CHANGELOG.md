@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.30.0
+_2019-05-28_
+
+ * Delete support for `AutoArchiveHelper`
+
 ## v0.29.0
 _2019-05-23_
 

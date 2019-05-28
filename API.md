@@ -124,7 +124,8 @@ Auto archive helper
 * [AutoArchiveHelper](#AutoArchiveHelper) ⇐ [<code>Helper</code>](#Helper)
     * [new AutoArchiveHelper([options])](#new_AutoArchiveHelper_new)
     * [.service](#Helper+service) : [<code>Service</code>](#Service)
-    * [.archiveJobs()](#AutoArchiveHelper+archiveJobs) ⇒ <code>Promise</code>
+    * [.archive()](#AutoArchiveHelper+archive) ⇒ <code>Promise</code>
+    * [.archiveJobs([action])](#AutoArchiveHelper+archiveJobs) ⇒ <code>Promise</code>
     * [.attach(service)](#AutoArchiveHelper+attach)
     * [.shutdown()](#AutoArchiveHelper+shutdown)
 
@@ -145,12 +146,23 @@ The attached service
 
 **Kind**: instance property of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
 **Read only**: true  
-<a name="AutoArchiveHelper+archiveJobs"></a>
+<a name="AutoArchiveHelper+archive"></a>
 
-### autoArchiveHelper.archiveJobs() ⇒ <code>Promise</code>
-Run the archival process
+### autoArchiveHelper.archive() ⇒ <code>Promise</code>
+Perform the archival process
 
 **Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+<a name="AutoArchiveHelper+archiveJobs"></a>
+
+### autoArchiveHelper.archiveJobs([action]) ⇒ <code>Promise</code>
+Archive or delete some jobs
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [action] | <code>String</code> | <code>archive</code> | The action with which to perform on the selected jobs  (defaults to "archive", but can also be "delete") |
+
 <a name="AutoArchiveHelper+attach"></a>
 
 ### autoArchiveHelper.attach(service)
