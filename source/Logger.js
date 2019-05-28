@@ -29,9 +29,6 @@ class Logger {
         logger.service.on("jobStarted", job => {
             logger.addEntry(logger.levels.LOGGER_INFO, `Started job ${job.id}`, job.id);
         });
-        logger.service.on("jobRestarted", job => {
-            logger.addEntry(logger.levels.LOGGER_INFO, `Restarted job ${job.id}`, job.id);
-        });
         logger.service.on("jobStopped", job => {
             logger.addEntry(logger.levels.LOGGER_INFO, `Stopped job ${job.id}`, job.id);
         });

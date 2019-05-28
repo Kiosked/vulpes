@@ -235,6 +235,23 @@ const stats = await service.tracker.fetchStats();
 
 `stats` will resemble the [`TrackerJobStats`](API.md#TrackerJobStats) object. You can also get the current live worker count by getting the property `service.tracker.liveWorkers`, which resembles [`RegisteredWorker`](API.md#registeredworker--object).
 
+### Service events
+
+The `Service` instance fires events for different processes having taken place:
+
+| Event             | Payload                       | Description                                               |
+|-------------------|-------------------------------|-----------------------------------------------------------|
+| `jobAdded`        | `{ id }`                      | Emitted when a job is added to the service.               |
+| `jobArchived`     | `{ id }`                      | Emitted when a job is archived.                           |
+| `jobDeleted`      | `{ id }`                      | Emitted when a job is deleted. Only the ID is available at this point and attempts to fetch the job will fail. |
+| `jobReset`        | `{ id }`                      | Emitted when a job is reset, made ready for another attempt. |
+| `jobStarted`      | `{ id }`                      | Emitted when a job is started.                            |
+| `jobStopped`      | `{ id }`                      | Emitted when a job is stopped (completed / failed etc.)   |
+| `jobTimeout`      | `{ id }`                      | Emitted when a job times out. Will be emitted along with `jobStopped`. |
+| `jobCompleted`    | `{ id }`                      | Emitted when a job completes successfully. Will be emitted along with `jobStopped`. |
+| `jobFailed`       | `{ id }`                      | Emitted when a job fails to complete successfully. Will be emitted along with `jobStopped`. May be emitted along with `jobTimeout` if the job timed-out. |
+| `jobUpdated`      | `{ id, original, updated }`   | Emitted when a job's payload is updated. The payload of the event, along with the job's `id`, will contain the `original` job along with the `updated` job. |
+
 ## Developing
 
 To begin development on Vuples, clone this repository (or your fork) and run `npm install` in the project directory. Vulpes uses **Babel** to compile its source files into the `dist/` directory. Building occurs automatically upon `npm install` or `npm publish`, but you can also run the process manually by executing `npm run build`. To watch for changes while developing simply run `npm run dev`.

@@ -534,6 +534,7 @@ class Service extends EventEmitter {
      */
     async removeJob(jobID) {
         await this.storage.removeItem(jobID);
+        this.emit("jobDeleted", { id: jobID });
     }
 
     /**
@@ -653,9 +654,6 @@ class Service extends EventEmitter {
                 job.attempts += 1;
                 await this.storage.setItem(job.id, job);
                 this.emit("jobStarted", { id: job.id });
-                if (!jobID) {
-                    this.emit("jobRestarted", { id: job.id });
-                }
                 return await prepareJobForWorker(this, job);
             })
             .catch(err => {
