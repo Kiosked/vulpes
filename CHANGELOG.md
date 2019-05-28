@@ -4,6 +4,7 @@
 _2019-05-28_
 
  * Delete support for `AutoArchiveHelper`
+ * New `jobDeleted` event for `Service`
 
 ## v0.29.0
 _2019-05-23_
