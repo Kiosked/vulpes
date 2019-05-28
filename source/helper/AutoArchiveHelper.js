@@ -27,31 +27,63 @@ class AutoArchiveHelper extends Helper {
      * @param {AutoArchiveHelperOptions=} options Config options
      * @memberof AutoArchiveHelper
      */
-    constructor({ checkInterval = ms("10m"), archivePeriod = ms("2w"), queryLimit = 50 } = {}) {
+    constructor({
+        checkInterval = ms("10m"),
+        archivePeriod = ms("2w"),
+        deletePeriod = ms("1w"),
+        queryLimit = 50
+    } = {}) {
         super();
         this._checkInterval = checkInterval;
         this._archivePeriod = archivePeriod;
         this._queryLimit = queryLimit;
+        this._deletePeriod = deletePeriod;
     }
 
     /**
-     * Run the archival process
+     * Perform the archival process
      * @returns {Promise}
      * @memberof AutoArchiveHelper
      */
-    async archiveJobs() {
+    async archive() {
+        await this.archiveJobs();
+        if (this._deletePeriod) {
+            await this.archiveJobs("delete");
+        }
+    }
+
+    /**
+     * Archive or delete some jobs
+     * @param {String=} action The action with which to perform on the selected jobs
+     *  (defaults to "archive", but can also be "delete")
+     * @returns {Promise}
+     * @memberof AutoArchiveHelper
+     */
+    async archiveJobs(action = "archive") {
+        if (action !== "archive" && action !== "delete") {
+            throw new Error(`Invalid archive action: ${action}`);
+        }
+        const checkPeriod = action === "archive" ? this._archivePeriod : this._deletePeriod;
         const now = getTimestamp();
-        const oldJobs = await this.service.queryJobs(
-            {
-                "result.type": type =>
-                    type === JOB_RESULT_TYPE_FAILURE ||
-                    type === JOB_RESULT_TYPE_TIMEOUT ||
-                    type === JOB_RESULT_TYPE_SUCCESS,
-                status: JOB_STATUS_STOPPED,
-                "times.stopped": stopped => stopped && now - stopped >= this._archivePeriod
-            },
-            { limit: this._queryLimit }
-        );
+        const query =
+            action === "archive"
+                ? {
+                      "result.type": type =>
+                          type === JOB_RESULT_TYPE_FAILURE ||
+                          type === JOB_RESULT_TYPE_TIMEOUT ||
+                          type === JOB_RESULT_TYPE_SUCCESS,
+                      status: JOB_STATUS_STOPPED,
+                      "times.stopped": timeProp => timeProp && now - timeProp >= checkPeriod
+                  }
+                : {
+                      archived: true,
+                      "times.archived": timeProp => timeProp && now - timeProp >= checkPeriod
+                  };
+        const oldJobs = await this.service.queryJobs(query, {
+            limit: this._queryLimit,
+            sort: "created",
+            order: "asc"
+        });
         const processedIDs = [];
         for (let i = 0; i < oldJobs.length; i += 1) {
             if (processedIDs.includes(oldJobs[i].id)) {
@@ -68,7 +100,11 @@ class AutoArchiveHelper extends Helper {
             );
             if (readyToArchive) {
                 for (let j = 0; j < jobTree.length; j += 1) {
-                    await this.service.archiveJob(jobTree[j].id);
+                    if (action === "archive") {
+                        await this.service.archiveJob(jobTree[j].id);
+                    } else if (action === "delete") {
+                        await this.service.removeJob(jobTree[j].id);
+                    }
                 }
             }
         }
@@ -81,7 +117,7 @@ class AutoArchiveHelper extends Helper {
      */
     attach(service) {
         super.attach(service);
-        this._timer = setDelayedInterval(() => this.archiveJobs(), this._checkInterval);
+        this._timer = setDelayedInterval(() => this.archive(), this._checkInterval);
     }
 
     /**

@@ -206,10 +206,13 @@ const service = new Service();
 const autoArchiveHelper = new AutoArchiveHelper({
     checkInterval: ms("15m"), // default: 10 minutes
     archivePeriod: ms("1m"), // default: 2 weeks
+    deletePeriod: ms("2w"), // default: 1 week
     queryLimit: 100 // default: 50 (max jobs per query to check for archiving)
 });
 service.use(autoArchiveHelper);
 ```
+
+The archive helper supports deleting jobs after a period. The `deletePeriod` option is the time _after archiving_ where jobs can then be deleted. When a job has stopped, the duration of `archivePeriod` _and_ `deletePeriod` is the time before the job is completely removed from the service.
 
 ### Shutdown
 
