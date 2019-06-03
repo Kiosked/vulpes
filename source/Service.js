@@ -9,6 +9,7 @@ const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const Logger = require("./Logger.js");
+const ArtifactManager = require("./artifacts/ArtifactManager.js");
 const {
     filterJobInitObject,
     generateEmptyJob,
@@ -101,21 +102,32 @@ const newNotInitialisedError = () =>
 class Service extends EventEmitter {
     /**
      * @typedef {Object} ServiceOptions
+     * @property {ArtifactManager=} artifactManager - Override for the ArtifactManager instance
      * @property {Boolean=} enableScheduling - Control whether or not the scheduling piece of the Service
      *  is enabled or not. Default is true.
      */
 
     /**
      * Contrsuctor for the Service class
-     * @param {Storage=} storage The storage instance
-     * @param {ServiceOptions=} ops Options for the service instance
+     * @param {ServiceOptions=} param0 Options for the new service
      */
-    constructor(storage = new MemoryStorage(), { enableScheduling = true } = {}) {
+    constructor() {
         super();
+        let storage,
+            options = {};
+        if (arguments[0] instanceof Storage) {
+            storage = arguments[0];
+            options = arguments[1] || {};
+        } else if (arguments[0] && typeof arguments[0] === "object") {
+            options = arguments[0];
+        }
+        storage = storage || options.storage || new MemoryStorage();
+        const { artifactManager = new ArtifactManager(), enableScheduling = true } = options;
         if (storage instanceof Storage !== true) {
             throw new Error("Failed instantiating Service: Provided storage is of invalid type");
         }
         this._storage = storage;
+        this._artifactManager = artifactManager;
         this._timeLimit = JOB_TIMELIMIT_DEFAULT;
         this._channelQueue = new ChannelQueue();
         this._scheduler = new Scheduler(this);
