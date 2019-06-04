@@ -423,9 +423,12 @@ class Service extends EventEmitter {
             );
         }
         await this.storage.initialise();
-        await this.scheduler.initialise();
         await this.logger.initialise();
+        await this.scheduler.initialise();
         this._initialised = true;
+        for (const helper of this.helpers) {
+            await helper.initialise();
+        }
     }
 
     /**
