@@ -214,6 +214,23 @@ service.use(autoArchiveHelper);
 
 The archive helper supports deleting jobs after a period. The `deletePeriod` option is the time _after archiving_ where jobs can then be deleted. When a job has stopped, the duration of `archivePeriod` _and_ `deletePeriod` is the time before the job is completely removed from the service.
 
+### Storage Migration
+
+It's possible to migrate from one storage to another if you're wishing to change storage mediums. This is especially useful when migrating from a development stage to a production one, where you may have used `FileStorage` and wish to migrate all the contents to `RedisStorage`.
+
+Storage migration is performed by using the `StorageMigrationHelper`, but note that this one should be attached **before** initialising the `Service` instance:
+
+```javascript
+const { FileStorage, RedisStorage, Service, StorageMigrationHelper } = require("vulpes");
+
+const oldStorage = new FileStorage("/tmp/somefile.json");
+const service = new Service(new RedisStorage());
+const migrateHelper = new StorageMigrationHelper(oldStorage);
+service.use(migrateHelper);
+
+service.initialise();
+```
+
 ### Shutdown
 
 Shutting down a Vulpes service is accomplished by running `service.shutdown()`, which returns a `Promise`:
