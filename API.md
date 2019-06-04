@@ -9,6 +9,9 @@
 Helpers provide an easy interface with which to
 attach to services to perform ancillary tasks.</p>
 </dd>
+<dt><a href="#StorageMigrationHelper">StorageMigrationHelper</a> ⇐ <code><a href="#Helper">Helper</a></code></dt>
+<dd><p>Storage migration helper</p>
+</dd>
 <dt><a href="#Scheduler">Scheduler</a> ⇐ <code>EventEmitter</code></dt>
 <dd><p>Scheduler for scheduled tasks</p>
 </dd>
@@ -128,6 +131,7 @@ Auto archive helper
     * [.archiveJobs([action])](#AutoArchiveHelper+archiveJobs) ⇒ <code>Promise</code>
     * [.attach(service)](#AutoArchiveHelper+attach)
     * [.shutdown()](#AutoArchiveHelper+shutdown)
+    * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
 
 <a name="new_AutoArchiveHelper_new"></a>
 
@@ -182,6 +186,13 @@ Shutdown the helper
 
 **Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
 **Overrides**: [<code>shutdown</code>](#Helper+shutdown)  
+<a name="Helper+initialise"></a>
+
+### autoArchiveHelper.initialise() ⇒ <code>Promise</code>
+Initialise the helper (only called if the helper is added BEFORE
+ service initialisation)
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
 <a name="Helper"></a>
 
 ## Helper
@@ -194,6 +205,7 @@ attach to services to perform ancillary tasks.
 * [Helper](#Helper)
     * [.service](#Helper+service) : [<code>Service</code>](#Service)
     * [.attach(service)](#Helper+attach)
+    * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
     * [.shutdown()](#Helper+shutdown)
 
 <a name="Helper+service"></a>
@@ -219,6 +231,13 @@ This will be called by a Service instance
 | --- | --- | --- |
 | service | [<code>Service</code>](#Service) | The service to attach to |
 
+<a name="Helper+initialise"></a>
+
+### helper.initialise() ⇒ <code>Promise</code>
+Initialise the helper (only called if the helper is added BEFORE
+ service initialisation)
+
+**Kind**: instance method of [<code>Helper</code>](#Helper)  
 <a name="Helper+shutdown"></a>
 
 ### helper.shutdown()
@@ -226,6 +245,69 @@ Shutdown the helper
 This will be called by a Service instance
 
 **Kind**: instance method of [<code>Helper</code>](#Helper)  
+<a name="StorageMigrationHelper"></a>
+
+## StorageMigrationHelper ⇐ [<code>Helper</code>](#Helper)
+Storage migration helper
+
+**Kind**: global class  
+**Extends**: [<code>Helper</code>](#Helper)  
+
+* [StorageMigrationHelper](#StorageMigrationHelper) ⇐ [<code>Helper</code>](#Helper)
+    * [new StorageMigrationHelper(originStorage)](#new_StorageMigrationHelper_new)
+    * [.service](#Helper+service) : [<code>Service</code>](#Service)
+    * [.attach(service)](#Helper+attach)
+    * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
+    * [.shutdown()](#Helper+shutdown)
+
+<a name="new_StorageMigrationHelper_new"></a>
+
+### new StorageMigrationHelper(originStorage)
+Constructor for the storage migration helper
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| originStorage | [<code>Storage</code>](#Storage) | The storage to migrate from |
+
+<a name="Helper+service"></a>
+
+### storageMigrationHelper.service : [<code>Service</code>](#Service)
+The attached service
+
+**Kind**: instance property of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
+**Read only**: true  
+<a name="Helper+attach"></a>
+
+### storageMigrationHelper.attach(service)
+Attach to a service
+This will be called by a Service instance
+
+**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
+**Throws**:
+
+- <code>Error</code> Throws if already attached to a service
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| service | [<code>Service</code>](#Service) | The service to attach to |
+
+<a name="Helper+initialise"></a>
+
+### storageMigrationHelper.initialise() ⇒ <code>Promise</code>
+Initialise the helper (only called if the helper is added BEFORE
+ service initialisation)
+
+**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
+**Overrides**: [<code>initialise</code>](#Helper+initialise)  
+<a name="Helper+shutdown"></a>
+
+### storageMigrationHelper.shutdown()
+Shutdown the helper
+This will be called by a Service instance
+
+**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
 <a name="Scheduler"></a>
 
 ## Scheduler ⇐ <code>EventEmitter</code>
@@ -391,7 +473,7 @@ Update properties of a task
 
 <a name="Scheduler+_cronSchedule"></a>
 
-### scheduler.\_cronSchedule() ⇒ <code>Object</code>
+### scheduler._cronSchedule() ⇒ <code>Object</code>
 Schedule a CRON execution
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -406,7 +488,7 @@ Schedule a CRON execution
 
 <a name="Scheduler+_executeTask"></a>
 
-### scheduler.\_executeTask(taskOrTaskID, [force])
+### scheduler._executeTask(taskOrTaskID, [force])
 Execute a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -420,7 +502,7 @@ Execute a task
 
 <a name="Scheduler+_unwatchTask"></a>
 
-### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
+### scheduler._unwatchTask(task) ⇒ <code>Boolean</code>
 Unwatch a CRON task (deschedule it)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -433,7 +515,7 @@ Unwatch a CRON task (deschedule it)
 
 <a name="Scheduler+_watchTask"></a>
 
-### scheduler.\_watchTask(task)
+### scheduler._watchTask(task)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -446,7 +528,7 @@ Watch a task (start timer for scheduling)
 
 <a name="Scheduler+_writeTask"></a>
 
-### scheduler.\_writeTask(task) ⇒ <code>Promise</code>
+### scheduler._writeTask(task) ⇒ <code>Promise</code>
 Write a task to storage
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  

@@ -231,6 +231,8 @@ service.use(migrateHelper);
 service.initialise();
 ```
 
+_Note that migrations also remove items from the origin storage._
+
 ### Shutdown
 
 Shutting down a Vulpes service is accomplished by running `service.shutdown()`, which returns a `Promise`:
