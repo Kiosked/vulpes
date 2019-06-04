@@ -135,10 +135,10 @@ class Service extends EventEmitter {
             this._scheduler.enabled = false;
         }
         this._tracker = new Tracker(this);
+        this._logger = new Logger(this);
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
-        this._logger = new Logger(this);
     }
 
     /**
@@ -149,6 +149,16 @@ class Service extends EventEmitter {
      */
     get alive() {
         return !this._shutdown;
+    }
+
+    /**
+     * Artifact manager instance
+     * @type {ArtifactManager}
+     * @readonly
+     * @memberof Service
+     */
+    get artifactManager() {
+        return this._artifactManager;
     }
 
     /**
@@ -435,6 +445,7 @@ class Service extends EventEmitter {
             );
         }
         await this.storage.initialise();
+        await this.artifactManager.initialise();
         await this.scheduler.initialise();
         await this.logger.initialise();
         this._initialised = true;
