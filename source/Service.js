@@ -9,7 +9,7 @@ const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
 const Logger = require("./Logger.js");
-const ArtifactManager = require("./artifacts/ArtifactManager.js");
+const ArtifactManager = require("./ArtifactManager.js");
 const {
     filterJobInitObject,
     generateEmptyJob,
