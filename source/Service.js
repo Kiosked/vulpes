@@ -26,6 +26,7 @@ const {
 const { getTimestamp } = require("./time.js");
 const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
 const { updateStatsForJob } = require("./jobStats.js");
+const { removeAllLegacyLogs } = require("./migrations.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -436,6 +437,7 @@ class Service extends EventEmitter {
         await this.artifactManager.initialise(this);
         await this.scheduler.initialise();
         this._initialised = true;
+        await removeAllLegacyLogs(this);
         for (const helper of this.helpers) {
             await helper.initialise();
         }
