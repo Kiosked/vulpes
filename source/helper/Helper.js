@@ -33,6 +33,16 @@ class Helper {
     }
 
     /**
+     * Initialise the helper (only called if the helper is added BEFORE
+     *  service initialisation)
+     * @memberof Helper
+     * @returns {Promise}
+     */
+    initialise() {
+        return Promise.resolve();
+    }
+
+    /**
      * Shutdown the helper
      * This will be called by a Service instance
      * @memberof Helper

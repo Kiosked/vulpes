@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.31.0
+_2019-06-04_
+
+ * `StorageMigrationHelper` for migrating storage mediums
+ * `Helper` instances gain `initialise` method
+
 ## v0.30.0
 _2019-05-28_
 

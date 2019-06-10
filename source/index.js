@@ -4,6 +4,7 @@ const Service = require("./Service.js");
 
 const Helper = require("./helper/Helper.js");
 const AutoArchiveHelper = require("./helper/AutoArchiveHelper.js");
+const StorageMigrationHelper = require("./helper/StorageMigrationHelper.js");
 const TimeoutHelper = require("./helper/TimeoutHelper.js");
 
 const Storage = require("./storage/Storage.js");
@@ -19,6 +20,7 @@ module.exports = {
 
     Helper,
     AutoArchiveHelper,
+    StorageMigrationHelper,
     TimeoutHelper,
 
     Storage,
