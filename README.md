@@ -244,6 +244,7 @@ The `Service` instance fires events for different processes having taken place:
 
 | Event             | Payload                       | Description                                               |
 |-------------------|-------------------------------|-----------------------------------------------------------|
+| `initialised`     | _None_                        | Emitted when the service has finished initialising.       |
 | `jobAdded`        | `{ id }`                      | Emitted when a job is added to the service.               |
 | `jobArchived`     | `{ id }`                      | Emitted when a job is archived.                           |
 | `jobDeleted`      | `{ id }`                      | Emitted when a job is deleted. Only the ID is available at this point and attempts to fetch the job will fail. |
