@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.32.0
+_2019-06-10_
+
+ * Remove logging (breaking)
+ * `ArtifactManager`
+
 ## v0.31.0
 _2019-06-04_
 

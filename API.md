@@ -1,6 +1,9 @@
 ## Classes
 
 <dl>
+<dt><a href="#ArtifactManager">ArtifactManager</a> ⇐ <code>EventEmitter</code></dt>
+<dd><p>Artifact Manager</p>
+</dd>
 <dt><a href="#AutoArchiveHelper">AutoArchiveHelper</a> ⇐ <code><a href="#Helper">Helper</a></code></dt>
 <dd><p>Auto archive helper</p>
 </dd>
@@ -63,6 +66,10 @@ of the <code>job</code></p>
 ## Typedefs
 
 <dl>
+<dt><a href="#NewJobAttachmentOptions">NewJobAttachmentOptions</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#JobAttachment">JobAttachment</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#AutoArchiveHelperOptions">AutoArchiveHelperOptions</a> : <code>Object</code></dt>
 <dd></dd>
 <dt><a href="#NewJob">NewJob</a> : <code>Object</code></dt>
@@ -116,6 +123,128 @@ of the <code>job</code></p>
 <dd></dd>
 </dl>
 
+<a name="ArtifactManager"></a>
+
+## ArtifactManager ⇐ <code>EventEmitter</code>
+Artifact Manager
+
+**Kind**: global class  
+**Extends**: <code>EventEmitter</code>  
+
+* [ArtifactManager](#ArtifactManager) ⇐ <code>EventEmitter</code>
+    * [new ArtifactManager([storagePath])](#new_ArtifactManager_new)
+    * [.addJobAttachment(jobID, param1)](#ArtifactManager+addJobAttachment) ⇒ <code>Promise.&lt;String&gt;</code>
+    * [.initialise(service)](#ArtifactManager+initialise) ⇒ <code>Promise</code>
+    * [.getArtifactReadStream(artifactID)](#ArtifactManager+getArtifactReadStream) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+    * [.getArtifactWriteStream(artifactID)](#ArtifactManager+getArtifactWriteStream) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
+    * [.getJobAttachments(jobID)](#ArtifactManager+getJobAttachments) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
+    * [.removeArtifact(artifactID)](#ArtifactManager+removeArtifact) ⇒ <code>Promise</code>
+    * [.removeJobAttachment(jobID, artifactID)](#ArtifactManager+removeJobAttachment) ⇒ <code>Promise</code>
+    * [.shutdown()](#ArtifactManager+shutdown) ⇒ <code>Promise</code>
+    * ["migrationComplete"](#ArtifactManager+event_migrationComplete)
+
+<a name="new_ArtifactManager_new"></a>
+
+### new ArtifactManager([storagePath])
+Constructor for the artifact manager
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [storagePath] | <code>String</code> | The path to store artifacts in. Defaults to  `~/.vulpes/artifacts` if not specified. |
+
+<a name="ArtifactManager+addJobAttachment"></a>
+
+### artifactManager.addJobAttachment(jobID, param1) ⇒ <code>Promise.&lt;String&gt;</code>
+Add a new job attachment
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+**Returns**: <code>Promise.&lt;String&gt;</code> - A promise that resolves with the attachment ID  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID to add the attachment to |
+| param1 | [<code>NewJobAttachmentOptions</code>](#NewJobAttachmentOptions) | Options for the new attachment |
+
+<a name="ArtifactManager+initialise"></a>
+
+### artifactManager.initialise(service) ⇒ <code>Promise</code>
+Initialise the manager (called by Service)
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+**Emits**: [<code>migrationComplete</code>](#ArtifactManager+event_migrationComplete)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| service | [<code>Service</code>](#Service) | The service instance we're attached to |
+
+<a name="ArtifactManager+getArtifactReadStream"></a>
+
+### artifactManager.getArtifactReadStream(artifactID) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Get a readable stream of an artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The artifact's ID |
+
+<a name="ArtifactManager+getArtifactWriteStream"></a>
+
+### artifactManager.getArtifactWriteStream(artifactID) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
+Get a writeable stream for an artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The artifact's ID |
+
+<a name="ArtifactManager+getJobAttachments"></a>
+
+### artifactManager.getJobAttachments(jobID) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
+Get all job attachments
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job to fetch artifacts for |
+
+<a name="ArtifactManager+removeArtifact"></a>
+
+### artifactManager.removeArtifact(artifactID) ⇒ <code>Promise</code>
+Remove an artifact (does not affect jobs)
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The ID of the artifact to remove |
+
+<a name="ArtifactManager+removeJobAttachment"></a>
+
+### artifactManager.removeJobAttachment(jobID, artifactID) ⇒ <code>Promise</code>
+Remove an attachment from a job, also removing
+the associated artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job containing the artifact |
+| artifactID | <code>String</code> | The ID of the artifact to remove from  the job |
+
+<a name="ArtifactManager+shutdown"></a>
+
+### artifactManager.shutdown() ⇒ <code>Promise</code>
+Shutdown the artifact manager
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
+<a name="ArtifactManager+event_migrationComplete"></a>
+
+### "migrationComplete"
+**Kind**: event emitted by [<code>ArtifactManager</code>](#ArtifactManager)  
 <a name="AutoArchiveHelper"></a>
 
 ## AutoArchiveHelper ⇐ [<code>Helper</code>](#Helper)
@@ -635,9 +764,10 @@ Service for managing jobs
 **Extends**: <code>EventEmitter</code>  
 
 * [Service](#Service) ⇐ <code>EventEmitter</code>
-    * [new Service([storage], [ops])](#new_Service_new)
+    * [new Service([param0])](#new_Service_new)
     * _instance_
         * [.alive](#Service+alive) : <code>Boolean</code>
+        * [.artifactManager](#Service+artifactManager) : [<code>ArtifactManager</code>](#ArtifactManager)
         * [.helpers](#Service+helpers) : [<code>Array.&lt;Helper&gt;</code>](#Helper)
         * [.initialised](#Service+initialised) : <code>Boolean</code>
         * [.jobQueue](#Service+jobQueue) : <code>Channel</code>
@@ -645,7 +775,6 @@ Service for managing jobs
         * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
         * [.timeLimit](#Service+timeLimit) : <code>Number</code>
         * [.tracker](#Service+tracker) : <code>Tracker</code>
-        * [.logger](#Service+logger) : <code>Logger</code>
         * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
         * [.addJobs(jobs)](#Service+addJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
         * [.archiveJob(jobID)](#Service+archiveJob) ⇒ <code>Promise</code>
@@ -670,19 +799,25 @@ Service for managing jobs
 
 <a name="new_Service_new"></a>
 
-### new Service([storage], [ops])
+### new Service([param0])
 Contrsuctor for the Service class
 
 
 | Param | Type | Description |
 | --- | --- | --- |
-| [storage] | [<code>Storage</code>](#Storage) | The storage instance |
-| [ops] | [<code>ServiceOptions</code>](#ServiceOptions) | Options for the service instance |
+| [param0] | [<code>ServiceOptions</code>](#ServiceOptions) | Options for the new service |
 
 <a name="Service+alive"></a>
 
 ### service.alive : <code>Boolean</code>
 Check that the instance is alive and not shut down
+
+**Kind**: instance property of [<code>Service</code>](#Service)  
+**Read only**: true  
+<a name="Service+artifactManager"></a>
+
+### service.artifactManager : [<code>ArtifactManager</code>](#ArtifactManager)
+Artifact manager instance
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
 **Read only**: true  
@@ -733,13 +868,6 @@ changes to this value do not affect existing jobs.
 
 ### service.tracker : <code>Tracker</code>
 Analytics tracking instance
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+logger"></a>
-
-### service.logger : <code>Logger</code>
-Logger instance
 
 **Kind**: instance property of [<code>Service</code>](#Service)  
 **Read only**: true  
@@ -1425,6 +1553,32 @@ of the `job`
 | jobStats | <code>Object</code> | Job stats - mutated during execution (not pure) |
 | job | [<code>Job</code>](#Job) | A raw job |
 
+<a name="NewJobAttachmentOptions"></a>
+
+## NewJobAttachmentOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| [title] | <code>String</code> | The title of the attachment |
+| data | <code>Buffer</code> \| <code>String</code> \| <code>ReadableStream</code> | The attachment data |
+| mime | <code>String</code> | The mime type of the attachment |
+| [created] | <code>Number</code> | The timestamp of creation |
+
+<a name="JobAttachment"></a>
+
+## JobAttachment : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | The attachment/artifact ID |
+| title | <code>String</code> | The artifact title |
+| mime | <code>String</code> | The mime type for the artifact |
+| created | <code>Number</code> | The JS timestamp of creation/addition |
+
 <a name="AutoArchiveHelperOptions"></a>
 
 ## AutoArchiveHelperOptions : <code>Object</code>
@@ -1554,6 +1708,7 @@ Job sorting step configuration
 
 | Name | Type | Description |
 | --- | --- | --- |
+| [artifactManager] | [<code>ArtifactManager</code>](#ArtifactManager) | Override for the ArtifactManager instance |
 | [enableScheduling] | <code>Boolean</code> | Control whether or not the scheduling piece of the Service  is enabled or not. Default is true. |
 
 <a name="GetJobChildrenOptions"></a>
