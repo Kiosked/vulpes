@@ -8,7 +8,6 @@ const Tracker = require("./Tracker.js");
 const Storage = require("./storage/Storage.js");
 const MemoryStorage = require("./storage/MemoryStorage.js");
 const Helper = require("./helper/Helper.js");
-const Logger = require("./Logger.js");
 const ArtifactManager = require("./ArtifactManager.js");
 const {
     filterJobInitObject,
@@ -27,6 +26,7 @@ const {
 const { getTimestamp } = require("./time.js");
 const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
 const { updateStatsForJob } = require("./jobStats.js");
+const { removeAllLegacyLogs } = require("./migrations.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -135,7 +135,6 @@ class Service extends EventEmitter {
             this._scheduler.enabled = false;
         }
         this._tracker = new Tracker(this);
-        this._logger = new Logger(this);
         this._helpers = [];
         this._initialised = false;
         this._shutdown = false;
@@ -230,16 +229,6 @@ class Service extends EventEmitter {
      */
     get tracker() {
         return this._tracker;
-    }
-
-    /**
-     * Logger instance
-     * @type {Logger}
-     * @readonly
-     * @memberof Service
-     */
-    get logger() {
-        return this._logger;
     }
 
     set timeLimit(tl) {
@@ -445,10 +434,10 @@ class Service extends EventEmitter {
             );
         }
         await this.storage.initialise();
-        await this.logger.initialise();
         await this.artifactManager.initialise(this);
         await this.scheduler.initialise();
         this._initialised = true;
+        await removeAllLegacyLogs(this);
         for (const helper of this.helpers) {
             await helper.initialise();
         }
