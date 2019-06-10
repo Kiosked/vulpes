@@ -1,8 +1,10 @@
-const uuid = require("uuid");
+const uuid = require("uuid/v4");
 const readEntireStream = require("read-all-stream");
 const ArtifactManager = require("../../dist/ArtifactManager.js");
 const Service = require("../../dist/Service.js");
 const MemoryStorage = require("../../dist/storage/MemoryStorage.js");
+
+const ATTACHMENT_ID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 function createTextAttachment(title, text) {
     return {
@@ -85,6 +87,43 @@ describe("ArtifactManager", function() {
             .then(([txt1, txt2]) => {
                 expect(txt1).to.equal("test");
                 expect(txt2).to.equal("test 2");
+            });
+    });
+
+    it("adds attachments to jobs", function() {
+        return this.service.artifactManager
+            .addJobAttachment(this.jobID2, {
+                title: "Test attachment",
+                mime: "text/plain",
+                data: Buffer.from("abc def")
+            })
+            .then(() => this.service.artifactManager.getJobAttachments(this.jobID2))
+            .then(attachments => {
+                expect(attachments).to.have.lengthOf(1);
+                expect(attachments[0]).to.have.property("title", "Test attachment");
+                expect(attachments[0]).to.have.property("mime", "text/plain");
+                expect(attachments[0])
+                    .to.have.property("id")
+                    .that.matches(ATTACHMENT_ID);
+                expect(attachments[0])
+                    .to.have.property("created")
+                    .that.is.a("number");
+            });
+    });
+
+    it("removes attachments from jobs", function() {
+        return this.service.artifactManager
+            .addJobAttachment(this.jobID2, {
+                title: "Test attachment",
+                mime: "text/plain",
+                data: Buffer.from("abc def")
+            })
+            .then(attachmentID =>
+                this.service.artifactManager.removeJobAttachment(this.jobID2, attachmentID)
+            )
+            .then(() => this.service.artifactManager.getJobAttachments(this.jobID2))
+            .then(attachments => {
+                expect(attachments).to.have.lengthOf(0);
             });
     });
 });

@@ -2,6 +2,7 @@ const os = require("os");
 const path = require("path");
 const fs = require("fs");
 const EventEmitter = require("eventemitter3");
+const uuid = require("uuid/v4");
 const pify = require("pify");
 const rimraf = pify(require("rimraf"));
 const mkdirp = pify(require("mkdirp"));
@@ -9,6 +10,7 @@ const dataURIToBuffer = require("data-uri-to-buffer");
 const parseDataURI = require("parse-data-uri");
 const endOfStream = require("end-of-stream");
 
+const ATTACHMENT_PREFIX = "%attachment:";
 const ATTACHMENT_REXP = /^%attachment:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
 function getArtifactPath(storagePath, artifactID) {
@@ -105,6 +107,48 @@ class ArtifactManager extends EventEmitter {
     }
 
     /**
+     * @typedef {Object} NewJobAttachmentOptions
+     * @property {String=} title The title of the attachment
+     * @property {Buffer|String|ReadableStream} data The attachment data
+     * @property {String} mime The mime type of the attachment
+     * @property {Number=} created The timestamp of creation
+     */
+
+    /**
+     * Add a new job attachment
+     * @param {String} jobID The job ID to add the attachment to
+     * @param {NewJobAttachmentOptions} param1 Options for the new attachment
+     * @returns {Promise.<String>} A promise that resolves with the attachment ID
+     */
+    async addJobAttachment(jobID, { title = "Untitled", data, mime, created = Date.now() } = {}) {
+        const attachment = {
+            id: uuid(),
+            title,
+            mime,
+            created
+        };
+        const writeStream = await this.getArtifactWriteStream(attachment.id);
+        if (Buffer.isBuffer(data) || typeof data === "string") {
+            writeStream.write(data);
+            writeStream.end();
+        } else {
+            // Assume stream
+            data.pipe(writeStream);
+            await waitForStream(data);
+        }
+        await waitForStream(writeStream);
+        // Update job
+        await this.service.updateJob(jobID, {
+            result: {
+                data: {
+                    [`${ATTACHMENT_PREFIX}${attachment.id}`]: attachment
+                }
+            }
+        });
+        return attachment.id;
+    }
+
+    /**
      * Initialise the manager (called by Service)
      * @param {Service} service The service instance we're attached to
      * @returns {Promise}
@@ -144,13 +188,60 @@ class ArtifactManager extends EventEmitter {
     }
 
     /**
-     * Remove an artifact
+     * @typedef {Object} JobAttachment
+     * @property {String} id - The attachment/artifact ID
+     * @property {String} title - The artifact title
+     * @property {String} mime - The mime type for the artifact
+     * @property {Number} created - The JS timestamp of creation/addition
+     */
+
+    /**
+     * Get all job attachments
+     * @param {String} jobID The ID of the job to fetch artifacts for
+     * @returns {JobAttachment[]}
+     */
+    async getJobAttachments(jobID) {
+        const job = await this.service.getJob(jobID);
+        return Object.keys(job.result.data || {}).reduce((payload, resultKey) => {
+            if (ATTACHMENT_REXP.test(resultKey)) {
+                payload.push(
+                    Object.assign(job.result.data[resultKey], {
+                        id:
+                            job.result.data[resultKey].id ||
+                            resultKey.replace(ATTACHMENT_PREFIX, "")
+                    })
+                );
+            }
+            return payload;
+        }, []);
+    }
+
+    /**
+     * Remove an artifact (does not affect jobs)
      * @param {String} artifactID The ID of the artifact to remove
      * @returns {Promise}
      */
     async removeArtifact(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
         await rimraf(filename);
+    }
+
+    /**
+     * Remove an attachment from a job, also removing
+     * the associated artifact
+     * @param {String} jobID The ID of the job containing the artifact
+     * @param {String} artifactID The ID of the artifact to remove from
+     *  the job
+     * @returns {Promise}
+     */
+    async removeJobAttachment(jobID, artifactID) {
+        // First remove from job
+        const job = await this.service.getJob(jobID);
+        const results = job.result.data || {};
+        delete results[`${ATTACHMENT_PREFIX}${artifactID}`];
+        await this.service.updateJob(jobID, { result: { data: results } }, { stripResults: true });
+        // Then remove artifact
+        await this.removeArtifact(artifactID);
     }
 
     /**
