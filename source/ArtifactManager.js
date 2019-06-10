@@ -83,7 +83,20 @@ function waitForStream(stream) {
     );
 }
 
+/**
+ * @event ArtifactManager#migrationComplete
+ */
+
+/**
+ * Artifact Manager
+ * @augments EventEmitter
+ */
 class ArtifactManager extends EventEmitter {
+    /**
+     * Constructor for the artifact manager
+     * @param {String=} storagePath The path to store artifacts in. Defaults to
+     *  `~/.vulpes/artifacts` if not specified.
+     */
     constructor(storagePath = getDefaultStoragePath()) {
         super();
         this._path = storagePath;
@@ -91,6 +104,12 @@ class ArtifactManager extends EventEmitter {
         this.service = null;
     }
 
+    /**
+     * Initialise the manager (called by Service)
+     * @param {Service} service The service instance we're attached to
+     * @returns {Promise}
+     * @fires ArtifactManager#migrationComplete
+     */
     async initialise(service) {
         this.service = service;
         await mkdirp(this._path);
@@ -104,21 +123,40 @@ class ArtifactManager extends EventEmitter {
         });
     }
 
+    /**
+     * Get a readable stream of an artifact
+     * @param {String} artifactID The artifact's ID
+     * @returns {Promise.<ReadableStream>}
+     */
     async getArtifactReadStream(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
         return fs.createReadStream(filename);
     }
 
+    /**
+     * Get a writeable stream for an artifact
+     * @param {String} artifactID The artifact's ID
+     * @returns {Promise.<WritableStream>}
+     */
     async getArtifactWriteStream(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
         return fs.createWriteStream(filename);
     }
 
+    /**
+     * Remove an artifact
+     * @param {String} artifactID The ID of the artifact to remove
+     * @returns {Promise}
+     */
     async removeArtifact(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
         await rimraf(filename);
     }
 
+    /**
+     * Shutdown the artifact manager
+     * @returns {Promise}
+     */
     async shutdown() {
         return new Promise(resolve => {
             if (!this._migrating) {
