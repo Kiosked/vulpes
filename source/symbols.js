@@ -31,7 +31,6 @@ const ERROR_CODE_PARENTS_INCOMPLETE = "vuples/error/job/parents/incomplete";
 const ERROR_CODE_PREDICATE_NOT_SATISFIED = "vuples/error/job/predicate/not-satisfied";
 
 const ITEM_TYPE = "@@type";
-const ITEM_TYPE_LOG_ENTRY = "vulpes/logEntry";
 const ITEM_TYPE_JOB = "vulpes/job";
 const ITEM_TYPE_SCHEDULED_TASK = "vulpes/scheduledTask";
 
@@ -71,7 +70,6 @@ module.exports = {
     ERROR_CODE_PARENTS_INCOMPLETE,
     ERROR_CODE_PREDICATE_NOT_SATISFIED,
     ITEM_TYPE,
-    ITEM_TYPE_LOG_ENTRY,
     ITEM_TYPE_JOB,
     ITEM_TYPE_SCHEDULED_TASK,
     JOB_PRIORITY_HIGH,
