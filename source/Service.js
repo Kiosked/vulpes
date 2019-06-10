@@ -606,6 +606,7 @@ class Service extends EventEmitter {
         this.helpers.forEach(helper => {
             helper.shutdown();
         });
+        await this.artifactManager.shutdown();
         await this.storage.shutdown();
         this._helpers = [];
         this._shutdown = true;

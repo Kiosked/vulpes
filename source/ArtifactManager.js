@@ -1,6 +1,7 @@
 const os = require("os");
 const path = require("path");
 const fs = require("fs");
+const EventEmitter = require("eventemitter3");
 const pify = require("pify");
 const rimraf = pify(require("rimraf"));
 const mkdirp = pify(require("mkdirp"));
@@ -82,16 +83,25 @@ function waitForStream(stream) {
     );
 }
 
-class ArtifactManager {
+class ArtifactManager extends EventEmitter {
     constructor(storagePath = getDefaultStoragePath()) {
+        super();
         this._path = storagePath;
+        this._migrating = false;
         this.service = null;
     }
 
     async initialise(service) {
         this.service = service;
         await mkdirp(this._path);
-        this.service.once("initialised", () => migrate(this.service, this));
+        this.service.once("initialised", async () => {
+            try {
+                this._migrating = true;
+                await migrate(this.service, this);
+            } catch (err) {}
+            this._migrating = false;
+            this.emit("migrationComplete");
+        });
     }
 
     async getArtifactReadStream(artifactID) {
@@ -107,6 +117,15 @@ class ArtifactManager {
     async removeArtifact(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
         await rimraf(filename);
+    }
+
+    async shutdown() {
+        return new Promise(resolve => {
+            if (!this._migrating) {
+                return resolve();
+            }
+            this.once("migrationComplete", resolve);
+        });
     }
 }
 
