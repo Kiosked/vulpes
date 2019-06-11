@@ -1,6 +1,7 @@
 require("./polyfill.js");
 
 const Service = require("./Service.js");
+const ArtifactManager = require("./ArtifactManager.js");
 
 const Helper = require("./helper/Helper.js");
 const AutoArchiveHelper = require("./helper/AutoArchiveHelper.js");
@@ -16,6 +17,7 @@ const Symbol = require("./symbols.js");
 
 module.exports = {
     Service,
+    ArtifactManager,
     Symbol,
 
     Helper,

@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v0.32.1
+_2019-06-11_
+
+ * **Bugfix**
+   * Expose `ArtifactManager` in index
+
 ## v0.32.0
 _2019-06-10_
 
