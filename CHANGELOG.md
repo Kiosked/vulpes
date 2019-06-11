@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v0.33.0
+_2019-06-11_
+
+ * Auto-extraction of job artifacts
+
 ## v0.32.1
 _2019-06-11_
 
