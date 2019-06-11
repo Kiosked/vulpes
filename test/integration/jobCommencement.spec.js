@@ -184,6 +184,39 @@ describe("Service", function() {
                     });
                 });
         });
+
+        it("extracts attachment data", function() {
+            sinon.spy(this.service.artifactManager, "addJobAttachment");
+            return this.service
+                .stopJob(this.jobID1, Service.JobResult.Success, {
+                    "%attachment:78591af9-6d16-4c10-9faf-14190ca26fc5": {
+                        id: "78591af9-6d16-4c10-9faf-14190ca26fc5",
+                        title: "some-log.txt",
+                        mime: "text/plain",
+                        data: `data:text/plain;charset=utf-8;base64,${Buffer.from(
+                            "test file text"
+                        ).toString("base64")}`,
+                        created: 1560234045134
+                    }
+                })
+                .then(() => this.service.getJob(this.jobID1))
+                .then(job => {
+                    expect(job.result.data).to.have.property(
+                        "%attachment:78591af9-6d16-4c10-9faf-14190ca26fc5"
+                    );
+                    expect(
+                        job.result.data["%attachment:78591af9-6d16-4c10-9faf-14190ca26fc5"]
+                    ).to.not.have.property("data");
+                    expect(this.service.artifactManager.addJobAttachment.callCount).to.equal(1);
+                    const [
+                        jobID,
+                        attachment
+                    ] = this.service.artifactManager.addJobAttachment.firstCall.args;
+                    expect(jobID).to.equal(job.id);
+                    expect(attachment).to.have.property("data");
+                    expect(attachment.data).to.equal("test file text");
+                });
+        });
     });
 
     describe("when resetting jobs", function() {

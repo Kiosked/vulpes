@@ -10,6 +10,7 @@ const { expect } = chai;
 chai.use(chaiAsPromised);
 
 Object.assign(global, {
+    VULPES_ARTIFACTS_PATH: "/tmp/vulpes-testing",
     expect,
     sinon
 });

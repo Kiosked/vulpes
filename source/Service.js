@@ -27,6 +27,7 @@ const { getTimestamp } = require("./time.js");
 const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSorting.js");
 const { updateStatsForJob } = require("./jobStats.js");
 const { removeAllLegacyLogs } = require("./migrations.js");
+const { extractAttachments } = require("./attachments.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -691,45 +692,72 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             return Promise.reject(newNotInitialisedError());
         }
-        return this.jobQueue.enqueue(() =>
-            this.getJob(jobID)
-                .then(job => {
-                    if (job.status === JOB_STATUS_STOPPED) {
-                        throw new VError(
-                            { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
-                            `Invalid job status: ${job.status}`
-                        );
-                    }
-                    if (JOB_RESULT_TYPES_REXP.test(resultType) === false) {
-                        throw new VError(
-                            { info: { code: ERROR_CODE_INVALID_JOB_RESULT } },
-                            `Invalid job result type: ${resultType}`
-                        );
-                    }
-                    job.status = JOB_STATUS_STOPPED;
-                    job.result.type = resultType;
-                    // Merge data payloads
-                    Object.assign(job.result.data, job.data, resultData);
-                    job.times.stopped = getTimestamp();
-                    if (resultType === JOB_RESULT_TYPE_SUCCESS) {
-                        job.times.completed = job.times.stopped;
-                    }
-                    return this.storage.setItem(job.id, job).then(() => {
-                        this.emit("jobStopped", { id: job.id });
-                        if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
-                            this.emit("jobTimeout", { id: job.id });
+        const attachments = [];
+        return this.jobQueue
+            .enqueue(() =>
+                this.getJob(jobID)
+                    .then(job => {
+                        if (job.status === JOB_STATUS_STOPPED) {
+                            throw new VError(
+                                { info: { code: ERROR_CODE_INVALID_JOB_STATUS } },
+                                `Invalid job status: ${job.status}`
+                            );
                         }
+                        if (JOB_RESULT_TYPES_REXP.test(resultType) === false) {
+                            throw new VError(
+                                { info: { code: ERROR_CODE_INVALID_JOB_RESULT } },
+                                `Invalid job result type: ${resultType}`
+                            );
+                        }
+                        job.status = JOB_STATUS_STOPPED;
+                        job.result.type = resultType;
+                        const {
+                            results: finalResultData,
+                            attachments: finalAttachments
+                        } = extractAttachments(resultData);
+                        attachments.push(...finalAttachments);
+                        // Merge data payloads
+                        Object.assign(job.result.data, job.data, finalResultData);
+                        job.times.stopped = getTimestamp();
                         if (resultType === JOB_RESULT_TYPE_SUCCESS) {
-                            this.emit("jobCompleted", { id: job.id });
-                        } else {
-                            this.emit("jobFailed", { id: job.id });
+                            job.times.completed = job.times.stopped;
                         }
-                    });
-                })
-                .catch(err => {
-                    throw new VError(err, `Failed stopping job (${jobID})`);
-                })
-        );
+                        return this.storage.setItem(job.id, job).then(() => {
+                            this.emit("jobStopped", { id: job.id });
+                            if (resultType === JOB_RESULT_TYPE_TIMEOUT) {
+                                this.emit("jobTimeout", { id: job.id });
+                            }
+                            if (resultType === JOB_RESULT_TYPE_SUCCESS) {
+                                this.emit("jobCompleted", { id: job.id });
+                            } else {
+                                this.emit("jobFailed", { id: job.id });
+                            }
+                        });
+                    })
+                    .catch(err => {
+                        throw new VError(
+                            {
+                                cause: err,
+                                info: { jobID }
+                            },
+                            "Failed stopping job"
+                        );
+                    })
+            )
+            .then(async () => {
+                for (const attachment of attachments) {
+                    await this.artifactManager.addJobAttachment(jobID, attachment);
+                }
+            })
+            .catch(err => {
+                throw new VError(
+                    {
+                        cause: err,
+                        info: { jobID }
+                    },
+                    "Failed adding attachments to job"
+                );
+            });
     }
 
     /**

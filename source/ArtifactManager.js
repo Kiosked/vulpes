@@ -9,15 +9,16 @@ const mkdirp = pify(require("mkdirp"));
 const dataURIToBuffer = require("data-uri-to-buffer");
 const parseDataURI = require("parse-data-uri");
 const endOfStream = require("end-of-stream");
-
-const ATTACHMENT_PREFIX = "%attachment:";
-const ATTACHMENT_REXP = /^%attachment:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+const { ATTACHMENT_PREFIX, ATTACHMENT_REXP } = require("./symbols.js");
 
 function getArtifactPath(storagePath, artifactID) {
     return path.join(storagePath, `${artifactID}.vulpesartifact`);
 }
 
 function getDefaultStoragePath() {
+    if (global.VULPES_ARTIFACTS_PATH) {
+        return global.VULPES_ARTIFACTS_PATH;
+    }
     return path.join(os.homedir(), ".vulpes/artifacts");
 }
 
@@ -120,9 +121,12 @@ class ArtifactManager extends EventEmitter {
      * @param {NewJobAttachmentOptions} param1 Options for the new attachment
      * @returns {Promise.<String>} A promise that resolves with the attachment ID
      */
-    async addJobAttachment(jobID, { title = "Untitled", data, mime, created = Date.now() } = {}) {
+    async addJobAttachment(
+        jobID,
+        { id = uuid(), title = "Untitled", data, mime, created = Date.now() } = {}
+    ) {
         const attachment = {
-            id: uuid(),
+            id,
             title,
             mime,
             created
