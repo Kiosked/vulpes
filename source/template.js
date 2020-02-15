@@ -20,6 +20,9 @@ function convertTemplateToJobArray(tmpObj) {
                         itemConfiguration
                     )
                 };
+                if (parentID) {
+                    output.parents = [parentID];
+                }
                 jobs.push(output);
                 if (templateJob.children) {
                     processTemplateJobs(templateJob.children, output.id);
@@ -72,5 +75,6 @@ function processValue(value, macros) {
 }
 
 module.exports = {
-    convertTemplateToJobArray
+    convertTemplateToJobArray,
+    processMacros
 };
