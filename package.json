@@ -8,7 +8,6 @@
     "dev": "run-s watch",
     "docs": "jsdoc2md 'source/**/*.js' > API.md",
     "format": "prettier --write '{source,test}/**/*.js'",
-    "precommit": "lint-staged",
     "prepare": "run-s build",
     "test": "run-s build test:all test:coverage test:format",
     "test:all": "nyc mocha --timeout 10000 -r test/index.js 'test/**/*.spec.js'",
@@ -29,6 +28,11 @@
       "prettier --write",
       "git add"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "repository": {
     "type": "git",
