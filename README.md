@@ -139,6 +139,41 @@ Special properties in job data can be used to change their behaviour. Special pr
 | `$`       | Sticky property - will be sent to jobs even if in failed result set. | `$lastValue` |
 | `!`       | Reserved: For client implementation. This should not be sent to the server as future implementations may break. It is reserved for client-side implementation and should be stripped from results and data. | `!system_value` |
 | `%`       | Hidden property - Properties prefixed by this symbol are hidden in the UI, but available everywhere else as a regular property. | `%imagedata` |
+| `?`       | [Lazy property value](#lazy-property-values). Value of this property, with the `?` prefix removed, is resolved upon job execution. | `?my_lazy_value` |
+
+#### Lazy property values
+
+The values of certain properties can be lazy-loaded when the job is run. This means that they do not need to be known until a parent job successfully completes and the child begins to run. Take the following two jobs:
+
+```
+{
+    "id": 1,
+    "type": "job1",
+    "data": {}
+}
+
+{
+    "type": "job2",
+    "data": {
+        "value": 1,
+        "?another": "parentResultProperty"
+    },
+    "parents": [1]
+}
+```
+
+In this example, say `job1` finishes with a result set of `{ "parentResultProperty": 42 }`. Once `job2` starts, its initialisation data will look like the following:
+
+```json
+{
+    "value": 1,
+    "another": 42
+}
+```
+
+The key `another`, prefixed with `?` to denote laziness, is set to the value of the property mentioned in its preliminary value upon job execution.
+
+_This process supports deep properties: `a.b.c.finalValue`. If the chain fails to resolve, `undefined` is set to the property and the job continues to execute **without failure**. The job may indeed fail after this, however, depdending upon implementation._
 
 ### Querying jobs
 
