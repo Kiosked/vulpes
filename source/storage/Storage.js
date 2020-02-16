@@ -5,6 +5,7 @@ const objectStream = require("@kiosked/object-stream");
  * Provides a storage mechanism for the job handling framework,
  * allowing jobs to persist between restarts. This is an
  * interface and does not actually perform any operations.
+ * @memberof module:Vulpes
  */
 class Storage {
     /**

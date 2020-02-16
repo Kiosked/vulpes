@@ -12,6 +12,7 @@ const { getTimestamp } = require("../time.js");
 /**
  * Auto archive helper
  * @augments Helper
+ * @memberof module:Vulpes
  */
 class AutoArchiveHelper extends Helper {
     /**

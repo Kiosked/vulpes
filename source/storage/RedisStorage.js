@@ -14,6 +14,7 @@ const STREAM_READ_COUNT = 2;
  * Redis storage adapter
  * Stores items in a Redis database
  * @augments Storage
+ * @memberof module:Vulpes
  */
 class RedisStorage extends Storage {
     /**

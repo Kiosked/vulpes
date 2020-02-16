@@ -10,6 +10,11 @@ const {
 
 const PROCESSING_LIMIT = 50;
 
+/**
+ * Helper for timing-out jobs
+ * @augments Helper
+ * @memberof module:Vulpes
+ */
 class TimeoutHelper extends Helper {
     constructor(interval = ms("15s")) {
         super();

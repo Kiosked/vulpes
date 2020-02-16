@@ -16,6 +16,7 @@ const JSON_PARSE_ARGS = ["*"];
  * File storage adapter
  * Stores and streams jobs in a local file (very inefficiently)
  * @augments Storage
+ * @memberof module:Vulpes
  */
 class FileStorage extends Storage {
     /**

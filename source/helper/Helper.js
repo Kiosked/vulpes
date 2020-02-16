@@ -2,6 +2,7 @@
  * Helper base class
  * Helpers provide an easy interface with which to
  * attach to services to perform ancillary tasks.
+ * @memberof module:Vulpes
  */
 class Helper {
     constructor() {

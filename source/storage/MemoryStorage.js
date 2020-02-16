@@ -7,6 +7,7 @@ const Storage = require("./Storage.js");
  * Stores jobs in memory. Once application is closed all jobs are
  * purged - do not use this storage if you desire persistence.
  * @augments Storage
+ * @memberof module:Vulpes
  */
 class MemoryStorage extends Storage {
     constructor() {

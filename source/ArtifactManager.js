@@ -93,6 +93,7 @@ function waitForStream(stream) {
 /**
  * Artifact Manager
  * @augments EventEmitter
+ * @memberof module:Vulpes
  */
 class ArtifactManager extends EventEmitter {
     /**
