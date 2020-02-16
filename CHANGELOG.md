@@ -1,5 +1,12 @@
 # Vulpes Changelog
 
+## v1.0.0
+_2020-02-16_
+
+ * Template importing via `convertTemplateToJobArray`
+ * **Breaking changes**:
+   * Minimum supported Node is now 10
+
 ## v0.33.0
 _2019-06-11_
 
