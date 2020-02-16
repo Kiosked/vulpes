@@ -38,12 +38,11 @@ describe("convertTemplateToJobArray", function() {
             .then(jobs => {
                 expect(jobs).to.have.a.lengthOf(6);
                 return Promise.all([
-                    this.service.queryJobs({ something: "4" }),
-                    this.service.queryJobs({ another: "5" })
+                    this.service.queryJobs({ "data.something": "4" }),
+                    this.service.queryJobs({ "data.another": "65" })
                 ]);
             })
             .then(([res1, res2]) => {
-                console.log(JSON.stringify(res1, undefined, 2));
                 expect(res1).to.have.lengthOf(1);
                 expect(res2).to.have.lengthOf(1);
             });
