@@ -15,6 +15,8 @@ const RedisStorage = require("./storage/RedisStorage.js");
 
 const Symbol = require("./symbols.js");
 
+const { convertTemplateToJobArray } = require("./template.js");
+
 module.exports = {
     Service,
     ArtifactManager,
@@ -28,5 +30,7 @@ module.exports = {
     Storage,
     FileStorage,
     MemoryStorage,
-    RedisStorage
+    RedisStorage,
+
+    convertTemplateToJobArray
 };

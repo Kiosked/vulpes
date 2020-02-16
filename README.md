@@ -78,6 +78,8 @@ const jobs = await service.addJobs([
 
 This allows you to insert full job trees using one method.
 
+_Make sure to read the [templated imports](#templated-imports) section which covers a more involved & advanced form of importing many jobs at once._
+
 ### Job trees
 
 You can fetch jobs that are connected to a certain job using `getJobChildren`, `getJobParents` and `getJobTree`.
@@ -139,6 +141,41 @@ Special properties in job data can be used to change their behaviour. Special pr
 | `$`       | Sticky property - will be sent to jobs even if in failed result set. | `$lastValue` |
 | `!`       | Reserved: For client implementation. This should not be sent to the server as future implementations may break. It is reserved for client-side implementation and should be stripped from results and data. | `!system_value` |
 | `%`       | Hidden property - Properties prefixed by this symbol are hidden in the UI, but available everywhere else as a regular property. | `%imagedata` |
+| `?`       | [Lazy property value](#lazy-property-values). Value of this property, with the `?` prefix removed, is resolved upon job execution. | `?my_lazy_value` |
+
+#### Lazy property values
+
+The values of certain properties can be lazy-loaded when the job is run. This means that they do not need to be known until a parent job successfully completes and the child begins to run. Take the following two jobs:
+
+```
+{
+    "id": 1,
+    "type": "job1",
+    "data": {}
+}
+
+{
+    "type": "job2",
+    "data": {
+        "value": 1,
+        "?another": "parentResultProperty"
+    },
+    "parents": [1]
+}
+```
+
+In this example, say `job1` finishes with a result set of `{ "parentResultProperty": 42 }`. Once `job2` starts, its initialisation data will look like the following:
+
+```json
+{
+    "value": 1,
+    "another": 42
+}
+```
+
+The key `another`, prefixed with `?` to denote laziness, is set to the value of the property mentioned in its preliminary value upon job execution.
+
+_This process supports deep properties: `a.b.c.finalValue`. If the chain fails to resolve, an empty string is set to the property and the job continues to execute **without failure**. The job may indeed fail after this, however, depdending upon implementation._
 
 ### Querying jobs
 
@@ -185,6 +222,68 @@ service.scheduler.enabled = false;
 ```
 
 The latter option is not recommended as the scheduler would still have a minutue amount of time, if the service is initialised, to create tasks.
+
+### Templated imports
+
+Jobs can be added to Vulpes via a variety of methods - but when building complex logic on the job-runner (client) side, adding similiar large-scale (multi-job) processes can be very tedious. Vulpes supports **templates** as well, so you can build the functional logic of your application in an abstract way, using placeholders, and then provide many combinations of these placeholders that are processed in relation to the template to create vast swarms of jobs.
+
+Take the following template example:
+
+```javascript
+const dataset = {
+    template: [
+        {
+            type: "my/job",
+            data: {
+                "value": 42,
+                "another": "$test$"
+            }
+        },
+        {
+            type: "my/conditional",
+            data: {
+                "value": 12,
+                "another": "$test$",
+                "concat": "$a$ - $b$"
+            },
+            condition: {
+                ifset: ["a", "b"]
+            }
+        },
+        {
+            type: "my/repeating",
+            data: {
+                "another": "$test$",
+                "singular": "Count: $special.item$"
+            },
+            condition: {
+                ifset: ["special.item"]
+            }
+            repeat: "special.item"
+        }
+    ],
+    items: [
+        { test: "value", a: "00", b: "123" },
+        {
+            test: "value",
+            special: {
+                item: [1, 2]
+            }
+        }
+    ]
+};
+
+service.addJobs(convertTemplateToJobArray(dataset));
+```
+
+This example would add **5** jobs - Because there's 2 items, the template is iterated over twice:
+
+ 1. On the first round, `my/job` is created as it's basic (1). `my/conditional` is also created because both `a` and `b` are set (2). The `my/repeating` job is _not_ created as it requires `special.item`, which is not set for the first item.
+ 2. On the second round, `my/job` is created again. (3) `my/conditional` is _not_ created as neither `a` nor `b` exist in the second item. `my/repeating` is created **twice** as it loops on `special.item` which has 2 values in it (5).
+
+This is quite complex, but it allows for more advanced use-cases. Conditonal logic can be used to block entire branches (as it stops the children from being processed as well) if a parent cannot be created. In the same manner repeating jobs also have their children repeated along with them.
+
+_**NB:** The template structure is entirely JSON-compatible, so it can be generated elsewhere and then sent to the service._
 
 ### Archiving jobs
 
