@@ -31,9 +31,9 @@ function conditionMet(condition, macros) {
  * @property {Object=} data Data payload for the new job
  * @property {Object=} condition Optionally trigger this job only under certain
  *  conditions
- * @property {String|String[]=} condition.ifset Trigger this job only if all
+ * @property {String|Array.<String>=} condition.ifset Trigger this job only if all
  *  mentioned macro properties are SET (not undefined)
- * @property {String|String[]=} condition.ifnotset Trigger this job only if
+ * @property {String|Array.<String>=} condition.ifnotset Trigger this job only if
  *  none of the mentioned macro properties are SET
  * @property {Object} condition.ifeq Trigger this job of all properties of this
  *  object (key, value) are preset and matching on the macro properties

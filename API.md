@@ -1,44 +1,15 @@
+## Modules
+
+<dl>
+<dt><a href="#module_Vulpes">Vulpes</a></dt>
+<dd></dd>
+</dl>
+
 ## Classes
 
 <dl>
-<dt><a href="#ArtifactManager">ArtifactManager</a> ⇐ <code>EventEmitter</code></dt>
-<dd><p>Artifact Manager</p>
-</dd>
-<dt><a href="#AutoArchiveHelper">AutoArchiveHelper</a> ⇐ <code><a href="#Helper">Helper</a></code></dt>
-<dd><p>Auto archive helper</p>
-</dd>
-<dt><a href="#Helper">Helper</a></dt>
-<dd><p>Helper base class
-Helpers provide an easy interface with which to
-attach to services to perform ancillary tasks.</p>
-</dd>
-<dt><a href="#StorageMigrationHelper">StorageMigrationHelper</a> ⇐ <code><a href="#Helper">Helper</a></code></dt>
-<dd><p>Storage migration helper</p>
-</dd>
 <dt><a href="#Scheduler">Scheduler</a> ⇐ <code>EventEmitter</code></dt>
 <dd><p>Scheduler for scheduled tasks</p>
-</dd>
-<dt><a href="#Service">Service</a> ⇐ <code>EventEmitter</code></dt>
-<dd><p>Service for managing jobs</p>
-</dd>
-<dt><a href="#FileStorage">FileStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
-<dd><p>File storage adapter
-Stores and streams jobs in a local file (very inefficiently)</p>
-</dd>
-<dt><a href="#MemoryStorage">MemoryStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
-<dd><p>Memory storage adapter
-Stores jobs in memory. Once application is closed all jobs are
-purged - do not use this storage if you desire persistence.</p>
-</dd>
-<dt><a href="#RedisStorage">RedisStorage</a> ⇐ <code><a href="#Storage">Storage</a></code></dt>
-<dd><p>Redis storage adapter
-Stores items in a Redis database</p>
-</dd>
-<dt><a href="#Storage">Storage</a></dt>
-<dd><p>Storage base class
-Provides a storage mechanism for the job handling framework,
-allowing jobs to persist between restarts. This is an
-interface and does not actually perform any operations.</p>
 </dd>
 </dl>
 
@@ -117,154 +88,91 @@ of the <code>job</code></p>
 <dt><a href="#Priority">Priority</a> : <code>String</code></dt>
 <dd><p>Job priority</p>
 </dd>
+<dt><a href="#JobImportTemplateItem">JobImportTemplateItem</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#JobImportTemplate">JobImportTemplate</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#TrackerJobStats">TrackerJobStats</a> : <code>Object</code></dt>
 <dd></dd>
 <dt><a href="#RegisteredWorker">RegisteredWorker</a> : <code>Object</code></dt>
 <dd></dd>
 </dl>
 
-<a name="ArtifactManager"></a>
+<a name="module_Vulpes"></a>
 
-## ArtifactManager ⇐ <code>EventEmitter</code>
-Artifact Manager
+## Vulpes
 
-**Kind**: global class  
-**Extends**: <code>EventEmitter</code>  
+* [Vulpes](#module_Vulpes)
+    * _static_
+        * [.AutoArchiveHelper](#module_Vulpes.AutoArchiveHelper) ⇐ <code>Helper</code>
+            * [new AutoArchiveHelper([options])](#new_module_Vulpes.AutoArchiveHelper_new)
+            * [.service](#Helper+service) : <code>Service</code>
+            * [.attach(service)](#Helper+attach)
+            * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
+            * [.shutdown()](#Helper+shutdown)
+        * [.FileStorage](#module_Vulpes.FileStorage) ⇐ <code>Storage</code>
+            * [new FileStorage(filename)](#new_module_Vulpes.FileStorage_new)
+            * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+            * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+            * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+            * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+            * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+            * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+        * [.RedisStorage](#module_Vulpes.RedisStorage) ⇐ <code>Storage</code>
+            * [new RedisStorage([redisOptions])](#new_module_Vulpes.RedisStorage_new)
+            * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+            * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+            * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+            * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+            * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+            * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+        * [.Storage](#module_Vulpes.Storage)
+        * [.convertTemplateToJobArray(tmpObj)](#module_Vulpes.convertTemplateToJobArray) ⇒ [<code>Array.&lt;NewJob&gt;</code>](#NewJob)
+    * _inner_
+        * [~ArtifactManager](#module_Vulpes.ArtifactManager) ⇐ <code>EventEmitter</code>
+            * [new ArtifactManager([storagePath])](#new_module_Vulpes.ArtifactManager_new)
+            * [.addJobAttachment(jobID, param1)](#module_Vulpes.ArtifactManager+addJobAttachment) ⇒ <code>Promise.&lt;String&gt;</code>
+            * [.initialise(service)](#module_Vulpes.ArtifactManager+initialise) ⇒ <code>Promise</code>
+            * [.getArtifactReadStream(artifactID)](#module_Vulpes.ArtifactManager+getArtifactReadStream) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+            * [.getArtifactWriteStream(artifactID)](#module_Vulpes.ArtifactManager+getArtifactWriteStream) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
+            * [.getJobAttachments(jobID)](#module_Vulpes.ArtifactManager+getJobAttachments) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
+            * [.removeArtifact(artifactID)](#module_Vulpes.ArtifactManager+removeArtifact) ⇒ <code>Promise</code>
+            * [.removeJobAttachment(jobID, artifactID)](#module_Vulpes.ArtifactManager+removeJobAttachment) ⇒ <code>Promise</code>
+            * [.shutdown()](#module_Vulpes.ArtifactManager+shutdown) ⇒ <code>Promise</code>
+        * [~Helper](#module_Vulpes.Helper)
+        * [~TimeoutHelper](#module_Vulpes.TimeoutHelper) ⇐ <code>Helper</code>
+            * [.service](#Helper+service) : <code>Service</code>
+            * [.attach(service)](#Helper+attach)
+            * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
+            * [.shutdown()](#Helper+shutdown)
+        * [~Service](#module_Vulpes.Service) ⇐ <code>EventEmitter</code>
+            * [new Service([param0])](#new_module_Vulpes.Service_new)
+        * [~MemoryStorage](#module_Vulpes.MemoryStorage) ⇐ <code>Storage</code>
+            * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+            * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+            * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+            * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+            * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+            * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
 
-* [ArtifactManager](#ArtifactManager) ⇐ <code>EventEmitter</code>
-    * [new ArtifactManager([storagePath])](#new_ArtifactManager_new)
-    * [.addJobAttachment(jobID, param1)](#ArtifactManager+addJobAttachment) ⇒ <code>Promise.&lt;String&gt;</code>
-    * [.initialise(service)](#ArtifactManager+initialise) ⇒ <code>Promise</code>
-    * [.getArtifactReadStream(artifactID)](#ArtifactManager+getArtifactReadStream) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.getArtifactWriteStream(artifactID)](#ArtifactManager+getArtifactWriteStream) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
-    * [.getJobAttachments(jobID)](#ArtifactManager+getJobAttachments) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
-    * [.removeArtifact(artifactID)](#ArtifactManager+removeArtifact) ⇒ <code>Promise</code>
-    * [.removeJobAttachment(jobID, artifactID)](#ArtifactManager+removeJobAttachment) ⇒ <code>Promise</code>
-    * [.shutdown()](#ArtifactManager+shutdown) ⇒ <code>Promise</code>
-    * ["migrationComplete"](#ArtifactManager+event_migrationComplete)
+<a name="module_Vulpes.AutoArchiveHelper"></a>
 
-<a name="new_ArtifactManager_new"></a>
-
-### new ArtifactManager([storagePath])
-Constructor for the artifact manager
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [storagePath] | <code>String</code> | The path to store artifacts in. Defaults to  `~/.vulpes/artifacts` if not specified. |
-
-<a name="ArtifactManager+addJobAttachment"></a>
-
-### artifactManager.addJobAttachment(jobID, param1) ⇒ <code>Promise.&lt;String&gt;</code>
-Add a new job attachment
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-**Returns**: <code>Promise.&lt;String&gt;</code> - A promise that resolves with the attachment ID  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID to add the attachment to |
-| param1 | [<code>NewJobAttachmentOptions</code>](#NewJobAttachmentOptions) | Options for the new attachment |
-
-<a name="ArtifactManager+initialise"></a>
-
-### artifactManager.initialise(service) ⇒ <code>Promise</code>
-Initialise the manager (called by Service)
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-**Emits**: [<code>migrationComplete</code>](#ArtifactManager+event_migrationComplete)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| service | [<code>Service</code>](#Service) | The service instance we're attached to |
-
-<a name="ArtifactManager+getArtifactReadStream"></a>
-
-### artifactManager.getArtifactReadStream(artifactID) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-Get a readable stream of an artifact
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| artifactID | <code>String</code> | The artifact's ID |
-
-<a name="ArtifactManager+getArtifactWriteStream"></a>
-
-### artifactManager.getArtifactWriteStream(artifactID) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
-Get a writeable stream for an artifact
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| artifactID | <code>String</code> | The artifact's ID |
-
-<a name="ArtifactManager+getJobAttachments"></a>
-
-### artifactManager.getJobAttachments(jobID) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
-Get all job attachments
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The ID of the job to fetch artifacts for |
-
-<a name="ArtifactManager+removeArtifact"></a>
-
-### artifactManager.removeArtifact(artifactID) ⇒ <code>Promise</code>
-Remove an artifact (does not affect jobs)
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| artifactID | <code>String</code> | The ID of the artifact to remove |
-
-<a name="ArtifactManager+removeJobAttachment"></a>
-
-### artifactManager.removeJobAttachment(jobID, artifactID) ⇒ <code>Promise</code>
-Remove an attachment from a job, also removing
-the associated artifact
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The ID of the job containing the artifact |
-| artifactID | <code>String</code> | The ID of the artifact to remove from  the job |
-
-<a name="ArtifactManager+shutdown"></a>
-
-### artifactManager.shutdown() ⇒ <code>Promise</code>
-Shutdown the artifact manager
-
-**Kind**: instance method of [<code>ArtifactManager</code>](#ArtifactManager)  
-<a name="ArtifactManager+event_migrationComplete"></a>
-
-### "migrationComplete"
-**Kind**: event emitted by [<code>ArtifactManager</code>](#ArtifactManager)  
-<a name="AutoArchiveHelper"></a>
-
-## AutoArchiveHelper ⇐ [<code>Helper</code>](#Helper)
+### Vulpes.AutoArchiveHelper ⇐ <code>Helper</code>
 Auto archive helper
 
-**Kind**: global class  
-**Extends**: [<code>Helper</code>](#Helper)  
+**Kind**: static class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>Helper</code>  
 
-* [AutoArchiveHelper](#AutoArchiveHelper) ⇐ [<code>Helper</code>](#Helper)
-    * [new AutoArchiveHelper([options])](#new_AutoArchiveHelper_new)
-    * [.service](#Helper+service) : [<code>Service</code>](#Service)
-    * [.archive()](#AutoArchiveHelper+archive) ⇒ <code>Promise</code>
-    * [.archiveJobs([action])](#AutoArchiveHelper+archiveJobs) ⇒ <code>Promise</code>
-    * [.attach(service)](#AutoArchiveHelper+attach)
-    * [.shutdown()](#AutoArchiveHelper+shutdown)
+* [.AutoArchiveHelper](#module_Vulpes.AutoArchiveHelper) ⇐ <code>Helper</code>
+    * [new AutoArchiveHelper([options])](#new_module_Vulpes.AutoArchiveHelper_new)
+    * [.service](#Helper+service) : <code>Service</code>
+    * [.attach(service)](#Helper+attach)
     * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
+    * [.shutdown()](#Helper+shutdown)
 
-<a name="new_AutoArchiveHelper_new"></a>
+<a name="new_module_Vulpes.AutoArchiveHelper_new"></a>
 
-### new AutoArchiveHelper([options])
+#### new AutoArchiveHelper([options])
 Constructor for the auto archive helper
 
 
@@ -274,83 +182,416 @@ Constructor for the auto archive helper
 
 <a name="Helper+service"></a>
 
-### autoArchiveHelper.service : [<code>Service</code>](#Service)
+#### autoArchiveHelper.service : <code>Service</code>
 The attached service
 
-**Kind**: instance property of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+**Kind**: instance property of [<code>AutoArchiveHelper</code>](#module_Vulpes.AutoArchiveHelper)  
+**Overrides**: [<code>service</code>](#Helper+service)  
 **Read only**: true  
-<a name="AutoArchiveHelper+archive"></a>
+<a name="Helper+attach"></a>
 
-### autoArchiveHelper.archive() ⇒ <code>Promise</code>
-Perform the archival process
+#### autoArchiveHelper.attach(service)
+Attach to a service
+This will be called by a Service instance
 
-**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
-<a name="AutoArchiveHelper+archiveJobs"></a>
-
-### autoArchiveHelper.archiveJobs([action]) ⇒ <code>Promise</code>
-Archive or delete some jobs
-
-**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [action] | <code>String</code> | <code>archive</code> | The action with which to perform on the selected jobs  (defaults to "archive", but can also be "delete") |
-
-<a name="AutoArchiveHelper+attach"></a>
-
-### autoArchiveHelper.attach(service)
-Attach to a service instance
-
-**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#module_Vulpes.AutoArchiveHelper)  
 **Overrides**: [<code>attach</code>](#Helper+attach)  
+**Throws**:
+
+- <code>Error</code> Throws if already attached to a service
+
 
 | Param | Type | Description |
 | --- | --- | --- |
-| service | [<code>Service</code>](#Service) | The service to attach to |
+| service | <code>Service</code> | The service to attach to |
 
-<a name="AutoArchiveHelper+shutdown"></a>
-
-### autoArchiveHelper.shutdown()
-Shutdown the helper
-
-**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
-**Overrides**: [<code>shutdown</code>](#Helper+shutdown)  
 <a name="Helper+initialise"></a>
 
-### autoArchiveHelper.initialise() ⇒ <code>Promise</code>
+#### autoArchiveHelper.initialise() ⇒ <code>Promise</code>
 Initialise the helper (only called if the helper is added BEFORE
  service initialisation)
 
-**Kind**: instance method of [<code>AutoArchiveHelper</code>](#AutoArchiveHelper)  
-<a name="Helper"></a>
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#module_Vulpes.AutoArchiveHelper)  
+**Overrides**: [<code>initialise</code>](#Helper+initialise)  
+<a name="Helper+shutdown"></a>
 
-## Helper
+#### autoArchiveHelper.shutdown()
+Shutdown the helper
+This will be called by a Service instance
+
+**Kind**: instance method of [<code>AutoArchiveHelper</code>](#module_Vulpes.AutoArchiveHelper)  
+**Overrides**: [<code>shutdown</code>](#Helper+shutdown)  
+<a name="module_Vulpes.FileStorage"></a>
+
+### Vulpes.FileStorage ⇐ <code>Storage</code>
+File storage adapter
+Stores and streams jobs in a local file (very inefficiently)
+
+**Kind**: static class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>Storage</code>  
+
+* [.FileStorage](#module_Vulpes.FileStorage) ⇐ <code>Storage</code>
+    * [new FileStorage(filename)](#new_module_Vulpes.FileStorage_new)
+    * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+    * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+    * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+    * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+
+<a name="new_module_Vulpes.FileStorage_new"></a>
+
+#### new FileStorage(filename)
+Constructor for a new FileStorage instance
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| filename | <code>String</code> | The file to store/stream jobs to and from |
+
+<a name="Storage+getItem"></a>
+
+#### fileStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+Get an item by its key
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>getItem</code>](#Storage+getItem)  
+**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the item, or
+ null if the item doesn't exist  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to fetch |
+
+<a name="Storage+initialise"></a>
+
+#### fileStorage.initialise() ⇒ <code>Promise</code>
+Initialise the storage
+This usually entails reading the store from the storage so that it is
+immediately available
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>initialise</code>](#Storage+initialise)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
+ completed  
+<a name="Storage+removeItem"></a>
+
+#### fileStorage.removeItem(key) ⇒ <code>Promise</code>
+Remove an item from storage
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the key has been removed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to remove |
+
+<a name="Storage+setItem"></a>
+
+#### fileStorage.setItem(key, value) ⇒ <code>Promise</code>
+Set an item
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>setItem</code>](#Storage+setItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the value has been
+ stored  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to set the value for |
+| value | <code>\*</code> | The value to set |
+
+<a name="Storage+shutdown"></a>
+
+#### fileStorage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
+<a name="Storage+streamItems"></a>
+
+#### fileStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>FileStorage</code>](#module_Vulpes.FileStorage)  
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
+<a name="module_Vulpes.RedisStorage"></a>
+
+### Vulpes.RedisStorage ⇐ <code>Storage</code>
+Redis storage adapter
+Stores items in a Redis database
+
+**Kind**: static class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>Storage</code>  
+**See**: https://www.npmjs.com/package/ioredis  
+
+* [.RedisStorage](#module_Vulpes.RedisStorage) ⇐ <code>Storage</code>
+    * [new RedisStorage([redisOptions])](#new_module_Vulpes.RedisStorage_new)
+    * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+    * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+    * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+    * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+
+<a name="new_module_Vulpes.RedisStorage_new"></a>
+
+#### new RedisStorage([redisOptions])
+Create a new Redis storage instance
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [redisOptions] | <code>Object</code> | The options for ioredis |
+
+<a name="Storage+getItem"></a>
+
+#### redisStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+Get an item by its key
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>getItem</code>](#Storage+getItem)  
+**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the item, or
+ null if the item doesn't exist  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to fetch |
+
+<a name="Storage+initialise"></a>
+
+#### redisStorage.initialise() ⇒ <code>Promise</code>
+Initialise the storage
+This usually entails reading the store from the storage so that it is
+immediately available
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>initialise</code>](#Storage+initialise)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
+ completed  
+<a name="Storage+removeItem"></a>
+
+#### redisStorage.removeItem(key) ⇒ <code>Promise</code>
+Remove an item from storage
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the key has been removed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to remove |
+
+<a name="Storage+setItem"></a>
+
+#### redisStorage.setItem(key, value) ⇒ <code>Promise</code>
+Set an item
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>setItem</code>](#Storage+setItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the value has been
+ stored  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to set the value for |
+| value | <code>\*</code> | The value to set |
+
+<a name="Storage+shutdown"></a>
+
+#### redisStorage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
+<a name="Storage+streamItems"></a>
+
+#### redisStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>RedisStorage</code>](#module_Vulpes.RedisStorage)  
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
+<a name="module_Vulpes.Storage"></a>
+
+### Vulpes.Storage
+Storage base class
+Provides a storage mechanism for the job handling framework,
+allowing jobs to persist between restarts. This is an
+interface and does not actually perform any operations.
+
+**Kind**: static class of [<code>Vulpes</code>](#module_Vulpes)  
+<a name="module_Vulpes.convertTemplateToJobArray"></a>
+
+### Vulpes.convertTemplateToJobArray(tmpObj) ⇒ [<code>Array.&lt;NewJob&gt;</code>](#NewJob)
+Convert a template to an array of jobs to import
+
+**Kind**: static method of [<code>Vulpes</code>](#module_Vulpes)  
+**Returns**: [<code>Array.&lt;NewJob&gt;</code>](#NewJob) - An array of new jobs to pass to `Service#addJobs`  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tmpObj | [<code>JobImportTemplate</code>](#JobImportTemplate) | The template to convert |
+
+<a name="module_Vulpes.ArtifactManager"></a>
+
+### Vulpes~ArtifactManager ⇐ <code>EventEmitter</code>
+Artifact Manager
+
+**Kind**: inner class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>EventEmitter</code>  
+
+* [~ArtifactManager](#module_Vulpes.ArtifactManager) ⇐ <code>EventEmitter</code>
+    * [new ArtifactManager([storagePath])](#new_module_Vulpes.ArtifactManager_new)
+    * [.addJobAttachment(jobID, param1)](#module_Vulpes.ArtifactManager+addJobAttachment) ⇒ <code>Promise.&lt;String&gt;</code>
+    * [.initialise(service)](#module_Vulpes.ArtifactManager+initialise) ⇒ <code>Promise</code>
+    * [.getArtifactReadStream(artifactID)](#module_Vulpes.ArtifactManager+getArtifactReadStream) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+    * [.getArtifactWriteStream(artifactID)](#module_Vulpes.ArtifactManager+getArtifactWriteStream) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
+    * [.getJobAttachments(jobID)](#module_Vulpes.ArtifactManager+getJobAttachments) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
+    * [.removeArtifact(artifactID)](#module_Vulpes.ArtifactManager+removeArtifact) ⇒ <code>Promise</code>
+    * [.removeJobAttachment(jobID, artifactID)](#module_Vulpes.ArtifactManager+removeJobAttachment) ⇒ <code>Promise</code>
+    * [.shutdown()](#module_Vulpes.ArtifactManager+shutdown) ⇒ <code>Promise</code>
+
+<a name="new_module_Vulpes.ArtifactManager_new"></a>
+
+#### new ArtifactManager([storagePath])
+Constructor for the artifact manager
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [storagePath] | <code>String</code> | The path to store artifacts in. Defaults to  `~/.vulpes/artifacts` if not specified. |
+
+<a name="module_Vulpes.ArtifactManager+addJobAttachment"></a>
+
+#### artifactManager.addJobAttachment(jobID, param1) ⇒ <code>Promise.&lt;String&gt;</code>
+Add a new job attachment
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+**Returns**: <code>Promise.&lt;String&gt;</code> - A promise that resolves with the attachment ID  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The job ID to add the attachment to |
+| param1 | [<code>NewJobAttachmentOptions</code>](#NewJobAttachmentOptions) | Options for the new attachment |
+
+<a name="module_Vulpes.ArtifactManager+initialise"></a>
+
+#### artifactManager.initialise(service) ⇒ <code>Promise</code>
+Initialise the manager (called by Service)
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+**Emits**: [<code>migrationComplete</code>](#ArtifactManager+event_migrationComplete)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| service | <code>Service</code> | The service instance we're attached to |
+
+<a name="module_Vulpes.ArtifactManager+getArtifactReadStream"></a>
+
+#### artifactManager.getArtifactReadStream(artifactID) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Get a readable stream of an artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The artifact's ID |
+
+<a name="module_Vulpes.ArtifactManager+getArtifactWriteStream"></a>
+
+#### artifactManager.getArtifactWriteStream(artifactID) ⇒ <code>Promise.&lt;WritableStream&gt;</code>
+Get a writeable stream for an artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The artifact's ID |
+
+<a name="module_Vulpes.ArtifactManager+getJobAttachments"></a>
+
+#### artifactManager.getJobAttachments(jobID) ⇒ [<code>Array.&lt;JobAttachment&gt;</code>](#JobAttachment)
+Get all job attachments
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job to fetch artifacts for |
+
+<a name="module_Vulpes.ArtifactManager+removeArtifact"></a>
+
+#### artifactManager.removeArtifact(artifactID) ⇒ <code>Promise</code>
+Remove an artifact (does not affect jobs)
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| artifactID | <code>String</code> | The ID of the artifact to remove |
+
+<a name="module_Vulpes.ArtifactManager+removeJobAttachment"></a>
+
+#### artifactManager.removeJobAttachment(jobID, artifactID) ⇒ <code>Promise</code>
+Remove an attachment from a job, also removing
+the associated artifact
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| jobID | <code>String</code> | The ID of the job containing the artifact |
+| artifactID | <code>String</code> | The ID of the artifact to remove from  the job |
+
+<a name="module_Vulpes.ArtifactManager+shutdown"></a>
+
+#### artifactManager.shutdown() ⇒ <code>Promise</code>
+Shutdown the artifact manager
+
+**Kind**: instance method of [<code>ArtifactManager</code>](#module_Vulpes.ArtifactManager)  
+<a name="module_Vulpes.Helper"></a>
+
+### Vulpes~Helper
 Helper base class
 Helpers provide an easy interface with which to
 attach to services to perform ancillary tasks.
 
-**Kind**: global class  
+**Kind**: inner class of [<code>Vulpes</code>](#module_Vulpes)  
+<a name="module_Vulpes.TimeoutHelper"></a>
 
-* [Helper](#Helper)
-    * [.service](#Helper+service) : [<code>Service</code>](#Service)
+### Vulpes~TimeoutHelper ⇐ <code>Helper</code>
+Helper for timing-out jobs
+
+**Kind**: inner class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>Helper</code>  
+
+* [~TimeoutHelper](#module_Vulpes.TimeoutHelper) ⇐ <code>Helper</code>
+    * [.service](#Helper+service) : <code>Service</code>
     * [.attach(service)](#Helper+attach)
     * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
     * [.shutdown()](#Helper+shutdown)
 
 <a name="Helper+service"></a>
 
-### helper.service : [<code>Service</code>](#Service)
+#### timeoutHelper.service : <code>Service</code>
 The attached service
 
-**Kind**: instance property of [<code>Helper</code>](#Helper)  
+**Kind**: instance property of [<code>TimeoutHelper</code>](#module_Vulpes.TimeoutHelper)  
+**Overrides**: [<code>service</code>](#Helper+service)  
 **Read only**: true  
 <a name="Helper+attach"></a>
 
-### helper.attach(service)
+#### timeoutHelper.attach(service)
 Attach to a service
 This will be called by a Service instance
 
-**Kind**: instance method of [<code>Helper</code>](#Helper)  
+**Kind**: instance method of [<code>TimeoutHelper</code>](#module_Vulpes.TimeoutHelper)  
+**Overrides**: [<code>attach</code>](#Helper+attach)  
 **Throws**:
 
 - <code>Error</code> Throws if already attached to a service
@@ -358,85 +599,128 @@ This will be called by a Service instance
 
 | Param | Type | Description |
 | --- | --- | --- |
-| service | [<code>Service</code>](#Service) | The service to attach to |
+| service | <code>Service</code> | The service to attach to |
 
 <a name="Helper+initialise"></a>
 
-### helper.initialise() ⇒ <code>Promise</code>
+#### timeoutHelper.initialise() ⇒ <code>Promise</code>
 Initialise the helper (only called if the helper is added BEFORE
  service initialisation)
 
-**Kind**: instance method of [<code>Helper</code>](#Helper)  
-<a name="Helper+shutdown"></a>
-
-### helper.shutdown()
-Shutdown the helper
-This will be called by a Service instance
-
-**Kind**: instance method of [<code>Helper</code>](#Helper)  
-<a name="StorageMigrationHelper"></a>
-
-## StorageMigrationHelper ⇐ [<code>Helper</code>](#Helper)
-Storage migration helper
-
-**Kind**: global class  
-**Extends**: [<code>Helper</code>](#Helper)  
-
-* [StorageMigrationHelper](#StorageMigrationHelper) ⇐ [<code>Helper</code>](#Helper)
-    * [new StorageMigrationHelper(originStorage)](#new_StorageMigrationHelper_new)
-    * [.service](#Helper+service) : [<code>Service</code>](#Service)
-    * [.attach(service)](#Helper+attach)
-    * [.initialise()](#Helper+initialise) ⇒ <code>Promise</code>
-    * [.shutdown()](#Helper+shutdown)
-
-<a name="new_StorageMigrationHelper_new"></a>
-
-### new StorageMigrationHelper(originStorage)
-Constructor for the storage migration helper
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| originStorage | [<code>Storage</code>](#Storage) | The storage to migrate from |
-
-<a name="Helper+service"></a>
-
-### storageMigrationHelper.service : [<code>Service</code>](#Service)
-The attached service
-
-**Kind**: instance property of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
-**Read only**: true  
-<a name="Helper+attach"></a>
-
-### storageMigrationHelper.attach(service)
-Attach to a service
-This will be called by a Service instance
-
-**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
-**Throws**:
-
-- <code>Error</code> Throws if already attached to a service
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| service | [<code>Service</code>](#Service) | The service to attach to |
-
-<a name="Helper+initialise"></a>
-
-### storageMigrationHelper.initialise() ⇒ <code>Promise</code>
-Initialise the helper (only called if the helper is added BEFORE
- service initialisation)
-
-**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
+**Kind**: instance method of [<code>TimeoutHelper</code>](#module_Vulpes.TimeoutHelper)  
 **Overrides**: [<code>initialise</code>](#Helper+initialise)  
 <a name="Helper+shutdown"></a>
 
-### storageMigrationHelper.shutdown()
+#### timeoutHelper.shutdown()
 Shutdown the helper
 This will be called by a Service instance
 
-**Kind**: instance method of [<code>StorageMigrationHelper</code>](#StorageMigrationHelper)  
+**Kind**: instance method of [<code>TimeoutHelper</code>](#module_Vulpes.TimeoutHelper)  
+**Overrides**: [<code>shutdown</code>](#Helper+shutdown)  
+<a name="module_Vulpes.Service"></a>
+
+### Vulpes~Service ⇐ <code>EventEmitter</code>
+Service for managing jobs
+
+**Kind**: inner class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>EventEmitter</code>  
+<a name="new_module_Vulpes.Service_new"></a>
+
+#### new Service([param0])
+Contrsuctor for the Service class
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [param0] | [<code>ServiceOptions</code>](#ServiceOptions) | Options for the new service |
+
+<a name="module_Vulpes.MemoryStorage"></a>
+
+### Vulpes~MemoryStorage ⇐ <code>Storage</code>
+Memory storage adapter
+Stores jobs in memory. Once application is closed all jobs are
+purged - do not use this storage if you desire persistence.
+
+**Kind**: inner class of [<code>Vulpes</code>](#module_Vulpes)  
+**Extends**: <code>Storage</code>  
+
+* [~MemoryStorage](#module_Vulpes.MemoryStorage) ⇐ <code>Storage</code>
+    * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
+    * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
+    * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
+    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
+    * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+
+<a name="Storage+getItem"></a>
+
+#### memoryStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
+Get an item by its key
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>getItem</code>](#Storage+getItem)  
+**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the item, or
+ null if the item doesn't exist  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to fetch |
+
+<a name="Storage+initialise"></a>
+
+#### memoryStorage.initialise() ⇒ <code>Promise</code>
+Initialise the storage
+This usually entails reading the store from the storage so that it is
+immediately available
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>initialise</code>](#Storage+initialise)  
+**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
+ completed  
+<a name="Storage+removeItem"></a>
+
+#### memoryStorage.removeItem(key) ⇒ <code>Promise</code>
+Remove an item from storage
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the key has been removed  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to remove |
+
+<a name="Storage+setItem"></a>
+
+#### memoryStorage.setItem(key, value) ⇒ <code>Promise</code>
+Set an item
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>setItem</code>](#Storage+setItem)  
+**Returns**: <code>Promise</code> - A promise that resolves once the value has been
+ stored  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| key | <code>String</code> | The key to set the value for |
+| value | <code>\*</code> | The value to set |
+
+<a name="Storage+shutdown"></a>
+
+#### memoryStorage.shutdown() ⇒ <code>Promise</code>
+Shutdown the storage instance
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
+**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
+<a name="Storage+streamItems"></a>
+
+#### memoryStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+Stream all items
+
+**Kind**: instance method of [<code>MemoryStorage</code>](#module_Vulpes.MemoryStorage)  
+**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
+**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
 <a name="Scheduler"></a>
 
 ## Scheduler ⇐ <code>EventEmitter</code>
@@ -446,7 +730,7 @@ Scheduler for scheduled tasks
 **Extends**: <code>EventEmitter</code>  
 
 * [Scheduler](#Scheduler) ⇐ <code>EventEmitter</code>
-    * [.service](#Scheduler+service) : [<code>Service</code>](#Service)
+    * [.service](#Scheduler+service) : <code>Service</code>
     * [.taskQueue](#Scheduler+taskQueue) : <code>Channel</code>
     * ~~[.addScheduledJobs()](#Scheduler+addScheduledJobs)~~
     * [.addScheduledTask(options)](#Scheduler+addScheduledTask) ⇒ <code>String</code>
@@ -473,7 +757,7 @@ Scheduler for scheduled tasks
 
 <a name="Scheduler+service"></a>
 
-### scheduler.service : [<code>Service</code>](#Service)
+### scheduler.service : <code>Service</code>
 Service reference
 
 **Kind**: instance property of [<code>Scheduler</code>](#Scheduler)  
@@ -602,7 +886,7 @@ Update properties of a task
 
 <a name="Scheduler+_cronSchedule"></a>
 
-### scheduler._cronSchedule() ⇒ <code>Object</code>
+### scheduler.\_cronSchedule() ⇒ <code>Object</code>
 Schedule a CRON execution
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -617,7 +901,7 @@ Schedule a CRON execution
 
 <a name="Scheduler+_executeTask"></a>
 
-### scheduler._executeTask(taskOrTaskID, [force])
+### scheduler.\_executeTask(taskOrTaskID, [force])
 Execute a task
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -631,7 +915,7 @@ Execute a task
 
 <a name="Scheduler+_unwatchTask"></a>
 
-### scheduler._unwatchTask(task) ⇒ <code>Boolean</code>
+### scheduler.\_unwatchTask(task) ⇒ <code>Boolean</code>
 Unwatch a CRON task (deschedule it)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -644,7 +928,7 @@ Unwatch a CRON task (deschedule it)
 
 <a name="Scheduler+_watchTask"></a>
 
-### scheduler._watchTask(task)
+### scheduler.\_watchTask(task)
 Watch a task (start timer for scheduling)
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -657,7 +941,7 @@ Watch a task (start timer for scheduling)
 
 <a name="Scheduler+_writeTask"></a>
 
-### scheduler._writeTask(task) ⇒ <code>Promise</code>
+### scheduler.\_writeTask(task) ⇒ <code>Promise</code>
 Write a task to storage
 
 **Kind**: instance method of [<code>Scheduler</code>](#Scheduler)  
@@ -755,711 +1039,6 @@ Event for when a task has been scheduled (fired both when created and
 | schedule | <code>String</code> | The CRON schedule for the task |
 | enabled | <code>Boolean</code> | Whether the task is enabled or not |
 
-<a name="Service"></a>
-
-## Service ⇐ <code>EventEmitter</code>
-Service for managing jobs
-
-**Kind**: global class  
-**Extends**: <code>EventEmitter</code>  
-
-* [Service](#Service) ⇐ <code>EventEmitter</code>
-    * [new Service([param0])](#new_Service_new)
-    * _instance_
-        * [.alive](#Service+alive) : <code>Boolean</code>
-        * [.artifactManager](#Service+artifactManager) : [<code>ArtifactManager</code>](#ArtifactManager)
-        * [.helpers](#Service+helpers) : [<code>Array.&lt;Helper&gt;</code>](#Helper)
-        * [.initialised](#Service+initialised) : <code>Boolean</code>
-        * [.jobQueue](#Service+jobQueue) : <code>Channel</code>
-        * [.scheduler](#Service+scheduler) : [<code>Scheduler</code>](#Scheduler)
-        * [.storage](#Service+storage) : [<code>Storage</code>](#Storage)
-        * [.timeLimit](#Service+timeLimit) : <code>Number</code>
-        * [.tracker](#Service+tracker) : <code>Tracker</code>
-        * [.addJob([properties])](#Service+addJob) ⇒ <code>Promise.&lt;String&gt;</code>
-        * [.addJobs(jobs)](#Service+addJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-        * [.archiveJob(jobID)](#Service+archiveJob) ⇒ <code>Promise</code>
-        * [.getJob(jobID)](#Service+getJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-        * [.getJobChildren(jobID, [options])](#Service+getJobChildren) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-        * [.getJobParents(jobID, [options])](#Service+getJobParents) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-        * [.getJobTree(jobID, [options])](#Service+getJobTree) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-        * [.getNextJob()](#Service+getNextJob) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-        * [.initialise()](#Service+initialise) ⇒ <code>Promise</code>
-        * [.queryJobs([query], [options])](#Service+queryJobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-        * [.removeJob(jobID)](#Service+removeJob) ⇒ <code>Promise</code>
-        * [.resetJob(jobID)](#Service+resetJob) ⇒ <code>Promise</code>
-        * [.shutdown()](#Service+shutdown) ⇒ <code>Promise</code>
-        * [.startJob([jobID], [options])](#Service+startJob) ⇒ <code>Promise.&lt;Object&gt;</code>
-        * [.stopJob(jobID, resultType, [resultData])](#Service+stopJob) ⇒ <code>Promise</code>
-        * [.updateJob(jobID, mergedProperties, [options])](#Service+updateJob)
-        * [.use(helper)](#Service+use) ⇒ [<code>Service</code>](#Service)
-    * _static_
-        * [.JobPriority](#Service.JobPriority) : [<code>JobPriorities</code>](#JobPriorities)
-        * [.JobResult](#Service.JobResult) : [<code>JobResultTypes</code>](#JobResultTypes)
-        * [.JobStatus](#Service.JobStatus) : <code>JobStatus</code>
-
-<a name="new_Service_new"></a>
-
-### new Service([param0])
-Contrsuctor for the Service class
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [param0] | [<code>ServiceOptions</code>](#ServiceOptions) | Options for the new service |
-
-<a name="Service+alive"></a>
-
-### service.alive : <code>Boolean</code>
-Check that the instance is alive and not shut down
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+artifactManager"></a>
-
-### service.artifactManager : [<code>ArtifactManager</code>](#ArtifactManager)
-Artifact manager instance
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+helpers"></a>
-
-### service.helpers : [<code>Array.&lt;Helper&gt;</code>](#Helper)
-Helpers attached to the Service
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+initialised"></a>
-
-### service.initialised : <code>Boolean</code>
-Whether the instance is initialised or not
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+jobQueue"></a>
-
-### service.jobQueue : <code>Channel</code>
-Execute queue for job manipulations
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+scheduler"></a>
-
-### service.scheduler : [<code>Scheduler</code>](#Scheduler)
-The scheduler instance for scheduling tasks
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+storage"></a>
-
-### service.storage : [<code>Storage</code>](#Storage)
-The storage mechanism used by the Service
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+timeLimit"></a>
-
-### service.timeLimit : <code>Number</code>
-The current default time-limit (milliseconds)
-The timelimit is applied to *new* jobs as they're added, and
-changes to this value do not affect existing jobs.
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-<a name="Service+tracker"></a>
-
-### service.tracker : <code>Tracker</code>
-Analytics tracking instance
-
-**Kind**: instance property of [<code>Service</code>](#Service)  
-**Read only**: true  
-<a name="Service+addJob"></a>
-
-### service.addJob([properties]) ⇒ <code>Promise.&lt;String&gt;</code>
-Add a new job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;String&gt;</code> - A promise that resolves with the job's ID  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [properties] | [<code>NewJob</code>](#NewJob) | The new job's properties |
-
-<a name="Service+addJobs"></a>
-
-### service.addJobs(jobs) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-Add an array of new jobs (a batch)
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - An array of newly created jobs  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobs | [<code>Array.&lt;NewJob&gt;</code>](#NewJob) | An array of new job objects |
-
-<a name="Service+archiveJob"></a>
-
-### service.archiveJob(jobID) ⇒ <code>Promise</code>
-Archive a job so it will be removed from queries
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID |
-
-<a name="Service+getJob"></a>
-
-### service.getJob(jobID) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-Get a job by its ID
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - A promise that resolves with the job
- or null if not found  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID |
-
-<a name="Service+getJobChildren"></a>
-
-### service.getJobChildren(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-Get a job's children (shallow)
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A promise that resolves with an array
- of child jobs  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID |
-| [options] | [<code>GetJobChildrenOptions</code>](#GetJobChildrenOptions) | Options for fetching |
-
-<a name="Service+getJobParents"></a>
-
-### service.getJobParents(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-Get the parents of a job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A promise that resolves with an array of
- jobs  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The ID of the job |
-| [options] | [<code>GetJobParentsOptions</code>](#GetJobParentsOptions) | Job fetching options |
-
-<a name="Service+getJobTree"></a>
-
-### service.getJobTree(jobID, [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-Get a job tree
-Fetches an array of jobs that form the relationship tree
-(parents-children) of a certain job.
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - A deduplicated array of jobs containing,
- if configured, all of the job's ancestry and progeny. Will also contain
- the job itself.  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID to branch from |
-| [options] | [<code>GetJobTreeOptions</code>](#GetJobTreeOptions) | Fetch options for the tree  processing |
-
-<a name="Service+getNextJob"></a>
-
-### service.getNextJob() ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-Get the next job that should be started
-This method is expensive as it sorts available jobs by priority first,
-before returning the very next job that should be started.
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - A promise that resolves with the job
- or null if none available  
-<a name="Service+initialise"></a>
-
-### service.initialise() ⇒ <code>Promise</code>
-Initialise the Service instance
-Must be called before any other operation
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation
- has been completed  
-<a name="Service+queryJobs"></a>
-
-### service.queryJobs([query], [options]) ⇒ <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code>
-Perform a jobs query
-Query for an array of jobs by the job's properties. This method streams all
-jobs from storage, testing each individually against the query. Once a group
-of jobs is collected, further sorting and limiting are applied before once
-again streaming the jobs to find the full matches to return.
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Array.&lt;Job&gt;&gt;</code> - Returns a promise that resolves with
- an array of jobs  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [query] | <code>Object</code> | The object query to perform |
-| [options] | [<code>QueryJobsOptions</code>](#QueryJobsOptions) | Options for querying jobs, like sorting |
-
-<a name="Service+removeJob"></a>
-
-### service.removeJob(jobID) ⇒ <code>Promise</code>
-Completely delete a job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise</code> - A promise that resolves once the job has
- been removed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The ID of the job to reset |
-
-<a name="Service+resetJob"></a>
-
-### service.resetJob(jobID) ⇒ <code>Promise</code>
-Reset a failed job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise</code> - A promise that resolves once the job has
- been reset  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The ID of the job to reset |
-
-<a name="Service+shutdown"></a>
-
-### service.shutdown() ⇒ <code>Promise</code>
-Shutdown the instance
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-<a name="Service+startJob"></a>
-
-### service.startJob([jobID], [options]) ⇒ <code>Promise.&lt;Object&gt;</code>
-Start a job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise.&lt;Object&gt;</code> - A promise that resolves with job data for a
- worker  
-
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| [jobID] | <code>String</code> | <code></code> | The job ID to start. If none provided the Service  will attempt to start the next job by priority. If none is found it  will simply resolve with null. If the job ID is specified by not found  an exception will be thrown. |
-| [options] | <code>Object</code> |  | Configuration options |
-
-<a name="Service+stopJob"></a>
-
-### service.stopJob(jobID, resultType, [resultData]) ⇒ <code>Promise</code>
-Stop a job
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: <code>Promise</code> - A promise that resolves once the job has been
- stopped successfully  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job's ID to stop |
-| resultType | [<code>ResultType</code>](#ResultType) | The result type to set |
-| [resultData] | <code>Object</code> | Optional results data |
-
-<a name="Service+updateJob"></a>
-
-### service.updateJob(jobID, mergedProperties, [options])
-Update a job's properties
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| jobID | <code>String</code> | The job ID |
-| mergedProperties | <code>Object</code> | The properties to merge (overwrite) |
-| [options] | [<code>UpdateJobOptions</code>](#UpdateJobOptions) | Update method options |
-
-<a name="Service+use"></a>
-
-### service.use(helper) ⇒ [<code>Service</code>](#Service)
-Attach a helper to the Service instance
-
-**Kind**: instance method of [<code>Service</code>](#Service)  
-**Returns**: [<code>Service</code>](#Service) - Returns self, for chaining  
-**Throws**:
-
-- <code>VError</code> Throws if the helper instance is invalid
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| helper | [<code>Helper</code>](#Helper) | The helper to attach |
-
-<a name="Service.JobPriority"></a>
-
-### Service.JobPriority : [<code>JobPriorities</code>](#JobPriorities)
-Job priority
-
-**Kind**: static property of [<code>Service</code>](#Service)  
-<a name="Service.JobResult"></a>
-
-### Service.JobResult : [<code>JobResultTypes</code>](#JobResultTypes)
-Job result type
-
-**Kind**: static property of [<code>Service</code>](#Service)  
-<a name="Service.JobStatus"></a>
-
-### Service.JobStatus : <code>JobStatus</code>
-Job status
-
-**Kind**: static property of [<code>Service</code>](#Service)  
-<a name="FileStorage"></a>
-
-## FileStorage ⇐ [<code>Storage</code>](#Storage)
-File storage adapter
-Stores and streams jobs in a local file (very inefficiently)
-
-**Kind**: global class  
-**Extends**: [<code>Storage</code>](#Storage)  
-
-* [FileStorage](#FileStorage) ⇐ [<code>Storage</code>](#Storage)
-    * [new FileStorage(filename)](#new_FileStorage_new)
-    * [.getItem(id)](#FileStorage+getItem) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-    * [.removeItem(id)](#FileStorage+removeItem) ⇒ <code>Promise</code>
-    * [.setItem(id, item)](#FileStorage+setItem) ⇒ <code>Promise</code>
-    * [.streamItems()](#FileStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
-    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
-
-<a name="new_FileStorage_new"></a>
-
-### new FileStorage(filename)
-Constructor for a new FileStorage instance
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| filename | <code>String</code> | The file to store/stream jobs to and from |
-
-<a name="FileStorage+getItem"></a>
-
-### fileStorage.getItem(id) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-Get an item by its ID
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>getItem</code>](#Storage+getItem)  
-**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - A promise that resolves with the item or
- null if not found  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>String</code> | The item ID |
-
-<a name="FileStorage+removeItem"></a>
-
-### fileStorage.removeItem(id) ⇒ <code>Promise</code>
-Remove an item by its ID
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
-**Returns**: <code>Promise</code> - A promise that resolves when the item's been removed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>String</code> | The item ID |
-
-<a name="FileStorage+setItem"></a>
-
-### fileStorage.setItem(id, item) ⇒ <code>Promise</code>
-Set an item using its ID
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>setItem</code>](#Storage+setItem)  
-**Returns**: <code>Promise</code> - A promise that resolves when the operation has been
- completed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>String</code> | The item ID to set |
-| item | <code>Object</code> \| <code>null</code> | The item to set (or null to remove) |
-
-<a name="FileStorage+streamItems"></a>
-
-### fileStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-Stream all items
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
-**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with a readable stream  
-<a name="Storage+initialise"></a>
-
-### fileStorage.initialise() ⇒ <code>Promise</code>
-Initialise the storage
-This usually entails reading the store from the storage so that it is
-immediately available
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
- completed  
-<a name="Storage+shutdown"></a>
-
-### fileStorage.shutdown() ⇒ <code>Promise</code>
-Shutdown the storage instance
-
-**Kind**: instance method of [<code>FileStorage</code>](#FileStorage)  
-**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
-<a name="MemoryStorage"></a>
-
-## MemoryStorage ⇐ [<code>Storage</code>](#Storage)
-Memory storage adapter
-Stores jobs in memory. Once application is closed all jobs are
-purged - do not use this storage if you desire persistence.
-
-**Kind**: global class  
-**Extends**: [<code>Storage</code>](#Storage)  
-
-* [MemoryStorage](#MemoryStorage) ⇐ [<code>Storage</code>](#Storage)
-    * [.store](#MemoryStorage+store) : <code>Object</code>
-    * [.getItem(key)](#MemoryStorage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-    * [.removeItem(key)](#MemoryStorage+removeItem) ⇒ <code>Promise</code>
-    * [.setItem(key, value)](#MemoryStorage+setItem) ⇒ <code>Promise</code>
-    * [.streamItems()](#MemoryStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
-    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
-
-<a name="MemoryStorage+store"></a>
-
-### memoryStorage.store : <code>Object</code>
-The job store
-
-**Kind**: instance property of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Read only**: true  
-<a name="MemoryStorage+getItem"></a>
-
-### memoryStorage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-Get an item's value
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>getItem</code>](#Storage+getItem)  
-**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the value of
- the key or null if not found  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | Get the value of a key |
-
-<a name="MemoryStorage+removeItem"></a>
-
-### memoryStorage.removeItem(key) ⇒ <code>Promise</code>
-Remove an item from the memory store
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
-**Returns**: <code>Promise</code> - A promise that resolves once the key has been removed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | The key of the item to remove |
-
-<a name="MemoryStorage+setItem"></a>
-
-### memoryStorage.setItem(key, value) ⇒ <code>Promise</code>
-Set an item in the memory store
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>setItem</code>](#Storage+setItem)  
-**Returns**: <code>Promise</code> - Returns a promise that resolves once the item has
- been stored  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | The key to store under |
-| value | <code>\*</code> | The value to store |
-
-<a name="MemoryStorage+streamItems"></a>
-
-### memoryStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-Stream all items
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
-**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
-<a name="Storage+initialise"></a>
-
-### memoryStorage.initialise() ⇒ <code>Promise</code>
-Initialise the storage
-This usually entails reading the store from the storage so that it is
-immediately available
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
- completed  
-<a name="Storage+shutdown"></a>
-
-### memoryStorage.shutdown() ⇒ <code>Promise</code>
-Shutdown the storage instance
-
-**Kind**: instance method of [<code>MemoryStorage</code>](#MemoryStorage)  
-**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
-<a name="RedisStorage"></a>
-
-## RedisStorage ⇐ [<code>Storage</code>](#Storage)
-Redis storage adapter
-Stores items in a Redis database
-
-**Kind**: global class  
-**Extends**: [<code>Storage</code>](#Storage)  
-
-* [RedisStorage](#RedisStorage) ⇐ [<code>Storage</code>](#Storage)
-    * [new RedisStorage([redisOptions])](#new_RedisStorage_new)
-    * [.getItem()](#RedisStorage+getItem) ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-    * [.removeItem()](#RedisStorage+removeItem) ⇒ <code>Promise</code>
-    * [.setItem(id, item)](#RedisStorage+setItem) ⇒ <code>Promise</code>
-    * [.shutdown()](#RedisStorage+shutdown) ⇒ <code>Promise</code>
-    * [.streamItems()](#RedisStorage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
-
-<a name="new_RedisStorage_new"></a>
-
-### new RedisStorage([redisOptions])
-Create a new Redis storage instance
-
-
-| Param | Type | Description |
-| --- | --- | --- |
-| [redisOptions] | <code>Object</code> | The options for ioredis |
-
-<a name="RedisStorage+getItem"></a>
-
-### redisStorage.getItem() ⇒ <code>Promise.&lt;(Object\|null)&gt;</code>
-Get an item by its ID
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Overrides**: [<code>getItem</code>](#Storage+getItem)  
-**Returns**: <code>Promise.&lt;(Object\|null)&gt;</code> - The found item or null if not found  
-<a name="RedisStorage+removeItem"></a>
-
-### redisStorage.removeItem() ⇒ <code>Promise</code>
-Remove an item by its ID
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Overrides**: [<code>removeItem</code>](#Storage+removeItem)  
-<a name="RedisStorage+setItem"></a>
-
-### redisStorage.setItem(id, item) ⇒ <code>Promise</code>
-Set an item for an ID
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Overrides**: [<code>setItem</code>](#Storage+setItem)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| id | <code>String</code> | The ID to set |
-| item | <code>Object</code> | The item to set |
-
-<a name="RedisStorage+shutdown"></a>
-
-### redisStorage.shutdown() ⇒ <code>Promise</code>
-Shutdown the adapter (and disconnect Redis)
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Overrides**: [<code>shutdown</code>](#Storage+shutdown)  
-**Returns**: <code>Promise</code> - A promise that resolves when shutdown has completed  
-<a name="RedisStorage+streamItems"></a>
-
-### redisStorage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-Stream all items
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Overrides**: [<code>streamItems</code>](#Storage+streamItems)  
-**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A readable stream  
-<a name="Storage+initialise"></a>
-
-### redisStorage.initialise() ⇒ <code>Promise</code>
-Initialise the storage
-This usually entails reading the store from the storage so that it is
-immediately available
-
-**Kind**: instance method of [<code>RedisStorage</code>](#RedisStorage)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
- completed  
-<a name="Storage"></a>
-
-## Storage
-Storage base class
-Provides a storage mechanism for the job handling framework,
-allowing jobs to persist between restarts. This is an
-interface and does not actually perform any operations.
-
-**Kind**: global class  
-
-* [Storage](#Storage)
-    * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-    * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
-    * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
-    * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
-    * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
-    * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-
-<a name="Storage+getItem"></a>
-
-### storage.getItem(key) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
-Get an item by its key
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise.&lt;(\*\|null)&gt;</code> - A promise that resolves with the item, or
- null if the item doesn't exist  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | The key to fetch |
-
-<a name="Storage+initialise"></a>
-
-### storage.initialise() ⇒ <code>Promise</code>
-Initialise the storage
-This usually entails reading the store from the storage so that it is
-immediately available
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise</code> - A promise that resolves once initialisation has
- completed  
-<a name="Storage+removeItem"></a>
-
-### storage.removeItem(key) ⇒ <code>Promise</code>
-Remove an item from storage
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise</code> - A promise that resolves once the key has been removed  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | The key to remove |
-
-<a name="Storage+setItem"></a>
-
-### storage.setItem(key, value) ⇒ <code>Promise</code>
-Set an item
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise</code> - A promise that resolves once the value has been
- stored  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| key | <code>String</code> | The key to set the value for |
-| value | <code>\*</code> | The value to set |
-
-<a name="Storage+shutdown"></a>
-
-### storage.shutdown() ⇒ <code>Promise</code>
-Shutdown the storage instance
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise</code> - A promise that resolves once the shutdown procedure is complete  
-<a name="Storage+streamItems"></a>
-
-### storage.streamItems() ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
-Stream all items
-
-**Kind**: instance method of [<code>Storage</code>](#Storage)  
-**Returns**: <code>Promise.&lt;ReadableStream&gt;</code> - A promise that resolves with the readable stream  
 <a name="JobPriorities"></a>
 
 ## JobPriorities : <code>enum</code>
@@ -1498,7 +1077,7 @@ Test if a job satisfies all of its predicates
 
 | Param | Type | Description |
 | --- | --- | --- |
-| service | [<code>Service</code>](#Service) | The service |
+| service | <code>Service</code> | The service |
 | job | [<code>Job</code>](#Job) | The job to test |
 
 <a name="sortJobs"></a>
@@ -1708,7 +1287,7 @@ Job sorting step configuration
 
 | Name | Type | Description |
 | --- | --- | --- |
-| [artifactManager] | [<code>ArtifactManager</code>](#ArtifactManager) | Override for the ArtifactManager instance |
+| [artifactManager] | <code>ArtifactManager</code> | Override for the ArtifactManager instance |
 | [enableScheduling] | <code>Boolean</code> | Control whether or not the scheduling piece of the Service  is enabled or not. Default is true. |
 
 <a name="GetJobChildrenOptions"></a>
@@ -1803,6 +1382,35 @@ Job status
 Job priority
 
 **Kind**: global typedef  
+<a name="JobImportTemplateItem"></a>
+
+## JobImportTemplateItem : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| type | <code>String</code> | The new job type |
+| [data] | <code>Object</code> | Data payload for the new job |
+| [condition] | <code>Object</code> | Optionally trigger this job only under certain  conditions |
+| condition.ifset | <code>String</code> \| <code>Array.&lt;String&gt;&#x3D;</code> | Trigger this job only if all  mentioned macro properties are SET (not undefined) |
+| condition.ifnotset | <code>String</code> \| <code>Array.&lt;String&gt;&#x3D;</code> | Trigger this job only if  none of the mentioned macro properties are SET |
+| condition.ifeq | <code>Object</code> | Trigger this job of all properties of this  object (key, value) are preset and matching on the macro properties |
+| [repeat] | <code>String</code> | Repeat on the property mentioned, that exists  within the macro properties, which is an array |
+
+<a name="JobImportTemplate"></a>
+
+## JobImportTemplate : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| template | [<code>Array.&lt;JobImportTemplateItem&gt;</code>](#JobImportTemplateItem) | An array of jobs |
+| items | <code>Array.&lt;Object&gt;</code> | An array of macro values for the template |
+| [base] | <code>Object</code> | Optional base configuration |
+| [base.tag] | <code>String</code> | Optional tag to attach to all job data payloads |
+
 <a name="TrackerJobStats"></a>
 
 ## TrackerJobStats : <code>Object</code>
