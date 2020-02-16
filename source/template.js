@@ -36,31 +36,51 @@ function convertTemplateToJobArray(tmpObj) {
     const jobs = [];
     let nextJobID = Math.max(1, ...template.map(spec => getNextValidJobID(spec)));
     items.forEach(itemConfiguration => {
-        (function processTemplateJobs(templateJobs, parentID = null) {
-            const processTemplateJob = templateJob => {
-                const output = {
-                    id: templateJob.id || nextJobID++,
-                    type: templateJob.type,
-                    data: processMacros(
-                        Object.assign({}, templateJob.data || {}, { tag }),
-                        itemConfiguration
-                    )
-                };
-                if (parentID) {
-                    output.parents = [parentID];
-                }
-                if (templateJob.condition) {
-                    if (!conditionMet(templateJob.condition, itemConfiguration)) {
-                        return;
+        (function processTemplateJobs(templateJobs, parentID = null, jobsConfiguration) {
+            const processTemplateJob = (templateJob, jobConfiguration) => {
+                const macros = [jobConfiguration];
+                if (templateJob.repeat) {
+                    // Get target array to repeat on
+                    const repeater = nested.get(jobConfiguration, templateJob.repeat);
+                    if (Array.isArray(repeater)) {
+                        // Remove all macro collections and insert repeated ones
+                        macros.splice(
+                            0, // remove at
+                            1, // remove count
+                            // Insert new macro sets:
+                            ...repeater.map(repeatedValue => {
+                                const output = JSON.parse(JSON.stringify(jobConfiguration));
+                                nested.set(output, templateJob.repeat, repeatedValue);
+                                return output;
+                            })
+                        );
                     }
                 }
-                jobs.push(output);
-                if (templateJob.children) {
-                    processTemplateJobs(templateJob.children, output.id);
-                }
+                macros.forEach(macroValues => {
+                    const output = {
+                        id: templateJob.id || nextJobID++,
+                        type: templateJob.type,
+                        data: processMacros(
+                            Object.assign({}, templateJob.data || {}, { tag }),
+                            macroValues
+                        )
+                    };
+                    if (parentID) {
+                        output.parents = [parentID];
+                    }
+                    if (templateJob.condition) {
+                        if (!conditionMet(templateJob.condition, macroValues)) {
+                            return;
+                        }
+                    }
+                    jobs.push(output);
+                    if (templateJob.children) {
+                        processTemplateJobs(templateJob.children, output.id, macroValues);
+                    }
+                });
             };
-            templateJobs.map(templateJob => processTemplateJob(templateJob));
-        })(template);
+            templateJobs.map(templateJob => processTemplateJob(templateJob, jobsConfiguration));
+        })(template, null, itemConfiguration);
     });
     return jobs;
 }
@@ -96,7 +116,8 @@ function processMacrosInString(str, macros) {
         replacements[replacement] = nested.get(macros, propChain);
     }
     Object.keys(replacements).forEach(repl => {
-        output = output.replace(repl, replacements[repl]);
+        const replacement = typeof replacements[repl] === "undefined" ? "" : replacements[repl];
+        output = output.replace(repl, replacement);
     });
     return output;
 }

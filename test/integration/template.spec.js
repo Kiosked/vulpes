@@ -95,4 +95,71 @@ describe("convertTemplateToJobArray", function() {
                 });
         });
     });
+
+    describe("repeats", function() {
+        beforeEach(function() {
+            this.tempConfig = {
+                template: [
+                    {
+                        type: "test/repeat",
+                        data: {
+                            value: "$count$",
+                            deepValue: "$deep.count$",
+                            deep: {
+                                value: "$deep.count$"
+                            }
+                        },
+                        repeat: "count"
+                    }
+                ],
+                items: [
+                    {},
+                    {
+                        count: [1, 2],
+                        deep: {
+                            count: [3, 4, 5]
+                        }
+                    }
+                ]
+            };
+        });
+
+        it("creates expected jobs for shallow repeat", function() {
+            return this.service
+                .addJobs(convertTemplateToJobArray(this.tempConfig))
+                .then(() => this.service.queryJobs())
+                .then(jobs => {
+                    expect(jobs).to.have.a.lengthOf(3);
+                    const jobPayloads = jobs.map(job => job.data);
+                    expect(jobPayloads.find(payload => payload.value === "")).to.not.be.undefined;
+                    expect(jobPayloads.find(payload => payload.value === "1")).to.not.be.undefined;
+                    expect(jobPayloads.find(payload => payload.value === "2")).to.not.be.undefined;
+                });
+        });
+
+        it("creates expected jobs for deep repeat", function() {
+            this.tempConfig.template[0].repeat = "deep.count";
+            return this.service
+                .addJobs(convertTemplateToJobArray(this.tempConfig))
+                .then(() => this.service.queryJobs())
+                .then(jobs => {
+                    expect(jobs).to.have.a.lengthOf(4);
+                    const jobPayloads = jobs.map(job => job.data);
+                    expect(jobPayloads.find(payload => payload.deepValue === "")).to.not.be
+                        .undefined;
+                    expect(
+                        jobPayloads.find(payload => payload.deepValue === "3"),
+                        "count 3"
+                    ).to.not.be.undefined;
+                    expect(
+                        jobPayloads.find(payload => payload.deepValue === "4"),
+                        "count 4"
+                    ).to.not.be.undefined;
+                    expect(
+                        jobPayloads.find(payload => payload.deepValue === "5"),
+                        "count 5"
+                    ).to.not.be.undefined;
+                });
+        });
+    });
 });
