@@ -67,7 +67,7 @@ function processValue(value, macros) {
     if (typeof value === "string") {
         return processMacrosInString(value, macros);
     } else if (Array.isArray(value)) {
-        return value.map(innerVal => processValue(innerVal));
+        return value.map(innerVal => processValue(innerVal, macros));
     } else if (typeof value === "object" && value) {
         return processMacros(value, macros);
     }
