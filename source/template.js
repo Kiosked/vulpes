@@ -1,5 +1,30 @@
 const nested = require("nested-property");
 
+function conditionMet(condition, macros) {
+    const { ifset, ifnotset, ifeq } = condition;
+    if (typeof ifset === "string" || Array.isArray(ifset)) {
+        const checkItems = Array.isArray(ifset) ? ifset : [ifset];
+        if (checkItems.some(item => typeof nested.get(macros, item) === "undefined")) {
+            return false;
+        }
+    }
+    if (typeof ifnotset === "string" || Array.isArray(ifnotset)) {
+        const checkItems = Array.isArray(ifnotset) ? ifnotset : [ifnotset];
+        if (checkItems.some(item => typeof nested.get(macros, item) !== "undefined")) {
+            return false;
+        }
+    }
+    if (ifeq && typeof ifeq === "object") {
+        const allMatch = Object.keys(ifeq).every(
+            propKey => nested.get(macros, propKey) == ifeq[propKey]
+        );
+        if (!allMatch) {
+            return false;
+        }
+    }
+    return true;
+}
+
 function convertTemplateToJobArray(tmpObj) {
     const { template, items, base = {} } = tmpObj;
     const { tag = createBatchTag() } = base;
@@ -16,7 +41,6 @@ function convertTemplateToJobArray(tmpObj) {
                 const output = {
                     id: templateJob.id || nextJobID++,
                     type: templateJob.type,
-                    // @todo conditionals
                     data: processMacros(
                         Object.assign({}, templateJob.data || {}, { tag }),
                         itemConfiguration
@@ -24,6 +48,11 @@ function convertTemplateToJobArray(tmpObj) {
                 };
                 if (parentID) {
                     output.parents = [parentID];
+                }
+                if (templateJob.condition) {
+                    if (!conditionMet(templateJob.condition, itemConfiguration)) {
+                        return;
+                    }
                 }
                 jobs.push(output);
                 if (templateJob.children) {
