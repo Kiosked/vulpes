@@ -91,5 +91,23 @@ describe("template", function() {
                 key: "this - works"
             });
         });
+
+        it("supports nested properties", function() {
+            const output = processMacros(
+                {
+                    deep: "$deep.value.chain$"
+                },
+                {
+                    deep: {
+                        value: {
+                            chain: "is-deep"
+                        }
+                    }
+                }
+            );
+            expect(output).to.deep.equal({
+                deep: "is-deep"
+            });
+        });
     });
 });

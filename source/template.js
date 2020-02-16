@@ -1,3 +1,5 @@
+const nested = require("nested-property");
+
 function convertTemplateToJobArray(tmpObj) {
     const { template, items, base = {} } = tmpObj;
     const { tag = createBatchTag() } = base;
@@ -56,9 +58,16 @@ function processMacros(target, macros) {
 }
 
 function processMacrosInString(str, macros) {
-    let output = str;
-    Object.keys(macros).forEach(macroKey => {
-        output = output.replace(new RegExp(`\\$${macroKey}\\$`, "g"), macros[macroKey]);
+    let output = str,
+        match;
+    const replacements = {};
+    const rexp = /\$([a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)\$/g;
+    while ((match = rexp.exec(output)) !== null) {
+        const [replacement, propChain] = match;
+        replacements[replacement] = nested.get(macros, propChain);
+    }
+    Object.keys(replacements).forEach(repl => {
+        output = output.replace(repl, replacements[repl]);
     });
     return output;
 }

@@ -173,7 +173,7 @@ In this example, say `job1` finishes with a result set of `{ "parentResultProper
 
 The key `another`, prefixed with `?` to denote laziness, is set to the value of the property mentioned in its preliminary value upon job execution.
 
-_This process supports deep properties: `a.b.c.finalValue`. If the chain fails to resolve, `undefined` is set to the property and the job continues to execute **without failure**. The job may indeed fail after this, however, depdending upon implementation._
+_This process supports deep properties: `a.b.c.finalValue`. If the chain fails to resolve, an empty string is set to the property and the job continues to execute **without failure**. The job may indeed fail after this, however, depdending upon implementation._
 
 ### Querying jobs
 
