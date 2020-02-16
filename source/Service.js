@@ -99,6 +99,7 @@ const newNotInitialisedError = () =>
 /**
  * Service for managing jobs
  * @augments EventEmitter
+ * @memberof module:Vulpes
  */
 class Service extends EventEmitter {
     /**

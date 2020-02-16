@@ -25,6 +25,36 @@ function conditionMet(condition, macros) {
     return true;
 }
 
+/**
+ * @typedef {Object} JobImportTemplateItem
+ * @property {String} type The new job type
+ * @property {Object=} data Data payload for the new job
+ * @property {Object=} condition Optionally trigger this job only under certain
+ *  conditions
+ * @property {String|String[]=} condition.ifset Trigger this job only if all
+ *  mentioned macro properties are SET (not undefined)
+ * @property {String|String[]=} condition.ifnotset Trigger this job only if
+ *  none of the mentioned macro properties are SET
+ * @property {Object} condition.ifeq Trigger this job of all properties of this
+ *  object (key, value) are preset and matching on the macro properties
+ * @property {String=} repeat Repeat on the property mentioned, that exists
+ *  within the macro properties, which is an array
+ */
+
+/**
+ * @typedef {Object} JobImportTemplate
+ * @property {Array.<JobImportTemplateItem>} template An array of jobs
+ * @property {Array.<Object>} items An array of macro values for the template
+ * @property {Object=} base Optional base configuration
+ * @property {String=} base.tag Optional tag to attach to all job data payloads
+ */
+
+/**
+ * Convert a template to an array of jobs to import
+ * @param {JobImportTemplate} tmpObj The template to convert
+ * @returns {Array.<NewJob>} An array of new jobs to pass to `Service#addJobs`
+ * @memberof module:Vulpes
+ */
 function convertTemplateToJobArray(tmpObj) {
     const { template, items, base = {} } = tmpObj;
     const { tag = createBatchTag() } = base;

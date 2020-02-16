@@ -17,6 +17,10 @@ const Symbol = require("./symbols.js");
 
 const { convertTemplateToJobArray } = require("./template.js");
 
+/**
+ * @module Vulpes
+ */
+
 module.exports = {
     Service,
     ArtifactManager,
