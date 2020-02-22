@@ -1,4 +1,5 @@
 const VError = require("verror");
+const nested = require("nested-property");
 const {
     ERROR_CODE_JOB_BATCH_DEPENDENCIES,
     ERROR_CODE_JOB_BATCH_IDS,
@@ -218,8 +219,28 @@ function prepareJobForWorker(service, job) {
                 normaliseJobData(data),
                 pickOnlySticky(normaliseJobData(result.data))
             );
+            workerJob.data = resolveLazyProperties(workerJob.data);
             return workerJob;
         });
+}
+
+function resolveLazyProperties(dataset) {
+    const output = Object.assign({}, dataset);
+    (function __resolveLevel(lvl) {
+        Object.keys(lvl).forEach(key => {
+            if (/^\?/.test(key) && /^\?/.test(lvl[key]) === false) {
+                const newKey = key.replace(/^\?/, "");
+                nested.set(lvl, newKey, nested.get(lvl, lvl[key]));
+                delete lvl[key];
+            }
+        });
+        Object.keys(lvl).forEach(key => {
+            if (lvl[key] && typeof lvl[key] === "object") {
+                __resolveLevel(lvl[key]);
+            }
+        });
+    })(output);
+    return output;
 }
 
 module.exports = {
@@ -228,5 +249,6 @@ module.exports = {
     jobCanBeRestarted,
     jobSatisfiesPredicates,
     pickFirstJob,
-    prepareJobForWorker
+    prepareJobForWorker,
+    resolveLazyProperties
 };
