@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v1.1.0
+_2020-02-22_
+
+ * Lazy properties
+
 ## v1.0.0
 _2020-02-16_
 
