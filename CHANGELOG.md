@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.2.0
+_2020-02-23_
+
+ * Allow jobs to start immediately if reset (skip time-between-retries)
+ * Set time-between-retries to 30 seconds by default
+
 ## v1.1.1
 _2020-02-23_
 
