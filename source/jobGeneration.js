@@ -122,7 +122,7 @@ function generateEmptyJob() {
         predicate: {
             attemptsMax: null,
             locked: false,
-            timeBetweenRetries: ms("15m")
+            timeBetweenRetries: ms("30s")
         },
         data: {},
         result: {
