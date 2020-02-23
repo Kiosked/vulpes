@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.2.1
+_2020-02-23_
+
+ * **Bugfix**:
+   * Child jobs would inherit lazy properties
+
 ## v1.2.0
 _2020-02-23_
 
