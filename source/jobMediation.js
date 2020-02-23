@@ -213,8 +213,8 @@ function prepareJobForWorker(service, job) {
             parentJobs.forEach(parentJob => {
                 Object.assign(
                     workerJob.data,
-                    normaliseJobData(parentJob.data),
-                    normaliseJobData(parentJob.result.data)
+                    stripLazyProperties(normaliseJobData(parentJob.data)),
+                    stripLazyProperties(normaliseJobData(parentJob.result.data))
                 );
             });
             // Update data to merge actual job's data and its previous sticky
@@ -236,11 +236,27 @@ function resolveLazyProperties(dataset) {
             if (/^\?/.test(key) && /^\?/.test(lvl[key]) === false) {
                 const newKey = key.replace(/^\?/, "");
                 nested.set(lvl, newKey, nested.get(lvl, lvl[key]));
+                lvl[key] = undefined;
                 delete lvl[key];
             }
         });
         Object.keys(lvl).forEach(key => {
             if (lvl[key] && typeof lvl[key] === "object") {
+                __resolveLevel(lvl[key]);
+            }
+        });
+    })(output);
+    return output;
+}
+
+function stripLazyProperties(dataset) {
+    const output = Object.assign({}, dataset);
+    (function __resolveLevel(lvl) {
+        Object.keys(lvl).forEach(key => {
+            if (/^\?/.test(key)) {
+                lvl[key] = undefined;
+                delete lvl[key];
+            } else if (lvl[key] && typeof lvl[key] === "object") {
                 __resolveLevel(lvl[key]);
             }
         });
