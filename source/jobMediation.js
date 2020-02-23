@@ -8,6 +8,7 @@ const {
     ERROR_CODE_PARENTS_INCOMPLETE,
     JOB_RESULT_TYPE_SUCCESS,
     JOB_RESULT_TYPES_RESTARTABLE_REXP,
+    JOB_STATUS_PENDING,
     JOB_STATUS_STOPPED,
     UUID_REXP
 } = require("./symbols.js");
@@ -144,13 +145,17 @@ function jobCanBeRestarted(job) {
 function jobSatisfiesPredicates(service, job) {
     return Promise.resolve().then(() => {
         const { attemptsMax, locked, timeBetweenRetries } = job.predicate;
-        const { attempts } = job;
+        const { attempts, status } = job;
         const { stopped: lastStopped } = job.times;
         const now = Date.now();
         if (typeof attemptsMax === "number" && attempts >= attemptsMax) {
             return { satisfies: false, predicate: "attemptsMax" };
         }
-        if (attempts > 0 && now - lastStopped < timeBetweenRetries) {
+        if (
+            attempts > 0 &&
+            now - lastStopped < timeBetweenRetries &&
+            status !== JOB_STATUS_PENDING // If in pending state, the job has been restarted and can begin
+        ) {
             return { satisfies: false, predicate: "timeBetweenRetries" };
         }
         // @todo CRON timings
