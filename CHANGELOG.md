@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.1.1
+_2020-02-23_
+
+ * **Bugfix**:
+   * Underscores and dashes not parsed in template macros
+
 ## v1.1.0
 _2020-02-22_
 
