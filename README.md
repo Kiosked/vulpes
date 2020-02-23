@@ -283,6 +283,8 @@ This example would add **5** jobs - Because there's 2 items, the template is ite
 
 This is quite complex, but it allows for more advanced use-cases. Conditonal logic can be used to block entire branches (as it stops the children from being processed as well) if a parent cannot be created. In the same manner repeating jobs also have their children repeated along with them.
 
+Note that the property chain strings can use the following character set only: `[a-zA-Z0-9_-]`. All other characters will cause the chain to **not** be parsed.
+
 _**NB:** The template structure is entirely JSON-compatible, so it can be generated elsewhere and then sent to the service._
 
 ### Archiving jobs

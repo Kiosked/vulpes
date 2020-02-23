@@ -54,6 +54,37 @@ describe("convertTemplateToJobArray", function() {
         });
     });
 
+    describe("special characters", function() {
+        const tempConfig = {
+            template: [
+                {
+                    type: "test/parent",
+                    data: {
+                        publisher_id: "$publisher_id$"
+                    },
+                    children: [
+                        {
+                            type: "test/child",
+                            data: {
+                                script_id: "$script_id$"
+                            }
+                        }
+                    ]
+                }
+            ],
+            items: [{ publisher_id: 5, script_id: 10 }]
+        };
+
+        it("creates jobs on service", function() {
+            return this.service
+                .addJobs(convertTemplateToJobArray(tempConfig))
+                .then(() => this.service.queryJobs({ type: "test/parent" }))
+                .then(([parentJob]) => {
+                    expect(parentJob).to.have.nested.property("data.publisher_id", "5");
+                });
+        });
+    });
+
     describe("conditionals", function() {
         const tempConfig = {
             template: [

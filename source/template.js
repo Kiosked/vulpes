@@ -140,7 +140,7 @@ function processMacrosInString(str, macros) {
     let output = str,
         match;
     const replacements = {};
-    const rexp = /\$([a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)\$/g;
+    const rexp = /\$([a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*)\$/g;
     while ((match = rexp.exec(output)) !== null) {
         const [replacement, propChain] = match;
         replacements[replacement] = nested.get(macros, propChain);
