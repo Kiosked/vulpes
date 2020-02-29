@@ -5,6 +5,14 @@ const { waitForStream } = require("../streams.js");
 const { clone } = require("../cloning.js");
 
 /**
+ * @typedef {Object} MemoryStorageOptions
+ * @property {FileStorage|null} fileStorage Optional filestorage reference
+ *  for sync'ing memory -> file system
+ * @property {Number=} flushDelay Delay in milliseconds between flushing
+ *  the memory to disk
+ */
+
+/**
  * Memory storage adapter
  * Stores jobs in memory. Once application is closed all jobs are
  * purged - do not use this storage if you desire persistence.
@@ -12,6 +20,11 @@ const { clone } = require("../cloning.js");
  * @memberof module:Vulpes
  */
 class MemoryStorage extends Storage {
+    /**
+     * Constructor for the storage instance
+     * @param {MemoryStorageOptions=} opts Optional configuration for
+     *  the memory storage instance
+     */
     constructor(opts = {}) {
         super();
         this._store = {};
@@ -55,11 +68,12 @@ class MemoryStorage extends Storage {
     async initialise() {
         await super.initialise();
         if (this._fileStorage) {
+            await this._fileStorage.initialise();
             const itemStream = await this._fileStorage.streamItems();
             itemStream.on("data", item => {
                 this.store[item.id] = item;
             });
-            await waitForStream(jobStream);
+            await waitForStream(itemStream);
         }
     }
 
