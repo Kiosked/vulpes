@@ -1,6 +1,7 @@
 const objectStream = require("@kiosked/object-stream");
 const filterStream = require("stream-filter");
 const Storage = require("./Storage.js");
+const { waitForStream } = require("../streams.js");
 const { clone } = require("../cloning.js");
 
 /**
@@ -11,9 +12,14 @@ const { clone } = require("../cloning.js");
  * @memberof module:Vulpes
  */
 class MemoryStorage extends Storage {
-    constructor() {
+    constructor(opts = {}) {
         super();
         this._store = {};
+        const { fileStorage = null, flushDelay = 5000 } = opts;
+        this._fileStorage = fileStorage;
+        this._dirty = [];
+        this._flushing = false;
+        this._flushDelay = flushDelay;
     }
 
     /**
@@ -42,6 +48,22 @@ class MemoryStorage extends Storage {
     }
 
     /**
+     * Initialise the memory storage
+     * @returns {Promise}
+     * @memberof MemoryStorage
+     */
+    async initialise() {
+        await super.initialise();
+        if (this._fileStorage) {
+            const itemStream = await this._fileStorage.streamItems();
+            itemStream.on("data", item => {
+                this.store[item.id] = item;
+            });
+            await waitForStream(jobStream);
+        }
+    }
+
+    /**
      * Remove an item from the memory store
      * @param {String} key The key of the item to remove
      * @returns {Promise} A promise that resolves once the key has been removed
@@ -50,6 +72,7 @@ class MemoryStorage extends Storage {
     removeItem(key) {
         this.store[key] = null;
         delete this.store[key];
+        this._flagDirtyKey(key);
         return Promise.resolve();
     }
 
@@ -63,6 +86,7 @@ class MemoryStorage extends Storage {
      */
     setItem(key, value) {
         this.store[key] = clone(value);
+        this._flagDirtyKey(key);
         return Promise.resolve();
     }
 
@@ -79,6 +103,42 @@ class MemoryStorage extends Storage {
                     .pipe(filterStream.obj(item => !!item))
             );
         });
+    }
+
+    _flagDirtyKey(key) {
+        // Skip if no filestorage is used
+        if (this._fileStorage === null) return;
+        if (this._dirty.includes(key) === false) {
+            this._dirty.push(key);
+        }
+        setTimeout(() => this._flushDirty(), 0);
+    }
+
+    async _flushDirty() {
+        if (this._flushing) return;
+        this._flushing = true;
+        const dirtyKeys = [...this._dirty];
+        this._dirty = [];
+        const items = dirtyKeys.reduce(
+            (output, key) =>
+                Object.assign(output, {
+                    [key]: this.store[key] ? clone(this.store[key]) : null
+                }),
+            {}
+        );
+        try {
+            await this._fileStorage.setItems(items);
+        } catch (err) {
+            console.error(err);
+            // Put back marked keys
+            this._dirty = [...new Set([...this._dirty, ...dirtyKeys])];
+        }
+        setTimeout(() => {
+            this._flushing = false;
+            if (this._dirty.length > 0) {
+                this._flushDirty();
+            }
+        }, this._flushDelay);
     }
 }
 

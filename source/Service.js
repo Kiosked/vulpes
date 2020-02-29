@@ -2,7 +2,6 @@ const EventEmitter = require("eventemitter3");
 const merge = require("merge");
 const VError = require("verror");
 const ChannelQueue = require("@buttercup/channel-queue");
-const endOfStream = require("end-of-stream");
 const Scheduler = require("./Scheduler.js");
 const Tracker = require("./Tracker.js");
 const Storage = require("./storage/Storage.js");
@@ -28,6 +27,7 @@ const { filterDuplicateJobs, sortJobs, sortJobsByPriority } = require("./jobSort
 const { updateStatsForJob } = require("./jobStats.js");
 const { removeAllLegacyLogs } = require("./migrations.js");
 const { extractAttachments } = require("./attachments.js");
+const { waitForStream } = require("./streams.js");
 const {
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
@@ -477,15 +477,6 @@ class Service extends EventEmitter {
         if (!this._initialised) {
             throw newNotInitialisedError();
         }
-        const waitForStream = stream =>
-            new Promise((resolve, reject) =>
-                endOfStream(stream, err => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve();
-                })
-            );
         query.archived =
             typeof query.archived === "boolean"
                 ? query.archived

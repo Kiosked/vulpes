@@ -8,7 +8,7 @@ const rimraf = pify(require("rimraf"));
 const mkdirp = require("mkdirp");
 const dataURIToBuffer = require("data-uri-to-buffer");
 const parseDataURI = require("parse-data-uri");
-const endOfStream = require("end-of-stream");
+const { waitForStream } = require("./streams.js");
 const { ATTACHMENT_PREFIX, ATTACHMENT_REXP } = require("./symbols.js");
 
 function getArtifactPath(storagePath, artifactID) {
@@ -73,17 +73,6 @@ async function migrate(service, manager) {
             );
         }
     } while (jobs.length > 0);
-}
-
-function waitForStream(stream) {
-    return new Promise((resolve, reject) =>
-        endOfStream(stream, err => {
-            if (err) {
-                return reject(err);
-            }
-            resolve();
-        })
-    );
 }
 
 /**
