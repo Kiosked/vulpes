@@ -87,6 +87,8 @@ class FileStorage extends Storage {
     /**
      * Set many items by specifying a hash map
      * @param {Object.<String, Object|null>} itemsInd The items hash map
+     * @param {String} method Method of writing. Defaults to "append".
+     *  When set to "clear" all other jobs are wiped during this action.
      * @returns {Promise}
      * @memberof FileStorage
      * @example
@@ -95,7 +97,7 @@ class FileStorage extends Storage {
      *      "def456": null // Delete item
      *  });
      */
-    async setItems(itemsInd) {
+    async setItems(itemsInd, method = "append") {
         await this._queue.channel("stream").enqueue(async () => {
             // Prepare jobs file
             const originalExists = await fileExists(this._filename);
@@ -135,7 +137,9 @@ class FileStorage extends Storage {
                     return;
                 }
                 // Another item we're not looking for, write it immediately
-                ws.write([currentItem.id, currentItem]);
+                if (method === "append") {
+                    ws.write([currentItem.id, currentItem]);
+                }
             });
             // Wait for the read stream to end
             endOfStream(rs, () => {
