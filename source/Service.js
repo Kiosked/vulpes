@@ -490,56 +490,34 @@ class Service extends EventEmitter {
             typeof query.archived === "boolean"
                 ? query.archived
                 : archived => archived === false || archived === undefined;
-        const jobStreamInitial = await this.storage.streamItems();
+        const jobStream = await this.storage.streamItems();
         const stats = this.tracker.statsTemplate;
         // First build an index of all job results
-        const jobsIndex = [];
-        jobStreamInitial.on("data", job => {
+        const allMatchedJobs = [];
+        jobStream.on("data", job => {
             if (job[ITEM_TYPE] === ITEM_TYPE_JOB) {
                 // Handle query check first
                 if (jobMatches(job, query)) {
-                    jobsIndex.push({
-                        id: job.id,
-                        type: job.type,
-                        status: job.status,
-                        priority: job.priority,
-                        created: job.created
-                    });
+                    allMatchedJobs.push(job);
                 }
                 // Process jobs for stats updates
                 updateStatsForJob(stats, job);
             }
         });
-        await waitForStream(jobStreamInitial);
+        await waitForStream(jobStream);
         // Update stats
         this.tracker.updateStats(stats);
-        // Sort initial list
-        const allJobsSorted = sortJobs(jobsIndex, [
+        // Sort jobs
+        const sortedJobs = sortJobs(allMatchedJobs, [
             {
                 property: sort,
                 direction: order
             }
         ]);
         // Select range
-        const finalRange = allJobsSorted.slice(start, limit === Infinity ? limit : start + limit);
-        // Final selection
-        const jobs = [];
-        const jobStreamFinal = await this.storage.streamItems();
-        jobStreamFinal.on("data", job => {
-            if (finalRange.find(stub => stub.id === job.id)) {
-                // Job is in the set
-                jobs.push(job);
-            }
-        });
-        await waitForStream(jobStreamFinal);
-        // Final sort
-        const output = sortJobs(jobs, [
-            {
-                property: sort,
-                direction: order
-            }
-        ]);
-        output.total = allJobsSorted.length;
+        const output = sortedJobs.slice(start, limit === Infinity ? limit : start + limit);
+        // Record total matched
+        output.total = sortedJobs.length;
         return output;
     }
 
