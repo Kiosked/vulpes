@@ -77,9 +77,27 @@ class FileStorage extends Storage {
      * @param {Object|null} item The item to set (or null to remove)
      * @returns {Promise} A promise that resolves when the operation has been
      *  completed
+     * @see setItems
      * @memberof FileStorage
      */
     async setItem(id, item) {
+        await this.setItems({ [id]: item });
+    }
+
+    /**
+     * Set many items by specifying a hash map
+     * @param {Object.<String, Object|null>} itemsInd The items hash map
+     * @param {String} method Method of writing. Defaults to "append".
+     *  When set to "clear" all other jobs are wiped during this action.
+     * @returns {Promise}
+     * @memberof FileStorage
+     * @example
+     *  await fileStorage.setItems({
+     *      "abc123": {}, // Set/Create item
+     *      "def456": null // Delete item
+     *  });
+     */
+    async setItems(itemsInd, method = "append") {
         await this._queue.channel("stream").enqueue(async () => {
             // Prepare jobs file
             const originalExists = await fileExists(this._filename);
@@ -100,30 +118,35 @@ class FileStorage extends Storage {
                 .createReadStream(this._filename)
                 .pipe(JSONStream.parse(...JSON_PARSE_ARGS));
             const ws = JSONStream.stringifyObject();
-            const key = id;
             // Track whether or not the item exists in the stream:
             //  - If it doesn't, it should be added at the end of the stream
             //  - If it does, it should be replaced mid-stream
-            let itemExisted = false;
+            const newItems = Object.keys(itemsInd);
             rs.on("data", currentItem => {
                 // Item found, replace
-                if (currentItem.id === id) {
-                    itemExisted = true;
-                    if (item === null) {
+                if (itemsInd.hasOwnProperty(currentItem.id)) {
+                    const newItemInd = newItems.indexOf(currentItem.id);
+                    if (newItemInd >= 0) {
+                        newItems.splice(newItemInd, 1);
+                    }
+                    if (itemsInd[currentItem.id] === null) {
+                        // Delete
                         return;
                     }
-                    ws.write([key, item]);
+                    ws.write([currentItem.id, itemsInd[currentItem.id]]);
                     return;
                 }
                 // Another item we're not looking for, write it immediately
-                ws.write([key, currentItem]);
+                if (method === "append") {
+                    ws.write([currentItem.id, currentItem]);
+                }
             });
             // Wait for the read stream to end
             endOfStream(rs, () => {
-                if (!itemExisted && item !== null) {
+                newItems.forEach(newItemID => {
                     // Item wasn't found, so add it
-                    ws.write([key, item]);
-                }
+                    ws.write([newItemID, itemsInd[newItemID]]);
+                });
                 ws.end();
             });
             // Now pump the new write stream into the temp file (as we can't simply overwrite

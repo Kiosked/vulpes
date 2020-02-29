@@ -1,18 +1,8 @@
-const endOfStream = require("end-of-stream");
 const ChannelQueue = require("@buttercup/channel-queue");
+const { waitForStream } = require("../streams.js");
 const Helper = require("./Helper.js");
 
 const { TASK_TYPE_TAIL } = ChannelQueue.Task;
-
-const waitForStream = stream =>
-    new Promise((resolve, reject) =>
-        endOfStream(stream, err => {
-            if (err) {
-                return reject(err);
-            }
-            resolve();
-        })
-    );
 
 /**
  * Storage migration helper

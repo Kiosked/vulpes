@@ -2,7 +2,7 @@ const uuid = require("uuid/v4");
 const ms = require("ms");
 const nested = require("nested-property");
 const { getTimestamp } = require("./time.js");
-const { clone } = require("./objects.js");
+const { cloneJob } = require("./cloning.js");
 const {
     ITEM_TYPE,
     ITEM_TYPE_JOB,
@@ -143,7 +143,7 @@ function generateEmptyJob() {
 }
 
 function validateJobProperties(job) {
-    const output = clone(job);
+    const output = cloneJob(job);
     Object.keys(JOB_VALIDATION).forEach(key => {
         const [test, defaultValue] = JOB_VALIDATION[key];
         const value = nested.get(output, key);
