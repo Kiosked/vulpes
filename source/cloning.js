@@ -1,3 +1,7 @@
+function clone(obj) {
+    return rebaseObjectDeep(obj);
+}
+
 function cloneJob(job) {
     const output = rebaseObject(job);
     if (output.predicate) {
@@ -49,5 +53,6 @@ function rebaseObjectDeep(obj) {
 }
 
 module.exports = {
+    clone,
     cloneJob
 };

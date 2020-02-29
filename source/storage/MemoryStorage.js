@@ -1,6 +1,7 @@
 const objectStream = require("@kiosked/object-stream");
 const filterStream = require("stream-filter");
 const Storage = require("./Storage.js");
+const { clone } = require("../cloning.js");
 
 /**
  * Memory storage adapter
@@ -33,7 +34,10 @@ class MemoryStorage extends Storage {
      * @memberof MemoryStorage
      */
     getItem(key) {
-        const value = this.store[key] || null;
+        let value = this.store[key] || null;
+        if (value !== null) {
+            value = clone(value);
+        }
         return Promise.resolve(value);
     }
 
@@ -52,13 +56,13 @@ class MemoryStorage extends Storage {
     /**
      * Set an item in the memory store
      * @param {String} key The key to store under
-     * @param {*} value The value to store
+     * @param {Object} value The value to store
      * @returns {Promise} Returns a promise that resolves once the item has
      *  been stored
      * @memberof MemoryStorage
      */
     setItem(key, value) {
-        this.store[key] = value;
+        this.store[key] = clone(value);
         return Promise.resolve();
     }
 

@@ -2,7 +2,7 @@ const uuid = require("uuid/v4");
 const ms = require("ms");
 const nested = require("nested-property");
 const { getTimestamp } = require("./time.js");
-const { cloneJob } = require("./jobCloning.js");
+const { cloneJob } = require("./cloning.js");
 const {
     ITEM_TYPE,
     ITEM_TYPE_JOB,
