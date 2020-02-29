@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.3.0
+_2020-02-29_
+
+ * `MemoryStorage` can be combined with `FileStorage` for persistence
+ * Improved query performance with `Service#queryJobs`
+
 ## v1.2.1
 _2020-02-23_
 

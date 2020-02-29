@@ -79,6 +79,8 @@ of the <code>job</code></p>
 <dt><a href="#UpdateJobOptions">UpdateJobOptions</a> : <code>Object</code></dt>
 <dd><p>Update job options</p>
 </dd>
+<dt><a href="#MemoryStorageOptions">MemoryStorageOptions</a> : <code>Object</code></dt>
+<dd></dd>
 <dt><a href="#ResultType">ResultType</a> : <code>String</code></dt>
 <dd><p>Job result type</p>
 </dd>
@@ -148,6 +150,7 @@ of the <code>job</code></p>
         * [~Service](#module_Vulpes.Service) ⇐ <code>EventEmitter</code>
             * [new Service([param0])](#new_module_Vulpes.Service_new)
         * [~MemoryStorage](#module_Vulpes.MemoryStorage) ⇐ <code>Storage</code>
+            * [new MemoryStorage([opts])](#new_module_Vulpes.MemoryStorage_new)
             * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
             * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
             * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
@@ -645,12 +648,23 @@ purged - do not use this storage if you desire persistence.
 **Extends**: <code>Storage</code>  
 
 * [~MemoryStorage](#module_Vulpes.MemoryStorage) ⇐ <code>Storage</code>
+    * [new MemoryStorage([opts])](#new_module_Vulpes.MemoryStorage_new)
     * [.getItem(key)](#Storage+getItem) ⇒ <code>Promise.&lt;(\*\|null)&gt;</code>
     * [.initialise()](#Storage+initialise) ⇒ <code>Promise</code>
     * [.removeItem(key)](#Storage+removeItem) ⇒ <code>Promise</code>
     * [.setItem(key, value)](#Storage+setItem) ⇒ <code>Promise</code>
     * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
     * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
+
+<a name="new_module_Vulpes.MemoryStorage_new"></a>
+
+#### new MemoryStorage([opts])
+Constructor for the storage instance
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| [opts] | [<code>MemoryStorageOptions</code>](#MemoryStorageOptions) | Optional configuration for  the memory storage instance |
 
 <a name="Storage+getItem"></a>
 
@@ -1363,6 +1377,17 @@ Update job options
 | --- | --- | --- |
 | [filterProps] | <code>Boolean</code> | Filter all properties that should  NOT be overwritten. This is true by default. Using 'false' here may  result in unpredictable and dangerous behaviour. Use at our own  peril. |
 | [stripResults] | <code>Boolean</code> | Remove existing results before  updating the job data. Default is false. |
+
+<a name="MemoryStorageOptions"></a>
+
+## MemoryStorageOptions : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| fileStorage | <code>FileStorage</code> \| <code>null</code> | Optional filestorage reference  for sync'ing memory -> file system |
+| [flushDelay] | <code>Number</code> | Delay in milliseconds between flushing  the memory to disk |
 
 <a name="ResultType"></a>
 
