@@ -18,6 +18,7 @@ const ms = require("ms");
 const ATTACHMENT_PREFIX = "%attachment:";
 const ATTACHMENT_REXP = /^%attachment:[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
+const ERROR_CODE_ARTIFACT_NOTFOUND = "vulpes/error/artifact/not-found";
 const ERROR_CODE_ALREADY_INIT = "vuples/error/init/multi-call";
 const ERROR_CODE_ALREADY_SUCCEEDED = "vuples/error/job/result/succeeded";
 const ERROR_CODE_CANNOT_RESTART = "vuples/error/job/restart/invalid";
@@ -60,6 +61,7 @@ const UUID_REXP = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}
 module.exports = {
     ATTACHMENT_PREFIX,
     ATTACHMENT_REXP,
+    ERROR_CODE_ARTIFACT_NOTFOUND,
     ERROR_CODE_ALREADY_INIT,
     ERROR_CODE_ALREADY_SUCCEEDED,
     ERROR_CODE_CANNOT_RESTART,

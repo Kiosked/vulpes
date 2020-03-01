@@ -6,10 +6,16 @@ const uuid = require("uuid/v4");
 const pify = require("pify");
 const rimraf = pify(require("rimraf"));
 const mkdirp = require("mkdirp");
+const VError = require("verror");
 const dataURIToBuffer = require("data-uri-to-buffer");
 const parseDataURI = require("parse-data-uri");
+const fileExists = require("file-exists");
 const { waitForStream } = require("./streams.js");
-const { ATTACHMENT_PREFIX, ATTACHMENT_REXP } = require("./symbols.js");
+const {
+    ATTACHMENT_PREFIX,
+    ATTACHMENT_REXP,
+    ERROR_CODE_ARTIFACT_NOTFOUND
+} = require("./symbols.js");
 
 function getArtifactPath(storagePath, artifactID) {
     return path.join(storagePath, `${artifactID}.vulpesartifact`);
@@ -168,6 +174,15 @@ class ArtifactManager extends EventEmitter {
      */
     async getArtifactReadStream(artifactID) {
         const filename = getArtifactPath(this._path, artifactID);
+        const exists = await fileExists(filename);
+        if (!exists) {
+            throw new VError(
+                {
+                    info: { code: ERROR_CODE_ARTIFACT_NOTFOUND }
+                },
+                `No artifact found at path: ${filename}`
+            );
+        }
         return fs.createReadStream(filename);
     }
 
