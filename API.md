@@ -129,6 +129,7 @@ of the <code>job</code></p>
             * [.shutdown()](#Storage+shutdown) ⇒ <code>Promise</code>
             * [.streamItems()](#Storage+streamItems) ⇒ <code>Promise.&lt;ReadableStream&gt;</code>
         * [.Storage](#module_Vulpes.Storage)
+        * [.waitForStream(stream)](#module_Vulpes.waitForStream) ⇒ <code>Promise</code>
         * [.convertTemplateToJobArray(tmpObj)](#module_Vulpes.convertTemplateToJobArray) ⇒ [<code>Array.&lt;NewJob&gt;</code>](#NewJob)
     * _inner_
         * [~ArtifactManager](#module_Vulpes.ArtifactManager) ⇐ <code>EventEmitter</code>
@@ -428,6 +429,17 @@ allowing jobs to persist between restarts. This is an
 interface and does not actually perform any operations.
 
 **Kind**: static class of [<code>Vulpes</code>](#module_Vulpes)  
+<a name="module_Vulpes.waitForStream"></a>
+
+### Vulpes.waitForStream(stream) ⇒ <code>Promise</code>
+Wait for a stream to end
+
+**Kind**: static method of [<code>Vulpes</code>](#module_Vulpes)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| stream | <code>ReadableStream</code> | The stream to wait for |
+
 <a name="module_Vulpes.convertTemplateToJobArray"></a>
 
 ### Vulpes.convertTemplateToJobArray(tmpObj) ⇒ [<code>Array.&lt;NewJob&gt;</code>](#NewJob)

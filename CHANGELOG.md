@@ -1,5 +1,10 @@
 # Vulpes Changelog
 
+## v1.4.0
+_2020-03-01_
+
+ * `waitForStream` helper
+
 ## v1.3.0
 _2020-02-29_
 
