@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.4.2
+_2020-03-02_
+
+ * **Bugfix**:
+   * `MemoryStorage` streamed items were not cloned
+
 ## v1.4.1
 _2020-03-01_
 
