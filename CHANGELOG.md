@@ -1,5 +1,11 @@
 # Vulpes Changelog
 
+## v1.4.1
+_2020-03-01_
+
+ * **Bugfix**:
+   * `ArtifactManager` throws fatal errors when attachments are missing
+
 ## v1.4.0
 _2020-03-01_
 
