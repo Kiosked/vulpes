@@ -113,7 +113,7 @@ class MemoryStorage extends Storage {
         return new Promise(resolve => {
             resolve(
                 objectStream
-                    .fromArray(Object.keys(this.store).map(key => this.store[key]))
+                    .fromArray(Object.keys(this.store).map(key => clone(this.store[key])))
                     .pipe(filterStream.obj(item => !!item))
             );
         });
