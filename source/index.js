@@ -16,6 +16,7 @@ const RedisStorage = require("./storage/RedisStorage.js");
 const Symbol = require("./symbols.js");
 
 const { convertTemplateToJobArray } = require("./template.js");
+const { waitForStream } = require("./streams.js");
 
 /**
  * @module Vulpes
@@ -36,5 +37,6 @@ module.exports = {
     MemoryStorage,
     RedisStorage,
 
-    convertTemplateToJobArray
+    convertTemplateToJobArray,
+    waitForStream
 };
